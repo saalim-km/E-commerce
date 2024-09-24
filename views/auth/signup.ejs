@@ -1,0 +1,187 @@
+<%- include('../partials/header.ejs') %>
+<style>
+  .password-container {
+    position: relative;
+    align-items: center;
+  }
+
+  .password-container i {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    bottom: 10px;
+    font-size: 15px;
+  }
+</style>
+<!--Body Content-->
+<div id="page-content">
+  <!--Page Title-->
+  <div class="page section-header text-center">
+    <div class="page-title">
+      <div class="wrapper"><h1 class="page-width">Create an Account</h1></div>
+    </div>
+  </div>
+  <!--End Page Title-->
+
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3">
+        <% if (message.error) { %>
+            <h3 style="color: red;"><%= message.error %></h3>
+           <% } %>
+        <form action="/user/signup" id="registerForm" onsubmit="return validateForm()" method="post">
+          <label for="">Username</label>
+          <input
+            type="text"
+            placeholder=""
+            id="username"
+            name="username"
+            required
+          />
+          <div id="error1" class="error-mess"></div>
+
+          <label for="">email</label>
+          <input type="email" placeholder="" id="email" name="email" required />
+          <div id="error2" class="error-mess"></div>
+
+          <label for="">phone</label>
+          <input type="text" placeholder="" id="phone" name="phone" required />
+          <div id="error3" class="error-mess"></div>
+
+          <div class="password-container">
+            <label for="">password</label>
+            <input
+              type="password"
+              id="password"
+              placeholder=""
+              name="password"
+              required
+            />
+            <i class="bi bi-eye-slash" id="togglePassword"></i>
+          </div>
+          <div id="error4" class="error-mess"></div>
+
+          <label for="">confirm password</label>
+          <input
+            type="password"
+            placeholder=""
+            id="confirm-password"
+            name="confirm-password"
+            required
+          />
+          <div id="error5" class="error-mess"></div>
+
+          <input type="submit" class="btn mt-3" />
+        </form>
+        <div class="m-auto d-flex justify-content-center flex-column">
+          <p>or</p>
+          <div>
+            <a href="/auth/google">
+              <button class="btn btn-sm mb-2">login with Google</button>
+            </a><br>
+            <a href="/">
+              <button class="btn btn-sm">login with Facebook</button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--End Body Content-->
+
+<script>
+  const form = document.getElementById("registerForm");
+  const email = document.getElementById("email");
+  const phone = document.getElementById("phone");
+  const password = document.getElementById("password");
+  const cpassword = document.getElementById("confirm-password");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+  const error3 = document.getElementById("error3");
+  const error4 = document.getElementById("error4");
+  const error5 = document.getElementById("error5");
+</script>
+
+<script>
+  const toggler = document.getElementById("togglePassword");
+  const inputField = document.getElementById("password");
+  console.log(toggler, inputField);
+
+  toggler.addEventListener("click", () => {
+    if (inputField.getAttribute("type") === "password") {
+      inputField.setAttribute("type", "text");
+      toggler.classList.remove("bi-eye-slash");
+      toggler.classList.add("bi-eye");
+    } else {
+      inputField.setAttribute("type", "password");
+      toggler.classList.remove("bi-eye");
+      toggler.classList.add("bi-eye-slash");
+    }
+  });
+
+
+  function validateEmail() {
+    const email = document.getElementById("email").value;
+    const emailError = document.getElementById("error2");
+    const emailPattern = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
+
+    emailError.textContent = "";
+
+    if (!emailPattern.test(email)) {
+      emailError.textContent = "invalid email";
+      emailError.style.color = "red";
+      return false;
+    }
+    return true;
+  }
+
+  function validatePhone() {
+    const phone = document.getElementById("phone").value
+    const phoneError = document.getElementById("error3");
+    const mobilePattern = /^\d{10}$/;
+    phoneError.textContent = "";
+    if (!mobilePattern.test(phone)) {
+      phoneError.textContent = "mobile number should be exactly 10 digit";
+      phoneError.style.color = 'red';
+      return false;
+    }
+    return true;
+  }
+
+  function validatePassword() {
+    const password = document.getElementById("password").value;
+    const confirmPass = document.getElementById("confirm-password").value;
+    const passwordError = document.getElementById("error4");
+    const cPasswordError = document.getElementById("error5");
+    const passwordPattern =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+    passwordError.textContent = "";
+
+    if (!passwordPattern.test(password)) {
+        passwordError.style.color = 'red';
+      passwordError.textContent =
+        "Password must be at least 8 characters long and include a letter, a number, and a special character.";
+      return false;
+    }
+
+    if (password !== confirmPass) {
+        cPasswordError.style.color = 'red';
+      cPasswordError.textContent = "password doesn't match!!";
+      return false;
+    }
+
+    return true;
+  }
+
+  function validateForm() {
+    const email = validateEmail();
+    const phone = validatePhone();
+    const password = validatePassword();
+
+    return email && phone && password;
+  }
+</script>
+
+<%- include('../partials/footer.ejs') %>

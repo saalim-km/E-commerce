@@ -1,0 +1,126 @@
+
+  <%- include('../partials/header.ejs') %>
+<div class="row d-flex justify-content-center mt-5 pt-5">
+    <div class="col-lg-4 m-auto col-md-6 col-sm-6">
+        <div class="otp-container">
+            <h2>Enter OTP</h2>
+            <form id="otpForm" action="/user/verify-otp" method="post" onsubmit="return validateOtpForm()">
+                <input type="text" id="otpInput" placeholder="Enter OTP" required maxlength="6">
+                <button class="btn" style="cursor: pointer;" id="submitOtpBtn" type="submit">Verify</button>
+            </form>
+            <p class="timer">Resend OTP in <span id="timer">60</span> seconds</p>
+            <button style="cursor: pointer;" onclick="resendOtp()" id="resendBtn">Resend OTP</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+let timeLeft = 60;
+const timerDisplay = document.getElementById('timer');
+const submitOtpBtn = document.getElementById('submitOtpBtn');
+const resendBtn = document.getElementById('resendBtn');
+resendBtn.style.display = 'none';
+
+function startTimer() {
+    timeLeft = 60;
+    timerDisplay.textContent = timeLeft;
+    const timerInterval = setInterval(function() {
+        timeLeft--;  
+
+        timerDisplay.textContent = timeLeft;
+
+        if (timeLeft === 0) {
+            clearInterval(timerInterval);  
+            submitOtpBtn.disabled = true;
+            resendBtn.style.display = 'inline';
+        }else{
+            resendBtn.style.display = 'none'; 
+        }
+    }, 1000);  
+
+    resendBtn.addEventListener('click',()=> {
+        clearInterval(timerInterval);
+        submitOtpBtn.disabled = false;
+        startTimer();
+    })
+}
+
+startTimer();
+
+
+    function validateOtpForm(){
+        const otp = document.getElementById('otpInput').value;
+
+        $.ajax({
+            type : 'POST',
+            url : '/user/verify-otp',
+            data : {otp : otp},
+            contentType: 'application/x-www-form-urlencoded', 
+            success : function(res){
+                if(res.success){
+                    Swal.fire({
+                        icon : 'success',
+                        title : "otp verified successfully",
+                        showConfirmButton : false,
+                        timer:1500,
+                    }).then(()=> {
+                        window.location.href = res.redirectUrl;
+                    })
+                }else{
+                    Swal.fire({
+                        icon:"error",
+                        title : "Error",
+                        text : res.message,
+                    })
+                }
+            },
+            error:function (){
+                Swal.fire({
+                    icon :"error",
+                    title : "invalid otp",
+                    text : "please try again",
+                })
+            }
+        })
+
+        return false;
+    }
+
+
+    function resendOtp() {
+        console.log('resend button clicked');
+        
+        $.ajax({
+            type : 'POST',
+            url : '/user/resend-otp',
+            success : function(res){
+                if(res.success){
+                    Swal.fire({
+                    icon  : "success",
+                    title : "OTP resent successfully",
+                    showConfirmButton : false,
+                    timer : 1500,
+                })
+                }else{
+                    Swal.fire({
+                        icon : 'error',
+                        title : "error",
+                        text : "An error occured while resending otp",
+                    })
+                }
+            }
+        })
+
+        return false;
+    }
+</script>
+ 
+
+<%- include('../partials/footer.ejs') %>
+
+
+
+
+

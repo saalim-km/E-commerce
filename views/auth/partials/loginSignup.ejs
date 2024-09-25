@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title>Create an Account &ndash; Belle Multipurpose Bootstrap 4 Template</title>
+<title>Savage</title>
 <meta name="description" content="description">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Favicon -->
@@ -24,6 +24,33 @@
 <!-- j query -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
+<style>
+    .dropwodn{
+        position: relative;
+        display: inline-block;
+    }
+    .dropwodn-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        right: 0;;
+    }
+    .dropwodn-content a{
+        color: white;
+    }
+    .dropwodn-content a:hover{
+        background-color: #f1f1f1;
+    }
+    .dropwodn:hover .dropwodn-content{
+        display: block;
+    }
+    
+</style>
+
+
 <body class="page-template belle">
 <div class="pageWrapper">
 	<!--Search Form Drawer-->
@@ -52,8 +79,18 @@
                 <div class="col-2 col-sm-4 col-md-3 col-lg-4 text-right">
                 	<span class="user-menu d-block d-lg-none"><i class="anm anm-user-al" aria-hidden="true"></i></span>
                     <ul class="customer-links list-inline">
+                        <% if (locals.user) { %>
+                            <div class="dropdown">
+                                <a href="#"><%= user.username %></a>
+                                <div class="dropwodn-content">
+                                    <a href="/user/profile">Profile</a>
+                                    <a href="/user/logout">Logout</a>
+                                </div>
+                            </div>
+                        <% } else {%>
                         <li><a href="/user/login">Login</a></li>
                         <li><a href="/user/signup">Create Account</a></li>
+                        <% } %>
                         <li><a href="wishlist.html">Wishlist</a></li>
                     </ul>
                 </div>
@@ -235,4 +272,3 @@
         </li>
       </ul>
 	</div>
-	<!--End Mobile Menu-->

@@ -1,4 +1,4 @@
-<%- include('../partials/header.ejs') %>
+<%- include('./partials/loginSignup.ejs') %>
 <style>
   .password-container {
     position: relative;
@@ -27,7 +27,9 @@
     <div class="row">
       <div class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3">
         <% if (message.error) { %>
-            <h3 style="color: red;"><%= message.error %></h3>
+            <div class="alert alert-danger text-center mt-3">
+                <%= message.error %>
+            </div>
            <% } %>
         <form action="/user/signup" id="registerForm" onsubmit="return validateForm()" method="post">
           <label for="">Username</label>
@@ -83,6 +85,7 @@
               <button class="btn btn-sm">login with Facebook</button>
             </a>
           </div>
+          <p class="mt-3">already have an account   <a style="color: red;" href="/user/login">Login</a></p>
         </div>
       </div>
     </div>
@@ -184,4 +187,4 @@
   }
 </script>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('./partials/footer.ejs') %>

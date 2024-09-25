@@ -5,21 +5,18 @@ const express = require('express');
 const flash = require('connect-flash');
 const app = express();
 const authRoute = require('./routes/auth');
+const adminRoute = require('./routes/adminrouter');
 const dbConnect = require('./config/config');
 const session = require('express-session');
 const nocache = require('nocache');
 const passport = require('./config/passport'); 
+const path = require('path')
 
 // session middleware
 app.use(session({
     secret : process.env.SECRET_KEY,
     resave : false,
     saveUninitialized : true,
-    cookie : {
-        secure : false,
-        httpOnly:true, 
-        maxAge : 72*60*60*1000
-    }
 }))
 
 // setting google auth
@@ -35,7 +32,7 @@ app.use((req,res,next)=> {
 
 //  template engine
 app.set('view engine','ejs');
-app.set("views", "./views/auth");
+app.set('views',[path.join(__dirname,"views/auth") , path.join(__dirname , "views/admin")]);
 
 // serving static files
 app.use(express.static('public'));
@@ -52,6 +49,7 @@ dbConnect();
 
 // setting routes
 app.use('/',authRoute);
+app.use('/admin',adminRoute);
 
 app.listen(3004,()=> {
     console.log('server started running on',3004);

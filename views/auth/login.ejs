@@ -1,5 +1,18 @@
-<%- include('../partials/header.ejs') %>
-    
+<%- include('./partials/loginSignup.ejs') %>
+<style>
+    .password-container {
+      position: relative;
+      align-items: center;
+    }
+  
+    .password-container i {
+      position: absolute;
+      right: 10px;
+      cursor: pointer;
+      bottom: 10px;
+      font-size: 15px;
+    }
+  </style>
     <!--Body Content-->
     <div id="page-content">
     	<!--Page Title-->
@@ -14,31 +27,33 @@
         	<div class="row">
                 <div class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3">
                 	<div class="mb-4">
-                       <form method="post" action="#" id="CustomerLoginForm" accept-charset="UTF-8" class="contact-form">	
-                          <div class="row">
-                            <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                                <div class="form-group">
-                                    <label for="CustomerEmail">Email</label>
-                                    <input type="email" name="customer[email]" placeholder="" id="CustomerEmail" class="" autocorrect="off" autocapitalize="off" autofocus="">
-                                </div>
-                            </div>
-                            <div class="col-12 col-sm-12 col-md-12 col-lg-12">
-                                <div class="form-group">
-                                    <label for="CustomerPassword">Password</label>
-                                    <input type="password" value="" name="customer[password]" placeholder="" id="CustomerPassword" class="">                        	
-                                </div>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="text-center col-12 col-sm-12 col-md-12 col-lg-12">
-                                <input type="submit" class="btn mb-3" value="Sign In">
-                                <p class="mb-4">
-									<a href="#" id="/user/forgot-password">Forgot your password?</a> &nbsp; | &nbsp;
-								    <a href="/user/signup" id="customer_register_link">Create account</a>
-                                </p>
-                            </div>
-                         </div>
-                     </form>
+                           <form action="/user/login" method="post">
+                                <label for="">Email</label>
+                                <input type="text" name="email" required>
+                                <div class="password-container">
+                                    <label for="">password</label>
+                                    <input
+                                      type="password"
+                                      id="password"
+                                      placeholder=""
+                                      name="password"
+                                      required
+                                    />
+                                    <i class="bi bi-eye-slash" id="togglePassword"></i>
+                                  </div>
+                                <input type="submit" class="btn mt-3">
+                                <% if (locals.message && message.length>0) { %>
+                                    <div class="alert alert-danger text-center mt-3">
+                                        <%= message %>
+                                    </div>
+                                <% } %>
+                           </form>
+                     <div class="text-center col-12 col-sm-12 col-md-12 col-lg-12">
+                        <p class="mb-4">
+                            <a href="#" id="/user/forgot-password">Forgot your password?</a> &nbsp; | &nbsp;
+                            <a href="/user/signup" id="customer_register_link">Create account</a>
+                        </p>
+                    </div>
                     </div>
                	</div>
             </div>
@@ -47,4 +62,22 @@
     </div>
     <!--End Body Content-->
     
- <%- include('../partials/footer.ejs') %>
+
+    <script>
+         const toggler = document.getElementById("togglePassword");
+  const inputField = document.getElementById("password");
+  console.log(toggler, inputField);
+
+  toggler.addEventListener("click", () => {
+    if (inputField.getAttribute("type") === "password") {
+      inputField.setAttribute("type", "text");
+      toggler.classList.remove("bi-eye-slash");
+      toggler.classList.add("bi-eye");
+    } else {
+      inputField.setAttribute("type", "password");
+      toggler.classList.remove("bi-eye");
+      toggler.classList.add("bi-eye-slash");
+    }
+  });
+    </script>
+ <%- include('./partials/footer.ejs') %>

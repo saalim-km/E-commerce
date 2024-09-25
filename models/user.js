@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
     },
     googleId : {
         type : String,
-        unique:true,
+        default : null,
         sparse: true,
     },
     phone : {

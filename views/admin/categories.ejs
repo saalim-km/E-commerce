@@ -1,0 +1,123 @@
+<%- include('./partials/header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Categories</h2>
+            <p>Add, edit, delete, list, or unlist a category</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search Categories" class="form-control bg-white" />
+        </div>
+    </div>
+
+    <!-- Category Form -->
+    <div class="card">
+        <div class="card-body">
+            <% if (message && message.success) { %>
+                <div class="alert alert-success"><%= message.success %></div>
+            <% } %>
+            <div class="row">
+                <% if (message.error) { %>
+                 <div class="alert alert-danger"><%= message.error %></div>
+                <% } %>
+                <div class="col-md-3">
+                    <form action="/admin/categories" method="POST" onsubmit="return validateForm()">
+                        <div class="mb-3">
+                            <label for="category_name" class="form-label">Name</label>
+                            <div id="nameError" style="color: red;"></div>
+                            <input type="text" placeholder="Category Name" class="form-control" id="category_name" name="name" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea id="description" placeholder="Category Description" class="form-control" name="description"></textarea>
+                            <div id="descriptionError" style="color: red;"></div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Add Category</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Category Management Table -->
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% categories.forEach(category => { %>
+                                    <tr>
+                                        <td><b><%= category.name %></b></td>
+                                        <td><%= category.description %></td>
+                                        <td>
+                                            <span class="badge <%= category.isListed ? 'bg-success' : 'bg-danger' %>">
+                                                <%= category.isListed ? "Listed" : 'UnListed' %>
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="dropdown">
+                                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm">
+                                                    <i class="material-icons md-more_horiz"></i>
+                                                </a>
+                                                <div class="dropdown-menu">
+                                                    <form action="/admin/categories/edit/<%= category._id %>" method="GET">
+                                                        <button type="submit" class="dropdown-item">Edit</button>
+                                                    </form>
+                                                    <form action="/admin/categories/islist/<%= category._id %>" method="POST">
+                                                        <button type="submit" class="dropdown-item"><%= category.isListed ? 'Unlist' : 'List' %></button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function validateName() {
+        const nameError = document.getElementById('nameError');
+        const name = document.getElementById('category_name').value;
+        
+        const namePattern = /^[A-Z][a-zA-Z ]*$/; 
+        
+        if (!namePattern.test(name)) {
+            nameError.textContent = "Name must start with an uppercase letter and contain only letters.";
+            return false;
+        }
+        
+        nameError.textContent = '';
+        return true;
+    }
+    function validateDescription(){
+        const description = document.getElementById('description').value;
+        const descriptionError = document.getElementById('descriptionError');
+        if(description===""){
+            descriptionError.textContent = "description cannot be empty";
+            return false;
+        }
+
+        descriptionError.textContent = "";
+        return true;
+    }
+    function validateForm() {
+        const name = validateName();
+        const description = validateDescription();
+
+        return name && description;
+    }
+</script>
+
+<%- include('./partials/footer.ejs') %>

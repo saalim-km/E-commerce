@@ -36,6 +36,8 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
   req.session.user = req.user.email;
   res.redirect('/home');
 });
+
+
 // exporting routes
 module.exports = router;
 

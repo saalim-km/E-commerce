@@ -7,6 +7,7 @@ const userSchema = mongoose.Schema({
     },
     email : {
         type : String,
+        unique : true,
         required : true,
     },
     password : {
@@ -49,11 +50,7 @@ const userSchema = mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : "Order",
     }],
-    createdOn : {
-        type : Date,
-        default : Date.now,
-    },
     
-});
+},{timestamps : true});
 
 module.exports = mongoose.model('Users',userSchema);

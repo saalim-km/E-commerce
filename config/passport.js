@@ -17,7 +17,7 @@ async function (request , accessToken, regreshToken, profile , done) {
 		const email = profile.emails[0].value;
 		const name = profile.displayName;
 
-		let existingUser = await userModel.findOne({googleId});
+		let existingUser = await userModel.findOne({email});
 		if(existingUser){
 			return done(null,existingUser);
 		}else{

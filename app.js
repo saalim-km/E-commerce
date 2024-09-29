@@ -10,14 +10,14 @@ const dbConnect = require('./config/config');
 const session = require('express-session');
 const nocache = require('nocache');
 const passport = require('./config/passport'); 
-const path = require('path')
+const path = require('path');
 
 // session middleware
-app.use(session({
+app.use(session({ 
     secret : process.env.SECRET_KEY,
     resave : false,
     saveUninitialized : true,
-}))
+}));
 
 // setting google auth
 app.use(passport.initialize());

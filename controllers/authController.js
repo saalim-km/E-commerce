@@ -101,7 +101,6 @@ const sendOtp = async (req, res) => {
   try {
     const { email, username, password, phone } = req.body;
     console.log(email, username, password, phone);
-    const otp = generateOtp();
 
     // check if the user already exists in the database
     const userData = await userModel.findOne({ email });
@@ -109,7 +108,8 @@ const sendOtp = async (req, res) => {
       req.flash("error", "user alredy exists");
       return res.redirect("/user/signup");
     }
-
+    // generating otp
+    const otp = generateOtp();
     // Store OTP and user data in the session
     req.session.otp = otp;
     req.session.userData = { email, username, password, phone };
@@ -205,8 +205,7 @@ const verifyLogin = async (req, res) => {
     const passMatch = await bcrypt.compare(password, user.password);
     if (!passMatch) {
       return res.render("login", { message: "passwod is not matching" });
-    }
-
+    } 
     req.session.user = user.email;
     console.log("after verifying login", req.session.user);
     res.redirect("/home");

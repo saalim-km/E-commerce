@@ -1,0 +1,25 @@
+<%- include('./partials/header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title card-title">Edit Category</h2>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form action="/admin/categories/edit/<%= category._id %>" method="POST">
+                <div class="mb-3">
+                    <label for="category_name" class="form-label">Name</label>
+                    <input type="text" placeholder="Category Name" class="form-control" id="category_name" name="name" value="<%= category.name %>" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" name="description"><%= category.description %></textarea>
+                </div>
+                <div class="d-grid">
+                    <button class="btn btn-primary">Update Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<%- include('./partials/footer.ejs') %>

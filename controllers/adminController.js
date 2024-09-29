@@ -26,7 +26,8 @@ const adminLogin = async(req,res)=> {
         if(!passMatch){
             return res.render('adminLogin',{message : "password didn't match"});
         }
-        req.session.admin = true;
+        req.session.admin = adminData._id;
+        console.log("admin logged in",req.session.admin);
         console.log('session set : ',req.session.admin);
         res.redirect('/admin');
     } catch (error) {
@@ -48,7 +49,7 @@ const dashboardLoad = async(req,res)=> {
 
 const Logout = async(req,res)=> {
     try {
-        req.session.admin = false;
+        req.session.admin = null;
         res.redirect("/admin/login")
     } catch (error) {
         console.log("error while loging out admin",error.message);

@@ -31,17 +31,19 @@ const productSchema = new mongoose.Schema({
         ref : "Category",
         require : true,
     },
-    isBlocked : {
+    isListed : {
         type : Boolean,
-        required : true,
-        default : false,
+        default : true,
     },
     status : {
         type : String,
-        enum : ["Available","out of stock"],
         required : true,
         default : "Available",
     },
+    sizes: {
+        type : [String],
+        required : true,
+    }
 },{timestamps : true});
 
 

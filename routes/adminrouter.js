@@ -47,4 +47,15 @@ router.post('/categories/islist/:id', categoriesController.toggleCategoryStatus)
 router.get("/addproducts",productController.loadAddProduct);
 router.post("/addproducts",uploads.array("images",4),productController.addProduct);
 
+
+
+// products list
+router.get("/products",productController.productList);
+router.get("/product/block/:id",productController.unListProduct);
+router.get("/product/unBlock/:id",productController.listProduct);
+
+// product Edit
+router.get("/product/edit/:id",productController.loadEditPage)
+router.post("/product/edit/:id",productController.editProduct)
+
 module.exports = router;

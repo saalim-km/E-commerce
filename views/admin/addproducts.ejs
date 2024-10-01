@@ -76,6 +76,10 @@
                               <div id="category-error" class="error-message"></div>
                            </div>
                         </div>
+                        <div class="form-group">
+                           <label for="sizes">Sizes (Separate with commas, e.g., S, M, L):</label>
+                           <input type="text" name="sizes" class="form-control" placeholder="S, M, L, XL">
+                       </div>
                      </div>
                   </div>
                   <div class="card mb-2">
@@ -254,16 +258,10 @@
     if (name.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-        isValid = false;
     }
 
     if (description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
-        isValid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
-        displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
         isValid = false;
     }
 

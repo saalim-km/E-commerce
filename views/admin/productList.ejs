@@ -1,0 +1,87 @@
+<%- include('./partials/header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products List</h2>
+        </div>
+    </div>
+    <% if (message && message.success) { %>
+        <div class="alert alert-success"><%= message.success %></div>
+    <% } %>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                    <select class="form-select">
+                        <option selected>All categories</option>
+                        <% category.forEach(cat => { %>
+                            <option value="<%= cat._id %>"><%= cat.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <% if (products.length > 0) { %>
+                <% products.forEach(product => { %>
+                    <article class="itemlist">
+                        <div class="row align-items-center">
+                            <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
+                                <a class="itemside" href="#">
+                                    <div class="left">
+                                        <img src="/uploads/product-images/<%= product.images[0] %>" class="img-sm img-thumbnail" alt="<%= product.productName %>">
+                                    </div>
+                                    <div class="info">
+                                        <h6 class="mb-0"><%= product.productName %></h6>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-lg-2 col-sm-2 col-4 col-price"> 
+                                <span> Regular Price : ₹<%= product.regularPrice %></span>
+                            </div>
+                            <div class="col-lg-2 col-sm-2 col-4 col-price"> 
+                                <span>Sales price : ₹<%= product.salesPrice %></span>
+                            </div>
+                            <div class="col-lg-2 col-sm-2 col-4 col-status">
+                                <% if (product.quantity > 2 ) { %>
+                                    <span class="badge rounded-pill alert-success">Available</span>
+                                <% } else {%>
+                                    <span class="badge rounded-pill alert-danger">Low in stock</span>
+                                <% } %>
+                            </div>
+                            <div class="col-lg-1 col-sm-2 col-4 col-date">
+                                <span><%= product.createdAt.toDateString() %></span>
+                            </div>
+                            <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
+                                <a href="/admin/product/edit/<%= product._id %>" class="btn btn-sm font-sm rounded btn-brand">
+                                    <i class="material-icons md-edit"></i> Edit
+                                </a>
+                                <% if (product.isListed==true) { %>
+                                    <a href="/admin/product/block/<%=product._id%>" class="btn btn-sm font-sm rounded btn-brand ">Un-List</a>
+                                <% } else {%>
+                                    <a href="/admin/product/unBlock/<%=product._id%>" class="btn btn-sm font-sm rounded btn-brand ">List</a>
+                                <% } %>
+                            </div>
+                        </div> <!-- row .// -->
+                    </article> <!-- itemlist  .// -->
+                <% }) %>
+            <% } else { %>
+                <p>No products found.</p>
+            <% } %>
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i == currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+</section> <!-- content-main end// -->
+
+
+<%- include('./partials/footer.ejs') %>

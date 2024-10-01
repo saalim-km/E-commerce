@@ -6,6 +6,7 @@ const flash = require('connect-flash');
 const app = express();
 const authRoute = require('./routes/auth');
 const adminRoute = require('./routes/adminrouter');
+const userRoute = require("./routes/userRoute")
 const dbConnect = require('./config/config');
 const session = require('express-session');
 const nocache = require('nocache');
@@ -32,7 +33,7 @@ app.use((req,res,next)=> {
 
 //  template engine
 app.set('view engine','ejs');
-app.set('views',[path.join(__dirname,"views/auth") , path.join(__dirname , "views/admin")]);
+app.set('views',[path.join(__dirname,"views/auth") , path.join(__dirname , "views/admin") , path.join(__dirname,"views/user")]);
 
 // serving static files
 app.use(express.static('public'));
@@ -50,6 +51,7 @@ dbConnect();
 // setting routes
 app.use('/',authRoute);
 app.use('/admin',adminRoute);
+app.use('/user',userRoute);
 
 app.listen(3004,()=> {
     console.log('server started running on',3004);

@@ -4,8 +4,7 @@ dotenv.config();
 const userModel = require("../models/user");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
-const sweetAlert = require("sweetalert2");
-const { errorMonitor } = require("nodemailer/lib/xoauth2");
+const productModel = require("../models/product");
 
 // Configuring NodeMailer
 const transporter = nodemailer.createTransport({
@@ -44,8 +43,9 @@ const generateOtp = () => {
 // Controllers
 const landingPage = async (req, res) => {
   try {
+    const products = await productModel.find({isListed : true}).populate('category','name');
     if (!req.session.user) {
-      return res.render("home");
+      return res.render("home",{products});
     } else {
       res.redirect("/home");
     }
@@ -70,12 +70,13 @@ const signupPage = async (req, res) => {
 
 const loadHome = async (req, res) => {
   try {
+    const products = await productModel.find({isListed : true}).limit(4).populate('category','name');
     if (req.session.user) {
       const user = req.session.user;
       console.log(user);
       const userData = await userModel.findOne({ email: user });
       console.log("before loading the home page", userData);
-      return res.render("home", { user: userData });
+      return res.render("home", { user: userData, products });
     } else {
       res.redirect("/");
     }

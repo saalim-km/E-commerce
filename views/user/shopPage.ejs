@@ -1,0 +1,198 @@
+<%- include('../auth/partials/header.ejs') %>
+
+    <style>
+        /* Basic Styles */
+        .breadcrumbs {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .breadcrumbs a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+
+        /* Filter button */
+        .filter-btn {
+            position: relative;
+            background-color: #fff;
+            border: 2px solid #000;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .filter-popup {
+            display: none;
+            background-color: #fff;
+            border: 1px solid #000;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filter-popup label {
+            font-weight: bold;
+        }
+
+        .filter-popup input,
+        .filter-popup select {
+            margin-bottom: 10px;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .product-item {
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: solid 1px rgba(128, 128, 128, 0.316);
+        }
+
+        .product-item img {
+            width: 100%;
+            height: auto;
+        }
+
+        .product-item .product-name {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .product-item .price {
+            color: #888;
+        }
+
+        /* Hover effect */
+        .add-to-cart-btn {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000;
+            color: #fff;
+            padding: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-item:hover .add-to-cart-btn {
+            bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs ml-5 mt-5">
+        <a href="/">Home</a> / <a href="/user/shop">Shop</a> / Oversized Fit
+    </div>
+
+    <!-- Filter Button -->
+    <button class="filter-btn ml-5 " onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>
+
+    <!-- Filter Popup -->
+    <div class="filter-popup container" id="filter-popup">
+        <!-- Search Bar -->
+        <label for="search">Search Products:</label>
+        <input type="text" id="search" class="form-control" placeholder="Search for products..." oninput="filterProducts()">
+
+        <!-- Category Filter -->
+        <label for="category">Select Category:</label>
+        <select id="category" class="form-select" onchange="filterProducts()">
+            <option value="all">All Categories</option>
+            <option value="glow">Glow in Dark</option>
+            <option value="printed">Full Printed Tshirts</option>
+            <option value="oversized">Oversized</option>
+            <option value="hoodie">Hoodie UV Light Reactive</option>
+        </select>
+
+        <!-- Price Range Filter -->
+        <label for="price">Price Range:</label>
+        <input type="range" id="price" class="form-range" min="500" max="5000" step="100" oninput="document.getElementById('price-output').value = this.value; filterProducts();">
+        <input type="text" id="price-output" value="500" readonly style="border: none; font-weight: bold; margin-bottom: 10px;">
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid container">
+        <% products.forEach((product)=> { %>
+        <div class="product-item pb-2" data-name="<%= product.productName %>" data-category="<%= product.category.name %>" data-price="<%= product.salesPrice %>">
+            <a href="/user/products/<%= product._id %>" style="text-decoration: none;">
+                <!-- Product Image -->
+                <img src="/uploads/product-images/<%= product.images[0] %>" alt="<%= product.productName %>">
+                
+                <!-- Product Details -->
+                <div>
+                    <h5 class="product-name"><%= product.productName %></h5>
+                    <p>Sizes Available: <%= product.sizes.join(', ') %></p>
+                    <p class="price">₹<%= product.salesPrice %> <del>₹<%= product.regularPrice %></del></p>
+                    <p class="category">Category: <%= product.category.name %></p>
+                    <a href="/user/products/<%= product._id %>" class="btn btn-primary mt-3">View Product</a>
+                </div>
+            </a>
+        </div>
+        <% }) %>
+    </div>
+
+
+    <script>
+        function toggleFilter() {
+            const filterPopup = document.getElementById("filter-popup");
+            if (filterPopup.style.display === "block") {
+                filterPopup.style.display = "none";
+            } else {
+                filterPopup.style.display = "block";
+            }
+        }
+
+        function filterProducts() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const category = document.getElementById('category').value;
+            const price = document.getElementById('price').value;
+
+            const products = document.querySelectorAll('.product-item');
+
+            products.forEach(product => {
+                const name = product.getAttribute('data-name').toLowerCase();
+                const prodCategory = product.getAttribute('data-category');
+                const prodPrice = product.getAttribute('data-price');
+
+                let show = true;
+
+                if (search && !name.includes(search)) {
+                    show = false;
+                }
+
+                if (category !== 'all' && prodCategory !== category) {
+                    show = false;
+                }
+
+                if (prodPrice > price) {
+                    show = false;
+                }
+
+                product.style.display = show ? 'block' : 'none';
+            });
+        }
+    </script>
+
+<%- include('../auth/partials/footer.ejs') %>

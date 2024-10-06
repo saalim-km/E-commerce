@@ -43,7 +43,7 @@ const generateOtp = () => {
 // Controllers
 const landingPage = async (req, res) => {
   try {
-    const products = await productModel.find({isListed : true}).populate('category','name');
+    const products = await productModel.find({isListed : true}).limit(4).populate('category','name');
     if (!req.session.user) {
       return res.render("home",{products});
     } else {
@@ -71,14 +71,16 @@ const signupPage = async (req, res) => {
 const loadHome = async (req, res) => {
   try {
     const products = await productModel.find({isListed : true}).limit(4).populate('category','name');
-    if (req.session.user) {
+    const userData = await userModel.findOne({email : req.session.user});
+    if (req.session.user && userData.isBlocked==0) {
       const user = req.session.user;
       console.log(user);
       const userData = await userModel.findOne({ email: user });
       console.log("before loading the home page", userData);
       return res.render("home", { user: userData, products });
     } else {
-      res.redirect("/");
+      req.flash("error","you are blocked by admin");
+      res.redirect("/user/login");
     }
   } catch (error) {
     console.log(error);
@@ -197,15 +199,18 @@ const verifyLogin = async (req, res) => {
     const user = await userModel.findOne({ isAdmin: 0, email: email });
     console.log(user);
     if (!user) {
-      return res.render("login", { message: "user not found" });
+      req.flash("error","invalid email");
+      return res.redirect("/user/login");
     }
     if (user.isBlocked) {
-      return res.render("login", { message: "user is blocked by admin" });
+      req.flash("error","user is blocked by admin");
+      return res.redirect("/user/login");
     }
 
     const passMatch = await bcrypt.compare(password, user.password);
     if (!passMatch) {
-      return res.render("login", { message: "passwod is not matching" });
+      req.flash("error","password didn't match");
+      return res.redirect("/user/login");
     } 
     req.session.user = user.email;
     console.log("after verifying login", req.session.user);

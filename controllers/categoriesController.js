@@ -6,7 +6,7 @@ const getAllCategories = async (req, res) => {
     if(!req.session.admin){
       return res.redirect("/admin/login");
     }else{
-      const categories = await Category.find();
+    const categories = await Category.find();
 
     if (categories.length === 0) {
       req.flash("info", "No categories found. Please add some categories.");
@@ -64,16 +64,36 @@ const editCategoryForm = async (req, res) => {
 
 // update  category
 const updateCategory = async (req, res) => {
-  const { id } = req.params;
-  const { name, description } = req.body;
-
   try {
-    await Category.findByIdAndUpdate(id, {
-      name,
-      description,
-    });
-    req.flash("success", "Category updated successfully");
-    res.redirect("/admin/categories");
+    const { id } = req.params;
+    const { name, description } = req.body;
+    console.log(name,description);
+
+    const categoryData = await Category.findById(id);
+    const existingCat = await Category.findOne({name});
+      if(categoryData.name==name && categoryData.description!==description){
+        const categoryUpdate = await Category.findByIdAndUpdate(id,{
+          description : description,
+        })
+        req.flash("success","category updated description");
+        return res.redirect("/admin/categories");
+      }
+      if(categoryData.name!==name && categoryData.description==description){
+        const categoryUpdate = await Category.findByIdAndUpdate(id,{
+          name : name,
+        })
+        req.flash("success","category updated name");
+        return res.redirect("/admin/categories");
+      }
+      
+      if(categoryData.name!==name && categoryData.description!==description){
+        const categoryUpdate = await Category.findByIdAndUpdate(id,{
+          name : name,
+          description : description,
+        })
+        req.flash("success","category updated description and name");
+        return res.redirect("/admin/categories");
+      }
   } catch (error) {
     console.error(error.message);
     req.flash("error", "Could not update category");

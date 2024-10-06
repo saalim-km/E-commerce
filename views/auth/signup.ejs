@@ -39,6 +39,7 @@
             id="username"
             name="username"
           />
+          <p id="userNameErr" style="color: red;"></p>
           <div id="error1" class="error-mess"></div>
 
           <label for="">email</label>
@@ -46,7 +47,7 @@
           <div id="error2" class="error-mess"></div>
 
           <label for="">phone</label>
-          <input type="text" placeholder="" id="phone" name="phone"  />
+          <input maxlength="10" type="text" placeholder="" id="phone" name="phone"/>
           <div id="error3" class="error-mess"></div>
 
           <div class="password-container">
@@ -175,12 +176,25 @@
     return true;
   }
 
+  function validateUsername(){
+    const username = document.getElementById("username").value;
+    const userNameErr = document.getElementById("userNameErr");
+
+    userNameErr.textContent = "";
+    if(username.trim()===""){
+      userNameErr.textContent = "username cannot be empty";
+      return false;
+    }
+    return true;
+  }
+
   function validateForm() {
     const email = validateEmail();
     const phone = validatePhone();
     const password = validatePassword();
+    const username = validateUsername();
 
-    return email && phone && password;
+    return email && phone && password && username;
   }
 </script>
 

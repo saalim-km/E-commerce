@@ -103,13 +103,18 @@
 <body>
 
     <!-- Breadcrumbs -->
-    <div class="breadcrumbs ml-5 mt-5">
-        <a href="/">Home</a> / <a href="/user/shop">Shop</a> / Oversized Fit
+
+    <div class="d-flex flex-column ml-5">
+        <div class="breadcrumbs ml-5 mt-5">
+            <a href="/">Home</a> / <a href="/user/shop">Shop</a> / Oversized Fit
+        </div>
+    
+        <!-- Filter Button -->
+         <div class="ml-5">
+            <button class="filter-btn  " onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>    
+         </div>
     </div>
-
-    <!-- Filter Button -->
-    <button class="filter-btn ml-5 " onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>
-
+    
     <!-- Filter Popup -->
     <div class="filter-popup container" id="filter-popup">
         <!-- Search Bar -->
@@ -143,7 +148,6 @@
                 <!-- Product Details -->
                 <div>
                     <h5 class="product-name"><%= product.productName %></h5>
-                    <p>Sizes Available: <%= product.sizes.join(', ') %></p>
                     <p class="price">₹<%= product.salesPrice %> <del>₹<%= product.regularPrice %></del></p>
                     <p class="category">Category: <%= product.category.name %></p>
                     <a href="/user/products/<%= product._id %>" class="btn btn-primary mt-3">View Product</a>
@@ -162,36 +166,6 @@
             } else {
                 filterPopup.style.display = "block";
             }
-        }
-
-        function filterProducts() {
-            const search = document.getElementById('search').value.toLowerCase();
-            const category = document.getElementById('category').value;
-            const price = document.getElementById('price').value;
-
-            const products = document.querySelectorAll('.product-item');
-
-            products.forEach(product => {
-                const name = product.getAttribute('data-name').toLowerCase();
-                const prodCategory = product.getAttribute('data-category');
-                const prodPrice = product.getAttribute('data-price');
-
-                let show = true;
-
-                if (search && !name.includes(search)) {
-                    show = false;
-                }
-
-                if (category !== 'all' && prodCategory !== category) {
-                    show = false;
-                }
-
-                if (prodPrice > price) {
-                    show = false;
-                }
-
-                product.style.display = show ? 'block' : 'none';
-            });
         }
     </script>
 

@@ -2,7 +2,6 @@ const dotenv = require('dotenv').config();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userModel = require('../models/user');
-const user = require('../models/user');
 
 
 passport.use(new GoogleStrategy({ 
@@ -25,7 +24,7 @@ async function (request , accessToken, regreshToken, profile , done) {
 				googleId : googleId,
 				email : email,
 				username : name,
-			})
+			});
 			await existingUser.save();
 			console.log('data stored in the database');
 			return done(null,existingUser);

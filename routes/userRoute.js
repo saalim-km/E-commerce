@@ -11,7 +11,7 @@ router.get("/products/:id",userSideController.productView);
 
 
 
-router.get("/shop",userSideController.shopList)
+router.get("/shop",userSideController.shopList);
 
 
 

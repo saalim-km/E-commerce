@@ -8,6 +8,9 @@
     <% if (message && message.success) { %>
         <div class="alert alert-success"><%= message.success %></div>
     <% } %>
+    <% if (message && message.error) { %>
+        <div class="alert alert-success"><%= message.error %></div>
+    <% } %>
     <div class="card mb-4">
         <header class="card-header">
             <div class="row align-items-center">
@@ -24,7 +27,7 @@
         <div class="card-body">
             <% if (products.length > 0) { %>
                 <% products.forEach(product => { %>
-                    <article class="itemlist">
+                    <article class="itemlist mb-3" style="border: 1px solid rgba(128, 128, 128, 0.195);">
                         <div class="row align-items-center">
                             <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
                                 <a class="itemside" href="#">
@@ -41,6 +44,9 @@
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-price"> 
                                 <span>Sales price : ₹<%= product.salesPrice %></span>
+                            </div>
+                            <div class="col-lg-2 col-sm-2 col-4 col-price"> 
+                                <span>Category : <%= product.category.name %></span>
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-status">
                                 <% if (product.quantity > 2 ) { %>

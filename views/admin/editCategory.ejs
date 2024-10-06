@@ -6,20 +6,55 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="/admin/categories/edit/<%= category._id %>" method="POST">
+            <form action="/admin/categories/edit/<%= category._id %>" method="POST" onsubmit="return validateForm()">
                 <div class="mb-3">
                     <label for="category_name" class="form-label">Name</label>
-                    <input type="text" placeholder="Category Name" class="form-control" id="category_name" name="name" value="<%= category.name %>" />
+                    <input onchange="validateInput()" type="text" placeholder="Category Name" class="form-control" id="name" name="name" value="<%= category.name %>" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Description</label>
-                    <textarea class="form-control" name="description"><%= category.description %></textarea>
+                    <textarea id="description" class="form-control" name="description"><%= category.description %></textarea>
                 </div>
                 <div class="d-grid">
-                    <button class="btn btn-primary">Update Category</button>
+                    <div>
+                        <button id="updateBtn" type="submit" class="btn btn-primary">Update Category</button>
+                    </div>
                 </div>
             </form>
+            <div>
+                <a href="/admin/categories">
+                    <button class="btn btn-secondary mt-3">Cancel</button>
+                </a>
+            </div>
         </div>
     </div>
 </section>
+
+
+<script>
+    const name = document.getElementById("name").value
+    const description = document.getElementById("description").value;
+    console.log(`name : ${name} , description : ${description}`);
+
+    function validateForm(){
+        const errorMess = document.getElementById("errorMess");
+        const updatedName = document.getElementById("name").value
+        const updateDescription = document.getElementById("description").value;
+        console.log(`updated name : ${updatedName} , update description : ${updateDescription}`);
+        
+        if(name===updatedName && description===updateDescription){
+            Swal.fire({
+                toast : true,
+                icon : "error",
+                position : "top-end",
+                title : "make any changes to update",
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true,
+            })
+            return false;
+        }
+        return true;
+    }
+</script>
 <%- include('./partials/footer.ejs') %>

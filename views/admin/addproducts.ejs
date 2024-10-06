@@ -10,6 +10,26 @@
    .thumbnail {
    margin-right: 10px;
    }
+
+
+
+.size-input-group label {
+    font-size: 14px;
+    font-weight: bold;
+    display: inline;
+}
+
+.tiny-box {
+    width: 50px;
+    height: 35px;
+    padding: 5px;
+    font-size: 14px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 </style>
 <section class="content-main">
     <% if (message.success) { %>
@@ -53,13 +73,6 @@
                         </div>
                         <div id="salePrice-error" class="error-message"></div>
                      </div>
-                     <div class="col-lg-4">
-                        <div class="mb-4">
-                           <label class="form-label">Quantity</label>
-                           <input placeholder="" name="quantity" type="text" class="form-control border">
-                           <div id="quantity-error" class="error-message"></div>
-                        </div>
-                     </div>
                   </div>
                   <div class="card mb-4">
                      <div class="card-body">
@@ -76,13 +89,30 @@
                               <div id="category-error" class="error-message"></div>
                            </div>
                         </div>
-                        <div class="form-group">
-                           <label for="sizes">Sizes (Separate with commas, e.g., S, M, L):</label>
-                           <input type="text" name="sizes" class="form-control" placeholder="S, M, L, XL">
-                       </div>
+                     </div>
+                  </div>
+                  <div class="product-form  mb-3">
+                     <div class=" d-flex flex-row gap-4 align-item-center">
+                        <div>
+                           <label class="mr-5" for="size_s"> S </label>
+                           <input type="text" name="sizes[s]" id="size_s" min="0" maxlength="2" class="tiny-box">
+                        </div>
+                        <div>
+                           <label class="mr-5" for="size_m"> M </label>
+                           <input type="text" name="sizes[m]" id="size_m" min="0" maxlength="2" class="tiny-box">
+                        </div>
+                        <div>
+                           <label class="mr-5" for="size_l"> L </label>
+                           <input type="text" name="sizes[l]" id="size_l" min="0" maxlength="2" class="tiny-box">
+                        </div>
+                        <div>
+                           <label class="mr-5" for="size_xl"> XL </label>
+                           <input type="text" name="sizes[xl]" id="size_xl" min="0" maxlength="2" class="tiny-box">
+                        </div>
                      </div>
                   </div>
                   <div class="card mb-2">
+                     <!-- selecting images -->
                      <div class="card-header">
                         <h4>Choose images</h4>
                      </div>
@@ -139,7 +169,7 @@
 
     function viewImage1(){
         document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0]);
-    }
+    } 
 
     function viewImage2(){
         document.getElementById("imgView2").src = URL.createObjectURL(event.target.files[0]);
@@ -215,7 +245,7 @@
             thumbnail.classList.add("thumbnail");
 
             const img = document.createElement("img");
-            img.scr = URL.createObjectURL(file);
+            img.src = URL.createObjectURL(file);
             img.alt = "thumbnail";
             img.style.width = "50px";
             img.style.height="auto";

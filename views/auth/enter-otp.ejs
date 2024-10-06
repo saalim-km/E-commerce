@@ -6,13 +6,14 @@
             <h2>Enter OTP</h2>
             <form id="otpForm" action="/user/verify-otp" method="post" onsubmit="return validateOtpForm()">
                 <input type="text" id="otpInput" placeholder="Enter OTP" required maxlength="6">
-                <button class="btn" style="cursor: pointer;" id="submitOtpBtn" type="submit">Verify</button>
+                <button class="btn mt-3" style="cursor: pointer;" id="submitOtpBtn" type="submit">Verify</button>
             </form>
             <p class="timer">Resend OTP in <span id="timer">60</span> seconds</p>
             <button style="cursor: pointer;" onclick="resendOtp()" id="resendBtn">Resend OTP</button>
         </div>
     </div>
 </div>
+
 
 
 <script>
@@ -116,7 +117,6 @@ startTimer();
         return false;
     }
 </script>
- 
 
 <%- include('./partials/footer.ejs') %>
 

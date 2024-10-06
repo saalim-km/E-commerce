@@ -32,9 +32,29 @@ router.get(
   "/auth/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
-router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:"/user/signup"}) , async(req,res)=> {
+
+
+router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:"/user/login"}) , async(req,res)=> {
   req.session.user = req.user.email;
-  res.redirect('/home');
+  const email = req.session.user;
+  const userData = await userModel.findOne({email});
+  console.log(userData)
+  console.log("before checking the condition");
+  if(userData.isBlocked==1){
+    console.log("before redirecting user\n");
+    req.logOut((err)=> {
+      if(err){
+        console.log("error while login out",err.message);
+      }
+      req.session.user = null;
+      res.clearCookie("connect.sid");
+
+      req.flash("error","user is blocked by admin");
+      return res.redirect("/user/signup");
+    });
+  }else{
+    res.redirect('/home');
+  }
 });
 
 

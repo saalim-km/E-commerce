@@ -40,8 +40,8 @@ const userBlock = async(req,res)=> {
     try {
         const userId = req.params.id;
         const result = await userModel.findByIdAndUpdate(userId,{isBlocked : 1});
-        // req.session.user = null;
-        // console.log('session set null after blocking user');
+        req.session.user = null;
+        console.log('session set null after blocking user');
         req.flash("success","User has been Blocked");
         res.redirect("/admin/users");
     } catch (error) {
@@ -56,9 +56,6 @@ const userUnBlock = async(req,res)=> {
     try {
         const userId = req.params.id;
         const user = await userModel.findByIdAndUpdate(userId,{isBlocked : 0});
-        // req.session.user = user.email;
-        // console.log('session set after unbBlocking user');
-        
         req.flash("success","user has been unBlocked");
         console.log("after Un-Blocking the user : ",user);
         res.redirect("/admin/users");

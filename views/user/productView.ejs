@@ -1,9 +1,8 @@
 <%- include('../auth/partials/header.ejs') %>
 <style>
-    /* Carousel and Zoom */
     .carousel-item img {
-        height: 650px; /* Increased height for t-shirt display */
-        object-fit: contain; /* Ensures the whole image is visible */
+        height: 650px;
+        object-fit: contain;
     }
 
     .zoomable {
@@ -14,7 +13,6 @@
         transform: scale(1.3);
     }
 
-    /* Sizes Selection Styling */
     .sizes {
         margin-top: 20px;
     }
@@ -33,7 +31,6 @@
         border-color: #007bff;
     }
 
-    /* Product Details */
     .product-info {
         padding: 20px;
     }
@@ -87,16 +84,15 @@
             <h3><%= product.productName %></h3>
             <p class="text-muted">Category: <%= product.category.name %></p>
             <p><strong>Price: </strong>$<%= product.salesPrice %> <del>$<%= product.regularPrice %></del></p>
-            <p><strong>Quantity in stock:</strong> <%= product.quantity %> items</p> <!-- Quantity added here -->
             <p><strong>Description:</strong> <%= product.description %></p>
 
-            <!-- Sizes Selection -->
+            <!-- Sizes Selection with Stock -->
             <div class="sizes">
-                <h5>Select Size:</h5>
+                <h5>Select Size (Stock Availability):</h5>
                 <div class="d-flex">
-                    <% product.sizes.forEach(size => { %>
-                        <div class="size-option mx-2" onclick="selectSize('<%= size %>')">
-                            <%= size %>
+                    <% product.sizes.forEach(sizeVariant => { %>
+                        <div class="size-option mx-2" onclick="selectSize('<%= sizeVariant.size %>')">
+                            <%= sizeVariant.size %> (Stock: <%= sizeVariant.stock %>)
                         </div>
                     <% }) %>
                 </div>

@@ -18,6 +18,9 @@ app.use(session({
     secret : process.env.SECRET_KEY,
     resave : false,
     saveUninitialized : true,
+    cookie: {
+        maxAge: 30 * 60 * 1000 // 30 minutes
+    }
 }));
 
 // setting google auth
@@ -53,6 +56,8 @@ app.use('/',authRoute);
 app.use('/admin',adminRoute);
 app.use('/user',userRoute);
 
-app.listen(3004,()=> {
+
+const PORT = process.env.PORT || 3008
+app.listen(PORT,()=> {
     console.log('server started running on',3004);
 })

@@ -16,10 +16,6 @@ const productSchema = new mongoose.Schema({
     },
     description : {
         type : String,
-        require : true,
-    },
-    quantity : {
-        type :  Number,
         required : true,
     },
     images : {
@@ -29,7 +25,7 @@ const productSchema = new mongoose.Schema({
     category : {
         type : mongoose.Schema.Types.ObjectId,
         ref : "Category",
-        require : true,
+        required : true,
     },
     isListed : {
         type : Boolean,
@@ -40,10 +36,20 @@ const productSchema = new mongoose.Schema({
         required : true,
         default : "Available",
     },
-    sizes: {
-        type : [String],
-        required : true,
-    }
+    sizes : [
+        {
+            size : {
+                type : String,
+                enum : ['S','M','L',"XL"],
+                required : true,
+            },
+            stock : {
+                type : Number,
+                required : true,
+                min : 0,
+            }
+        }
+    ]
 },{timestamps : true});
 
 

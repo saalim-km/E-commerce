@@ -56,6 +56,11 @@ router.get("/product/unBlock/:id",productController.listProduct);
 
 // product Edit
 router.get("/product/edit/:id",productController.loadEditPage)
-router.post("/product/edit/:id",productController.editProduct)
+router.post("/product/edit/:id",uploads.array("images",4),productController.editProduct);
+
+router.post("/product/remove-image",productController.removeImage);
 
 module.exports = router;
+
+
+

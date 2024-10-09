@@ -205,7 +205,7 @@ function removeImage(imageName, index) {
           alert("Error removing image: " + response.message);
         }
       },
-      error: function (xhr, status, error) {
+      error: function ( error) {
         console.error("AJAX error:", error);
         alert("An error occurred while trying to remove the image.");
       }

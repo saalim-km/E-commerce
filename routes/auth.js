@@ -4,7 +4,6 @@ const authContoller = require("../controllers/authController");
 const passport = require("passport");
 const userModel = require('../models/user');
 const user = require("../models/user");
-const authMiddleware = require('../middlewares/auth');
 
 // signUp routes
 router.get("/", authContoller.landingPage);
@@ -18,6 +17,11 @@ router.post("/user/resend-otp", authContoller.resendOtp);
 // login routes
 router.get("/user/login", authContoller.loginPage);
 router.post('/user/login',authContoller.verifyLogin);
+
+// forgot password
+router.get("/user/forgotPassword",authContoller.forgotPass);
+router.post("/user/forgotPassword",authContoller.verifyForgotEmail);
+router.post("/user/updatePassword",authContoller.updatePassword);
 
 // logout routes
 router.get('/user/logout',authContoller.userLogout);

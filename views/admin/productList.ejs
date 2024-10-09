@@ -49,11 +49,6 @@
                                 <span>Category : <%= product.category.name %></span>
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-status">
-                                <% if (product.quantity > 2 ) { %>
-                                    <span class="badge rounded-pill alert-success">Available</span>
-                                <% } else {%>
-                                    <span class="badge rounded-pill alert-danger">Low in stock</span>
-                                <% } %>
                             </div>
                             <div class="col-lg-1 col-sm-2 col-4 col-date">
                                 <span><%= product.createdAt.toDateString() %></span>

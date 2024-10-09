@@ -38,12 +38,11 @@ const userList = async(req,res)=> {
 
 const userBlock = async(req,res)=> {
     try {
-        const userId = req.params.id;
+        const {userId} = req.body;
         const result = await userModel.findByIdAndUpdate(userId,{isBlocked : 1});
         req.session.user = null;
         console.log('session set null after blocking user');
-        req.flash("success","User has been Blocked");
-        res.redirect("/admin/users");
+        res.json({success : true});
     } catch (error) {
         console.log('error while blocking user',error.message);
         req.flash("error","something went wrong while blocking the user");
@@ -54,11 +53,10 @@ const userBlock = async(req,res)=> {
 
 const userUnBlock = async(req,res)=> {
     try {
-        const userId = req.params.id;
+        const {userId} = req.body;
+        console.log(userId);
         const user = await userModel.findByIdAndUpdate(userId,{isBlocked : 0});
-        req.flash("success","user has been unBlocked");
-        console.log("after Un-Blocking the user : ",user);
-        res.redirect("/admin/users");
+        res.json({success:true});
     } catch (error) {
         console.log('error while Un-Blocking user',error.message);
         req.flash("error","something went wrong while unblocking user");

@@ -454,7 +454,7 @@ h4,
 h5,
 h6 {
   font-family: "Spartan", sans-serif;
-  color: #495057;
+  color: #232425;
   font-weight: 600;
   line-height: 1.5;
 }
@@ -534,7 +534,7 @@ b {
 }
 
 .menu-aside .menu-item.active .icon {
-  color: #088178;
+  color: #1f2323;
 }
 
 .menu-aside .menu-item.active .menu-link {
@@ -643,7 +643,7 @@ b {
 
 .pagination-area .page-item.active .page-link, .pagination-area .page-item:hover .page-link {
   color: #fff;
-  background: #088178;
+  background: #191b1a;
 }
 
 .pagination-area .page-item .page-link {
@@ -690,7 +690,7 @@ b {
   padding: 10px 40px;
   color: #ffffff;
   border: none;
-  background-color: #088178;
+  background-color: #161717ca;
   border-radius: 4px;
 }
 
@@ -847,7 +847,7 @@ b {
 }
 
 .btn-brand {
-  background-color: #088178;
+  background-color: #2a2d2d;
   border: 0;
   color: #fff;
 }

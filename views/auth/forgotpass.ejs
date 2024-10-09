@@ -1,0 +1,282 @@
+<%- include('./partials/header.ejs') %>
+  
+  <!-- Custom Styles (Optional) -->
+    <style>
+        .forgot-password-container {
+            margin-top: 100px;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+        }
+        .password-container {
+            position: relative;
+        }
+
+        .password-container .toggle-password {
+            position: absolute;
+            top: 72%;
+            right: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+        }
+        input  {
+            border-radius: 5px;
+        }
+    </style>
+<body>
+
+    <div class="container d-flex justify-content-center forgot-password-container">
+        <div class="col-lg-4" id="Econtainer">
+            <h1 class="mb-3">Forgot Password?</h1>
+            <p class="mb-4">Don't worry, we'll help you reset your password.</p>
+            <!-- Forgot Password Form -->
+            <form onsubmit="return validateForm(event)">
+                <div class="form-group mb-3">
+                    <label for="email" class="form-label">Enter your email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="you@example.com"  
+                    >
+                    <p class="error-message" id="EM"></p>
+                    <div id="emailHelp" class="form-text">We'll send you instructions to reset your password.</div>
+                </div>
+                <button id="submitBtn" type="submit" class="btn btn-primary w-100">Submit</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- password change container -->
+    <div class="container d-flex justify-content-center forgot-password-container">
+        <div class="col-lg-4 d-none" id="Pcontainer">
+            <h1 class="mb-3">Enter you new Password</h1>
+            <!-- password change Form -->
+            <form onsubmit="return validatePassForm(event)">
+                <div class="form-group mb-3">
+                    <div class="mb-3 password-container">
+                        <label for="password" class="form-label">Enter you new password</label>
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="passwordINput"
+                            name="newPass"
+                            placeholder="Enter your password"
+                            
+                            aria-describedby="passwordHelp"
+                        />
+                        <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
+                    </div>
+                    <p style="color: red;" id="passError"></p>
+
+                    <label for="email" class="form-label">Confirm password</label>
+                    <input
+                        type="password" 
+                        id="CPInput" 
+                        name="confPass" 
+                    >
+                </div>
+                <p style="color: red;" id="confError"></p>
+                <button id="btn" type="submit" class="btn btn-primary w-100">Submit</button>
+            </form>
+        </div>
+    </div>
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
+    </script>
+    <!-- toastify -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script> 
+
+     <!-- script for validation -->
+    <script>
+        // getting all ements 
+        const emailInput = document.getElementById("email");
+        const newPassInput = document.getElementById("passwordINput");
+        const confirmPassInput = document.getElementById("CPInput");
+        const toggleBtn = document.getElementById("togglePassword");
+
+        function validateEmail(){
+            const email = emailInput.value.trim();
+            const emailRegex = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
+            const emailErr = document.getElementById("EM");
+
+            // reseting all errors before checking the condition.
+            emailErr.textContent = "";
+
+            // chekcing conditions.
+            if(email==""){
+                emailErr.textContent = "email cannot be empty";
+                emailInput.style.border = "2px solid red";
+                return false;
+            }
+            if(!emailRegex.test(email)){
+                emailErr.textContent = "Invalid email. Please use gmail.com, yahoo.com, or microsoft.com.";
+                emailInput.style.border = "2px solid red";
+                return false;
+            }
+
+            emailInput.style.border = "2px solid green";
+            return true;
+        }
+
+
+        function validateForm(e){
+            const email = emailInput.value.trim();
+            const passForm = document.getElementById("Pcontainer");
+            const emailForm = document.getElementById("Econtainer");
+            console.log(passForm,emailForm);
+            
+            e.preventDefault();
+            const result = validateEmail();
+            if(result){
+               $.ajax({
+                url : "/user/forgotPassword",
+                method : "POST",
+                data : JSON.stringify({
+                    email : email
+                }),
+                contentType : "application/json",
+                success : function (res){
+                    if(res.success){
+                        emailForm.classList.add("d-none")
+                        passForm.classList.remove("d-none");
+                        localStorage.setItem("email",email)
+                        Toastify({
+                            text: "email verified.",
+                            duration: 3000,
+                            gravity: "bottom",
+                            position: "center",
+                            backgroundColor: "green",
+                        }).showToast();
+                    }else{
+                        Toastify({
+                            text: "User doesn't exist!",
+                            duration: 3000,
+                            gravity: "bottom",
+                            position: "center",
+                            backgroundColor: "red",
+                        }).showToast();
+                    }
+                }
+               })
+            }
+        }
+
+        function NPvalidate(){
+            const passError = document.getElementById("passError");
+            const NP = newPassInput.value.trim();
+            const passwordPattern =
+            /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+            // reseting errors
+            passError.textContent = "";
+
+            if(NP==""){
+                passError.textContent = "new password cannot be empty";
+                newPassInput.style.border = "2px solid red";
+                return false;
+            }
+            if(!passwordPattern.test(NP)){
+                passError.textContent = "Password must be at least 8 characters long and include a letter, a number, and a special character.";
+                newPassInput.style.border = "2px solid red";
+                return false;
+            }
+
+            newPassInput.style.border = "2px solid green";
+            return true;
+        }
+
+        function CPvalidate(){
+            const CP = confirmPassInput.value.trim();
+            const NP = newPassInput.value.trim();
+            const confError = document.getElementById("confError");
+
+            confError.textContent = "";
+
+            if(CP==""){
+                confError.textContent = "confirm password cannot be emtpty";
+                confirmPassInput.style.border = "2px solid red";
+                return fales;
+            }
+            if(NP!==CP){
+                confError.textContent = "password is not matching";
+                confirmPassInput.style.border = "2px solid red";
+                return false;
+            }
+
+            confirmPassInput.style.border = "2px solid green";
+            return true;
+        }
+
+        function validatePassForm(e){
+            e.preventDefault();
+            const userPassword = newPassInput.value.trim();
+            const userEmail = localStorage.getItem("email");
+            console.log(userPassword,userEmail);
+            const result = NPvalidate() && CPvalidate();
+            if(result){
+                $.ajax({
+                    url : "/user/updatePassword",
+                    method : "POST",
+                    data : JSON.stringify({
+                        password : userPassword,
+                        email : userEmail,
+                    }),
+                    contentType : "application/json",
+                    success : function (res){
+                        if(res.success){
+                            Toastify({
+                            text: "New password has been saved",
+                            duration: 3000,
+                            gravity: "bottom",
+                            position: "center",
+                            backgroundColor: "green",
+                        }).showToast();
+                            localStorage.removeItem("email");
+                            window.location.href = "/user/login";
+                        }else{
+                            Toastify({
+                            text: "An error occured while saving password",
+                            duration: 3000,
+                            gravity: "bottom",
+                            position: "center",
+                            backgroundColor: "red",
+                        }).showToast();
+                        }
+                    },error : function (){
+                        Toastify({
+                            text: "An error occured while saving password",
+                            duration: 3000,
+                            gravity: "bottom",
+                            position: "center",
+                            backgroundColor: "red",
+                        }).showToast();
+                    }
+                })
+            }
+        }
+
+        function togglePass(){
+            const toggler = document.getElementById("togglePassword");
+            if(newPassInput.getAttribute("type")=="password"){
+                newPassInput.setAttribute("type","text");
+                toggler.classList.remove("bi-eye-slash");
+                toggler.classList.add("bi-eye");
+            }else{
+                newPassInput.setAttribute("type","password");
+                toggler.classList.remove("bi-eye");
+                toggler.classList.add("bi-eye-slash");
+            }
+        }
+        
+        toggleBtn.addEventListener("click",togglePass)
+        newPassInput.addEventListener("input",NPvalidate)
+        confirmPassInput.addEventListener("input",CPvalidate);
+        emailInput.addEventListener("input",validateEmail);
+    </script>
+</body>
+</html>

@@ -1,133 +1,240 @@
 <%- include('../auth/partials/header.ejs') %>
-<style>
-    .carousel-item img {
-        height: 650px;
-        object-fit: contain;
-    }
+    <style>
+        /* Enhanced Carousel Styling */
+        .carousel-item img {
+            height: 650px;
+            object-fit: cover;
+            transition: transform 0.3s ease-in-out;
+        }
 
-    .zoomable {
-        transition: transform 0.3s ease-in-out;
-    }
+        .carousel-item img:hover {
+            transform: scale(1.05);
+        }
 
-    .zoomable:hover {
-        transform: scale(1.3);
-    }
+        /* Modern Size Selection */
+        .size-option {
+            margin: 5px;
+        }
 
-    .sizes {
-        margin-top: 20px;
-    }
+        .size-option .btn {
+            min-width: 60px;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-    .sizes .size-option {
-        border: 1px solid #ddd;
-        padding: 10px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
-    }
+        .size-option .btn.selected {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
 
-    .sizes .size-option:hover,
-    .sizes .size-option.selected {
-        background-color: #007bff;
-        color: white;
-        border-color: #007bff;
-    }
+        /* Improved Add to Cart Button */
+        #addToCartBtn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-    .product-info {
-        padding: 20px;
-    }
+        #addToCartBtn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
 
-    .btn-lg {
-        font-size: 18px;
-    }
-</style>
+        /* Enhanced Product Information */
+        .product-info h3 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .product-info p {
+            font-size: 1rem;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            color: #28a745;
+        }
+
+        .product-price del {
+            color: #6c757d;
+            font-size: 1rem;
+            margin-left: 10px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .carousel-item img {
+                height: 400px;
+            }
+
+            .product-info h3 {
+                font-size: 1.5rem;
+            }
+
+            #addToCartBtn {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .carousel-item img {
+                height: 300px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container mt-5">
-    <!-- Breadcrumbs -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/category/<%= product.category._id %>"><%= product.category.name %></a></li>
-            <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
-        </ol>
-    </nav>
+    <div class="container mt-5">
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/category/<%= product.category._id %>"><%= product.category.name %></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
+            </ol>
+        </nav>
 
-    <div class="row">
-        <!-- Image Carousel -->
-        <div class="col-md-6">
-            <div id="productCarousel" class="carousel slide" data-ride="carousel">
-                <ol class="carousel-indicators">
-                    <% for(let i = 0; i < product.images.length; i++) { %>
-                        <li data-target="#productCarousel" data-slide-to="<%= i %>" class="<%= i === 0 ? 'active' : '' %>"></li>
-                    <% } %>
-                </ol>
-                <div class="carousel-inner">
-                    <% product.images.forEach((image, index) => { %>
-                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                            <img src="/uploads/product-images/<%= image %>" alt="Product Image" class="d-block w-100 zoomable">
-                        </div>
-                    <% }) %>
-                </div>
-                <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Product Information -->
-        <div class="col-md-6 product-info">
-            <h3><%= product.productName %></h3>
-            <p class="text-muted">Category: <%= product.category.name %></p>
-            <p><strong>Price: </strong>$<%= product.salesPrice %> <del>$<%= product.regularPrice %></del></p>
-            <p><strong>Description:</strong> <%= product.description %></p>
-
-            <!-- Sizes Selection with Stock -->
-            <div class="sizes">
-                <h5>Select Size (Stock Availability):</h5>
-                <div class="d-flex">
-                    <% product.sizes.forEach(sizeVariant => { %>
-                        <div class="size-option mx-2" onclick="selectSize('<%= sizeVariant.size %>')">
-                            <%= sizeVariant.size %> (Stock: <%= sizeVariant.stock %>)
-                        </div>
-                    <% }) %>
+        <div class="row">
+            <!-- Image Carousel -->
+            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div id="productCarousel" class="carousel slide" data-ride="carousel">
+                    <ol class="carousel-indicators">
+                        <% for(let i = 0; i < product.images.length; i++) { %>
+                            <li data-target="#productCarousel" data-slide-to="<%= i %>" class="<%= i === 0 ? 'active' : '' %>" aria-current="<%= i === 0 ? 'true' : 'false' %>" aria-label="Slide <%= i + 1 %>"></li>
+                        <% } %>
+                    </ol>
+                    <div class="carousel-inner">
+                        <% product.images.forEach((image, index) => { %>
+                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                <img src="/uploads/product-images/<%= image %>" alt="Product Image <%= index + 1 %>" class="d-block w-100 zoomable">
+                            </div>
+                        <% }) %>
+                    </div>
+                    <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
                 </div>
             </div>
 
-            <!-- Add to Cart Button -->
-            <div class="mt-4">
-                <button class="btn btn-primary btn-lg" id="addToCartBtn" disabled>Add to Cart</button>
+            <!-- Product Information -->
+            <div class="col-lg-6 col-md-6 col-sm-12 product-info">
+                <h3><%= product.productName %></h3>
+                <p class="text-muted">Category: <%= product.category.name %></p>
+                <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPrice %></span> <del>₹<%= product.regularPrice %></del></p>
+                <p><strong>Description:</strong> <%= product.description %></p>
+
+                <!-- Sizes Selection with Stock -->
+                <div class="sizes">
+                    <h5>Select Size:</h5>
+                    <div class="btn-group" role="group" aria-label="Size Selection">
+                        <% product.sizes.forEach(sizeVariant => { %>
+                            <button type="button" class="btn btn-outline-primary size-option" data-size="<%= sizeVariant.size %>" data-stock="<%= sizeVariant.stock %>" <%= sizeVariant.stock === 0 ? 'disabled' : '' %>>
+                                <%= sizeVariant.size %> 
+                                <% if(sizeVariant.stock === 0){ %>
+                                    <span class="badge bg-danger ms-1">Out</span>
+                                <% } else { %>
+                                    <span class="badge bg-success ms-1"><%= sizeVariant.stock %></span>
+                                <% } %>
+                            </button>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <!-- Add to Cart Button -->
+                <div class="mt-4">
+                    <button class="btn btn-primary btn-lg" id="addToCartBtn" disabled>Add to Cart <i class="bi bi-cart-fill ms-2"></i></button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Bootstrap 4 JS, Popper.js, and jQuery (Ensure Bootstrap 4 is consistent) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXd2R6Kq3GvJ0lEnxAGN7B77wzNs1cFeHyJ7QoA+u7xzZV3ZJnPA0K+7pjGcI5U" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"
+        integrity="sha384-VP5x0yQ3V5ZqYQQrLUoc6+RH7b0qm3sT6bFHC+1V+VfXwgiD8tADyYj9KvlEMC9K" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-XoU2KQeh3B8ZEmFZ3lQm3icbjItgblgHZb+I56Pwz4eEM5G9tCCP+2W0k1MBHs2U" crossorigin="anonymous"></script>
 
-<script>
-    let selectedSize = null;
+    <!-- SweetAlert2 and Toastify JS (Ensure they are included after jQuery) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    // Function to handle size selection
-    function selectSize(size) {
-        selectedSize = size;
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sizeButtons = document.querySelectorAll('.size-option');
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            let selectedSize = null;
+            let selectedStock = 0;
 
-        // Remove 'selected' class from all size options
-        document.querySelectorAll('.size-option').forEach(option => {
-            option.classList.remove('selected');
+            sizeButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // Deselect all buttons
+                    sizeButtons.forEach(btn => btn.classList.remove('selected'));
+
+                    // Select the clicked button
+                    this.classList.add('selected');
+
+                    // Update selected size and stock
+                    selectedSize = this.getAttribute('data-size');
+                    selectedStock = parseInt(this.getAttribute('data-stock'));
+
+                    // Enable or disable the Add to Cart button based on stock
+                    if (selectedStock > 0) {
+                        addToCartBtn.disabled = false;
+                    } else {
+                        addToCartBtn.disabled = true;
+                        Toastify({
+                            text: "Selected size is out of stock.",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#dc3545",
+                        }).showToast();
+                    }
+                });
+            });
+
+            addToCartBtn.addEventListener('click', function () {
+                if (!selectedSize) {
+                    Toastify({
+                        text: "Please select a size.",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545",
+                    }).showToast();
+                    return;
+                }
+
+                // Implement your Add to Cart functionality here
+                // For demonstration, we'll show a success message
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Added to Cart!',
+                    text: `Size: ${selectedSize}`,
+                    showConfirmButton: false,
+                    timer: 1500,
+                    toast: true,
+                    position: 'top-end',
+                });
+
+                // Optionally, reset the selection
+                sizeButtons.forEach(btn => btn.classList.remove('selected'));
+                addToCartBtn.disabled = true;
+                selectedSize = null;
+                selectedStock = 0;
+            });
         });
-
-        // Add 'selected' class to the clicked size option
-        event.target.classList.add('selected');
-
-        // Enable the 'Add to Cart' button
-        document.getElementById('addToCartBtn').disabled = false;
-    }
-</script>
+    </script>
 
 <%- include('../auth/partials/footer.ejs') %>

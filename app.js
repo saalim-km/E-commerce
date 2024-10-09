@@ -36,7 +36,11 @@ app.use((req,res,next)=> {
 
 //  template engine
 app.set('view engine','ejs');
-app.set('views',[path.join(__dirname,"views/auth") , path.join(__dirname , "views/admin") , path.join(__dirname,"views/user")]);
+app.set('views',[
+    path.join(__dirname,"views/auth") ,
+    path.join(__dirname , "views/admin"), 
+    path.join(__dirname,"views/user"),
+]);
 
 // serving static files
 app.use(express.static('public'));
@@ -50,7 +54,6 @@ app.use(nocache());
 // connecting to database
 dbConnect();
 
-
 // setting routes
 app.use('/',authRoute);
 app.use('/admin',adminRoute);
@@ -59,5 +62,5 @@ app.use('/user',userRoute);
 
 const PORT = process.env.PORT || 3008
 app.listen(PORT,()=> {
-    console.log('server started running on',3004);
+    console.log(`🚀 Server is running on port ${PORT}`);
 })

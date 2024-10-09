@@ -41,12 +41,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% if (message.success ) { %>
-                                 <div class="alert alert-success"><%= message.success%></div>
-                                <% }%>
-                                <% if (message.error) { %>
-                                 <div class="alert alert-danger"><%= message.error %></div>
-                                <% } %>
                                 <% users.forEach(user => { %>
                                     <tr>
                                         <td><%= user.username %></td>
@@ -54,9 +48,15 @@
                                         <td><%= user.phone %></td>
                                         <td class="text-end">
                                             <% if (user.isBlocked) { %>
-                                                <a href="/admin/user/unblock/<%=user._id%>" class="btn btn-sm  rounded font-sm mt-15 btn-danger ">UnBlock</a>
-                                            <% } else {%>
-                                                <a href="/admin/user/block/<%=user._id%>" class="btn btn-sm  rounded font-sm mt-15 btn-danger ">Block</a>
+                                                <a onclick="unblockUser('<%= user._id %>')" 
+                                                   class="btn btn-sm rounded font-sm mt-15 btn-warning">
+                                                    UnBlock
+                                                </a>
+                                            <% } else { %>
+                                                <a onclick="blockUser('<%= user._id %>')" 
+                                                   class="btn btn-sm rounded font-sm mt-15 btn-danger">
+                                                    Block
+                                                </a>
                                             <% } %>
                                         </td>
                                     </tr>
@@ -81,4 +81,89 @@
         </section> <!-- content-main end// -->
         
 
-        <%- include('./partials/footer.ejs') %>
+
+<script>
+    function unblockUser(user){
+        console.log(user);
+        const userId = user;
+        $.ajax({
+            url : "/admin/user/unblock",
+            type : 'POST',
+            data : JSON.stringify({
+                userId : userId,
+            }),
+            contentType : "application/json",
+            success : function success(response){
+                if(response.success){
+                    const btn = $(`[onclick="unblockUser('${userId}')"]`);
+                    btn.removeClass('btn-warning').addClass('btn-danger');
+                    btn.text("Bock");
+                    btn.attr("onclick",`blockUser('${userId}')`);
+                    Swal.fire({
+                    toast : true,
+                    position : "top-end",
+                    title : "user unblocked",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    background : "green",
+                    color : "white",
+                    });
+                }else{
+                    Swal.fire({
+                    toast : true,
+                    position : "top-end",
+                    title : "error while unblocking user , please try again later",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    });
+                }
+            }
+        })
+    }
+
+    function blockUser(user){
+        console.log(user);
+        const userId = user;
+        $.ajax({
+            url : "/admin/user/block",
+            type : 'POST',
+            data : JSON.stringify({
+                userId : userId,
+            }),
+            contentType : "application/json",
+            success : function success(response){
+                if(response.success){
+                    const btn = $(`[onclick="blockUser('${userId}')"]`);
+                    btn.removeClass('btn-danger').addClass('btn-warning');
+                    btn.text("un-Block");
+                    btn.attr('onclick',`unblockUser('${userId}')`);
+                    Swal.fire({
+                    toast : true,
+                    position : "top-end",
+                    title : "user blocked",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    background : "red",
+                    color : "white",
+                    });
+                }else{
+                    Swal.fire({
+                    toast : true,
+                    icon : "error",
+                    position : "top-end",
+                    title : "error while unblocking user , please try again later",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                    });
+                }
+            }
+        })
+    }
+
+</script>
+
+<%- include('./partials/footer.ejs') %>

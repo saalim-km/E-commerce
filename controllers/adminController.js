@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const userModel = require('../models/user');
 
+// get
 const loadLogin = async(req,res)=> {
     try {   
         if(req.session.admin){
@@ -13,7 +13,7 @@ const loadLogin = async(req,res)=> {
         console.log('error while loading admin login page',error.message); 
     }
 }
-
+// post
 const adminLogin = async(req,res)=> {
     try {
         const {email,password} = req.body;
@@ -37,11 +37,7 @@ const adminLogin = async(req,res)=> {
 
 const dashboardLoad = async(req,res)=> {
     try {
-        if(!req.session.admin){
-            return res.redirect('/admin/login');
-        }else{
-            res.render("dashboard",{});
-        }
+        res.render("dashboard",{});
     } catch (error) {
         console.log('error while loading dashboard',error.message);
     }

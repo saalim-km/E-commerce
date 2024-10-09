@@ -1,201 +1,296 @@
-<%- include('./partials/loginSignup.ejs') %>
-<style>
-  .password-container {
-    position: relative;
-    align-items: center;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create an Account</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <!-- Custom Styles -->
+    <style>
+        .password-container {
+            position: relative;
+        }
 
-  .password-container i {
-    position: absolute;
-    right: 10px;
-    cursor: pointer;
-    bottom: 10px;
-    font-size: 15px;
-  }
-</style>
-<!--Body Content-->
-<div id="page-content">
-  <!--Page Title-->
-  <div class="page section-header text-center">
-    <div class="page-title">
-      <div class="wrapper"><h1 class="page-width">Create an Account</h1></div>
-    </div>
-  </div>
-  <!--End Page Title-->
+        .password-container .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+        }
 
-  <div class="container">
-    <div class="row">
-      <div class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3">
-        <% if (message.error) { %>
-            <div class="alert alert-danger text-center mt-3">
-                <%= message.error %>
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+
+        .signup-container {
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .social-buttons .btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: #0d6efd;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <%- include('./partials/header.ejs') %>
+
+    <!-- Main Content -->
+    <div class="container d-flex justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10 signup-container">
+            <h2 class="text-center mb-4">Create an Account</h2>
+            <!-- Display Server-Side Error Messages -->
+            <% if (message && message.error) { %>
+                <div class="alert alert-danger text-center">
+                    <%= message.error %>
+                </div>
+            <% } %>
+            <form action="/user/signup" id="registerForm" onsubmit="return validateForm()" method="post">
+                <!-- Username Field -->
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        aria-describedby="usernameHelp"
+                    />
+                    <p class="error-message" id="userNameErr"></p>
+                </div>
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input 
+                        type="email" 
+                        class="form-control" 
+                        id="email" 
+                        name="email" 
+                        placeholder="you@example.com" 
+                         
+                        aria-describedby="emailHelp"
+                    />
+                    <p class="error-message" id="error2"></p>
+                </div>
+                <!-- Phone Field -->
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input 
+                        type="number" 
+                        class="form-control" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="Enter your 10-digit phone number" 
+                        maxlength="10" 
+                         
+                        aria-describedby="phoneHelp"
+                    />
+                    <p class="error-message" id="error3"></p>
+                </div>
+                <!-- Password Field with Toggle -->
+                <div class="mb-3 password-container">
+                    <label for="password" class="form-label">Password</label>
+                    <input
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        
+                        aria-describedby="passwordHelp"
+                    />
+                    <i class="bi bi-eye-slash toggle-password" id="togglePassword"></i>
+                    <p class="error-message" id="error4"></p>
+                </div>
+                <!-- Confirm Password Field -->
+                <div class="mb-3">
+                    <label for="confirm-password" class="form-label">Confirm Password</label>
+                    <input
+                        type="password"
+                        class="form-control"
+                        id="confirm-password"
+                        name="confirm-password"
+                        placeholder="Re-enter your password"
+                        
+                        aria-describedby="confirmPasswordHelp"
+                    />
+                    <p class="error-message" id="error5"></p>
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+            </form>
+            <!-- Social Login Options -->
+            <div class="social-buttons mt-4">
+                <p class="text-center">or</p>
+                <a href="/auth/google">
+                    <button type="button" class="btn btn-danger">
+                        <i class="bi bi-google"></i> Sign up with Google
+                    </button>
+                </a>
+                <a href="/">
+                    <button type="button" class="btn btn-primary">
+                        <i class="bi bi-facebook"></i> Sign up with Facebook
+                    </button>
+                </a>
             </div>
-           <% } %>
-        <form action="/user/signup" id="registerForm" onsubmit="return validateForm()" method="post">
-          <label for="">Username</label>
-          <input
-            type="text"
-            placeholder=""
-            id="username"
-            name="username"
-          />
-          <p id="userNameErr" style="color: red;"></p>
-          <div id="error1" class="error-mess"></div>
-
-          <label for="">email</label>
-          <input type="email" placeholder="" id="email" name="email"  />
-          <div id="error2" class="error-mess"></div>
-
-          <label for="">phone</label>
-          <input maxlength="10" type="text" placeholder="" id="phone" name="phone"/>
-          <div id="error3" class="error-mess"></div>
-
-          <div class="password-container">
-            <label for="">password</label>
-            <input
-              type="password"
-              id="password"
-              placeholder=""
-              name="password"
-            />
-            <i class="bi bi-eye-slash" id="togglePassword"></i>
-          </div>
-          <div id="error4" class="error-mess"></div>
-
-          <label for="">confirm password</label>
-          <input
-            type="password"
-            placeholder=""
-            id="confirm-password"
-            name="confirm-password"
-          />
-          <div id="error5" class="error-mess"></div>
-
-          <input type="submit" class="btn mt-3" />
-        </form>
-        <div class="m-auto d-flex justify-content-center flex-column">
-          <p>or</p>
-          <div>
-            <a href="/auth/google">
-              <button class="btn btn-sm mb-2">login with Google</button>
-            </a><br>
-            <a href="/">
-              <button class="btn btn-sm">login with Facebook</button>
-            </a>
-          </div>
-          <p class="mt-3">already have an account   <a style="color: red;" href="/user/login">Login</a></p>
+            <!-- Additional Links -->
+            <div class="text-center mt-4 footer-links">
+                <p>Already have an account? <a href="/user/login">Login</a></p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-<!--End Body Content-->
-
-<script>
-  const form = document.getElementById("registerForm");
-  const email = document.getElementById("email");
-  const phone = document.getElementById("phone");
-  const password = document.getElementById("password");
-  const cpassword = document.getElementById("confirm-password");
-  const error1 = document.getElementById("error1");
-  const error2 = document.getElementById("error2");
-  const error3 = document.getElementById("error3");
-  const error4 = document.getElementById("error4");
-  const error5 = document.getElementById("error5");
-</script>
-
-<script>
-  const toggler = document.getElementById("togglePassword");
-  const inputField = document.getElementById("password");
-  console.log(toggler, inputField);
-
-  toggler.addEventListener("click", () => {
-    if (inputField.getAttribute("type") === "password") {
-      inputField.setAttribute("type", "text");
-      toggler.classList.remove("bi-eye-slash");
-      toggler.classList.add("bi-eye");
-    } else {
-      inputField.setAttribute("type", "password");
-      toggler.classList.remove("bi-eye");
-      toggler.classList.add("bi-eye-slash");
-    }
-  });
 
 
-  function validateEmail() {
-    const email = document.getElementById("email").value;
-    const emailError = document.getElementById("error2");
-    const emailPattern = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
+    <%- include('./partials/footer.ejs') %>
 
-    emailError.textContent = "";
 
-    if (!emailPattern.test(email)) {
-      emailError.textContent = "invalid email";
-      emailError.style.color = "red";
-      return false;
-    }
-    return true;
-  }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  function validatePhone() {
-    const phone = document.getElementById("phone").value
-    const phoneError = document.getElementById("error3");
-    const mobilePattern = /^\d{10}$/;
-    phoneError.textContent = "";
-    if (!mobilePattern.test(phone)) {
-      phoneError.textContent = "mobile number should be exactly 10 digit";
-      phoneError.style.color = 'red';
-      return false;
-    }
-    return true;
-  }
+    <!-- getting all elements for validation -->
+    <script>
+      // Existing Elements Selection
+      const form = document.getElementById("registerForm");
+      const email = document.getElementById("email");
+      const phone = document.getElementById("phone");
+      const password = document.getElementById("password");
+      const cpassword = document.getElementById("confirm-password");
+      const error1 = document.getElementById("error1");
+      const error2 = document.getElementById("error2");
+      const error3 = document.getElementById("error3");
+      const error4 = document.getElementById("error4");
+      const error5 = document.getElementById("error5");
+    </script>
 
-  function validatePassword() {
-    const password = document.getElementById("password").value;
-    const confirmPass = document.getElementById("confirm-password").value;
-    const passwordError = document.getElementById("error4");
-    const cPasswordError = document.getElementById("error5");
-    const passwordPattern =
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    <!-- Password Visibility Toggle Script -->
+    <script>
+      const toggler = document.getElementById("togglePassword");
+      const inputField = document.getElementById("password");
+      console.log(toggler, inputField);
+    
+      toggler.addEventListener("click", () => {
+        if (inputField.getAttribute("type") === "password") {
+          inputField.setAttribute("type", "text");
+          toggler.classList.remove("bi-eye-slash");
+          toggler.classList.add("bi-eye");
+        } else {
+          inputField.setAttribute("type", "password");
+          toggler.classList.remove("bi-eye");
+          toggler.classList.add("bi-eye-slash");
+        }
+      });
+    </script>
 
-    passwordError.textContent = "";
-
-    if (!passwordPattern.test(password)) {
-        passwordError.style.color = 'red';
-      passwordError.textContent =
-        "Password must be at least 8 characters long and include a letter, a number, and a special character.";
-      return false;
-    }
-
-    if (password !== confirmPass) {
-        cPasswordError.style.color = 'red';
-      cPasswordError.textContent = "password doesn't match!!";
-      return false;
-    }
-
-    return true;
-  }
-
-  function validateUsername(){
-    const username = document.getElementById("username").value;
-    const userNameErr = document.getElementById("userNameErr");
-
-    userNameErr.textContent = "";
-    if(username.trim()===""){
-      userNameErr.textContent = "username cannot be empty";
-      return false;
-    }
-    return true;
-  }
-
-  function validateForm() {
-    const email = validateEmail();
-    const phone = validatePhone();
-    const password = validatePassword();
-    const username = validateUsername();
-
-    return email && phone && password && username;
-  }
-</script>
-
-<%- include('./partials/footer.ejs') %>
+    <!-- Form Validation Script -->
+    <script>
+      function validateEmail() {
+        const email = document.getElementById("email").value;
+        const emailError = document.getElementById("error2");
+        const emailPattern = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
+    
+        emailError.textContent = "";
+    
+        if (!emailPattern.test(email)) {
+          emailError.textContent = "Invalid email. Please use gmail.com, yahoo.com, or microsoft.com.";
+          emailError.style.color = "red";
+          return false;
+        }
+        return true;
+      }
+    
+      function validatePhone() {
+        const phone = document.getElementById("phone").value
+        const phoneError = document.getElementById("error3");
+        const mobilePattern = /^\d{10}$/;
+        phoneError.textContent = "";
+        if (!mobilePattern.test(phone)) {
+          phoneError.textContent = "Mobile number should be exactly 10 digits.";
+          phoneError.style.color = 'red';
+          return false;
+        }
+        return true;
+      }
+    
+      function validatePassword() {
+        const password = document.getElementById("password").value;
+        const confirmPass = document.getElementById("confirm-password").value;
+        const passwordError = document.getElementById("error4");
+        const cPasswordError = document.getElementById("error5");
+        const passwordPattern =
+          /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+    
+        passwordError.textContent = "";
+        cPasswordError.textContent = "";
+    
+        if (!passwordPattern.test(password)) {
+            passwordError.style.color = 'red';
+          passwordError.textContent =
+            "Password must be at least 8 characters long and include a letter, a number, and a special character.";
+          return false;
+        }
+    
+        if (password !== confirmPass) {
+            cPasswordError.style.color = 'red';
+          cPasswordError.textContent = "Passwords don't match.";
+          return false;
+        }
+    
+        return true;
+      }
+    
+      function validateUsername(){
+        const username = document.getElementById("username").value;
+        const userNameErr = document.getElementById("userNameErr");
+        const userPattern = /^[a-zA-Z\s]{4,14}$/;
+        const isvalidUser = userPattern.test(username)
+    
+        userNameErr.textContent = "";
+        if(username.trim()===""){
+          userNameErr.textContent = "Username cannot be empty.";
+          return false;
+        }
+    
+        if(!isvalidUser){
+          userNameErr.textContent = "Enter a username with alphabetic characters.";
+          return false;
+        }
+        return true;
+      }
+    
+      function validateForm() {
+        const emailValid = validateEmail();
+        const phoneValid = validatePhone();
+        const passwordValid = validatePassword();
+        const usernameValid = validateUsername();
+    
+        return emailValid && phoneValid && passwordValid && usernameValid;
+      }
+    </script>
+</body>
+</html>

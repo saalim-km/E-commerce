@@ -45,12 +45,13 @@
         if(name===updatedName && description===updateDescription){
             Swal.fire({
                 toast : true,
-                icon : "error",
                 position : "top-end",
-                title : "make any changes to update",
+                title : "make any changes to update.",
                 showConfirmButton: false,
                 timer: 2500,
                 timerProgressBar: true,
+                background : "red",
+                color : "white",
             })
             return false;
         }

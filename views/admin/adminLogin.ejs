@@ -3,99 +3,277 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Evara Dashboard</title>
+    <title>Evara Dashboard - Login</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="">
+    <meta name="description" content="Login to your Evara Dashboard">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="">
-    <meta property="og:type" content="">
-    <meta property="og:url" content="">
-    <meta property="og:image" content="">
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg">
-    <!-- Template CSS -->
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
     <link href="/backend/assets/css/main.css" rel="stylesheet" type="text/css" />
+    <!-- Custom Styles (Optional) -->
+    <style>
+        body {
+            background: linear-gradient(to right, #ece9e6, #ffffff);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-login {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            background-color: #ffffff;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .card-login:hover {
+            transform: translateY(-10px);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding-left: 2.5rem;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #6c63ff;
+        }
+
+        .input-group-text {
+            background-color: transparent;
+            border: none;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c63ff;
+        }
+
+        .btn-primary {
+            background-color: #6c63ff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 0;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #5751d3;
+            transform: scale(1.02);
+        }
+
+        .forgot-password {
+            text-decoration: none;
+            color: #6c63ff;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: #5751d3;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.875em;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 576px) {
+            .card-login {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <main>
-        <section class="content-main mt-80 mb-80">
-            <div class="card mx-auto card-login">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">Sign in</h4>
-                    <form action="/admin/login" method="post" onsubmit="return validateForm()">
-                        <div class="mb-3">
-                            <input class="form-control" placeholder="email" type="email"  name="email" id="email">
-                            <p id="emailError" style="color: red;"></p>
-                        </div> <!-- form-group// -->
-                        <div class="mb-3">
-                            <input class="form-control" placeholder="Password" type="password"  name="password" id="password">
-                            <p id="passwordError" style="color: red;"></p>
-                        </div> <!-- form-group// -->
-                        <div class="mb-3">
-                            <a href="#" class="float-end font-sm text-muted mb-2">Forgot password?</a>
-                        </div> <!-- form-group form-check .// -->
-                        <div class="mb-4">
-                            <button type="submit" class="btn btn-primary w-100"> Login </button>
-                        </div> <!-- form-group// -->
-                    </form>
-                    <% if (locals.message && message.length>0) { %>
-                        <div class="alert alert-danger text-center mt-3">
-                            <%= message %>
-                        </div>
-                    <% } %>
-                </div>
+
+    <div class="card-login">
+        <div class="text-center mb-4">
+            <h1>SAVAGE</h1>
+        </div>
+        <form action="/admin/login" method="post" onsubmit="return validateForm()">
+            <div class="mb-3 position-relative">
+                <span class="input-group-text">
+                    <i class="bi bi-envelope-fill"></i>
+                </span>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control ps-5"
+                    placeholder="you@example.com"
+                    required
+                >
             </div>
-        </section>
-        <footer class="main-footer text-center">
-            <p class="font-xs">
-                <script>
-                document.write(new Date().getFullYear())
-                </script> ©, Evara - HTML Ecommerce Template .
-            </p>
-            <p class="font-xs mb-30">All rights reserved</p>
-        </footer>
-    </main>
+            <p class="error-message" id="emailError"></p>
+            <div class="mb-3 position-relative">
+                <span class="input-group-text">
+                    <i class="bi bi-lock-fill"></i>
+                </span>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control ps-5"
+                    placeholder="Enter your password"
+                    required
+                >
+                <i class="bi bi-eye-slash-fill position-absolute" id="togglePassword"
+                    style="top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #6c63ff;"></i>
+            </div>
+            <p class="error-message" id="passwordError"></p>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <% if (locals.message && message.length > 0) { %>
+            <div class="alert alert-danger text-center mt-3">
+                <%= message %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
+    </script>
+    <!-- jQuery (if required for other scripts) -->
     <script src="/backend/assets/js/vendors/jquery-3.6.0.min.js"></script>
-    <script src="/backend/assets/js/vendors/bootstrap.bundle.min.js"></script>
-    <script src="/backend/assets/js/vendors/jquery.fullscreen.min.js"></script>
+    <!-- SweetAlert2 for Enhanced Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Toastify JS for Toast Notifications -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- Main Script -->
     <script src="/backend/assets/js/main.js" type="text/javascript"></script>
 
-
-
+    <!-- Custom Script for Form Validation and Interaction -->
     <script>
-        function validateEmail(){
-            const email = document.getElementById("email").value;
+        // Wait for the DOM to fully load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get form elements
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            const togglePassword = document.getElementById("togglePassword");
             const emailError = document.getElementById("emailError");
-            
-            emailError.textContent = "";
-            if(email.trim()===""){
-                emailError.textContent = "email cannot be empty";
-                return false;
-            }
-            return true;
-        }
-
-        function validatePassword(){
-            const password = document.getElementById("password").value;
             const passwordError = document.getElementById("passwordError");
 
-            passwordError.textContent = "";
-            if(password.trim()===""){
-                passwordError.textContent = "password cannot be empty";
-                return false;
+            // Email Validation Function
+            function validateEmail() {
+                const email = emailInput.value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+
+                // Reset previous errors
+                emailError.textContent = "";
+                emailInput.style.borderColor = "";
+
+                if (email === "") {
+                    emailError.textContent = "Email cannot be empty.";
+                    emailInput.style.borderColor = "red";
+                    return false;
+                }
+
+                if (!emailRegex.test(email)) {
+                    emailError.textContent = "Please enter a valid email address.";
+                    emailInput.style.borderColor = "red";
+                    return false;
+                }
+
+                emailInput.style.borderColor = "green";
+                return true;
             }
-            return true;
-        }
 
-        function validateForm(){
-            const email = validateEmail();
-            const password = validatePassword();
+            // Password Validation Function
+            function validatePassword() {
+                const password = passwordInput.value.trim();
 
-            return email && password;
-        }
+                // Reset previous errors
+                passwordError.textContent = "";
+                passwordInput.style.borderColor = "";
+
+                if (password === "") {
+                    passwordError.textContent = "Password cannot be empty.";
+                    passwordInput.style.borderColor = "red";
+                    return false;
+                }
+
+                if (password.length < 8) {
+                    passwordError.textContent = "Password must be at least 8 characters long.";
+                    passwordInput.style.borderColor = "red";
+                    return false;
+                }
+
+                passwordInput.style.borderColor = "green";
+                return true;
+            }
+
+            // Toggle Password Visibility
+            togglePassword.addEventListener("click", function () {
+                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+                passwordInput.setAttribute("type", type);
+                this.classList.toggle("bi-eye-fill");
+                this.classList.toggle("bi-eye-slash-fill");
+            });
+
+            // Form Validation on Submit
+            function validateForm(e) {
+                const isEmailValid = validateEmail();
+                const isPasswordValid = validatePassword();
+
+                if (!isEmailValid || !isPasswordValid) {
+                    e.preventDefault(); // Prevent form submission
+                    Toastify({
+                        text: "Please fix the errors before submitting.",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545",
+                        stopOnFocus: true,
+                    }).showToast();
+                    return false;
+                }
+
+                // Optionally, show a success toast
+                Toastify({
+                    text: "Logging in...",
+                    duration: 1000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    stopOnFocus: true,
+                }).showToast();
+
+                return true;
+            }
+
+            // Attach event listeners
+            emailInput.addEventListener("input", validateEmail);
+            passwordInput.addEventListener("input", validatePassword);
+            document.querySelector("form").addEventListener("submit", validateForm);
+        });
     </script>
+
 </body>
 
 </html>

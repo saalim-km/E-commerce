@@ -1,139 +1,170 @@
-<%- include('./partials/loginSignup.ejs') %>
-<style>
-    .password-container {
-      position: relative;
-      align-items: center;
-    }
-  
-    .password-container i {
-      position: absolute;
-      right: 10px;
-      cursor: pointer;
-      bottom: 10px;
-      font-size: 15px;
-    }
-  </style>
-    <!--Body Content-->
-    <div id="page-content">
-    	<!--Page Title-->
-    	<div class="page section-header text-center">
-			<div class="page-title">
-        		<div class="wrapper"><h1 class="page-width">Login</h1></div>
-      		</div>
-		</div>
-        <!--End Page Title-->
-        
-        <div class="container">
-        	<div class="row">
-                <div class="col-12 col-sm-12 col-md-6 col-lg-6 main-col offset-md-3">
-                	<div class="mb-4">
-                           <form action="/user/login" method="post" onsubmit="return validateForm()">
-                                <label for="">Email</label>
-                                <input id="email" type="text" name="email" >
-                                <p id="emailError" style="color: red;"></p>
-                                <div class="password-container">
-                                    <label for="">password</label>
-                                    <input
-                                      type="password"
-                                      id="password"
-                                      placeholder=""
-                                      name="password"
-                                    />
-                                <p id="passwordError" style="color: red;"></p>
-                                    <i class="bi bi-eye-slash" id="togglePassword"></i>
-                                  </div>
-                                <input type="submit" class="btn mt-3">
-                                <% if (message.error) { %>
-                                    <div class="alert alert-danger text-center mt-3">
-                                        <%= message.error %>
-                                    </div>
-                                <% } %>
-                                <% if (locals.message.length>0) { %>
-                                  <div class="alert alert-danger text-center mt-3">
-                                      <%= message %>
-                                  </div>
-                              <% } %>
-                           </form>
-                     <div class="text-center col-12 col-sm-12 col-md-12 col-lg-12">
-                      <div class="m-auto d-flex justify-content-center flex-column">
-                        <p>or</p>
-                        <div>
-                          <a href="/auth/google">
-                            <button class="btn btn-sm mb-2">login with Google</button>
-                          </a><br>
-                          <a href="/">
-                            <button class="btn btn-sm">login with Facebook</button>
-                          </a>
-                        </div>
-                      </div>
-                        <p class="mb-4">
-                            <a href="#" id="/user/forgot-password">Forgot your password?</a> &nbsp; | &nbsp;
-                            <a href="/user/signup" id="customer_register_link">Create account</a>
-                        </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <!-- Custom Styles -->
+    <style>
+        .password-container {
+            position: relative;
+        }
+
+        .password-container i {
+            position: absolute;
+            right: 10px;
+            top: 38px; /* Adjusted for better alignment */
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #6c757d;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+        }
+
+        .login-container {
+            margin-top: 100px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar (if any) -->
+    <%- include('./partials/header.ejs') %>
+
+    <!-- Main Content -->
+    <div class="container d-flex justify-content-center">
+        <div class="col-lg-5 col-md-7 col-sm-10 login-container">
+            <h2 class="text-center mb-4">Login</h2>
+            <!-- Login Form -->
+            <form id="loginForm" action="/user/login" method="POST" onsubmit="return validateForm()">
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input 
+                        type="email" 
+                        class="form-control" 
+                        id="email" 
+                        name="email" 
+                        placeholder="you@example.com"  
+                        aria-describedby="emailHelp"
+                    >
+                    <p class="error-message" id="emailError"></p>
+                </div>
+                <!-- Password Field -->
+                <div class="mb-3 password-container">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"  
+                        aria-describedby="passwordHelp"
+                    >
+                    <i class="bi bi-eye-slash" id="togglePassword"></i>
+                    <p class="error-message" id="passwordError"></p>
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+                <!-- Display Server-Side Messages -->
+                <% if (message && message.error) { %>
+                    <div class="alert alert-danger text-center mt-3">
+                        <%= message.error %>
                     </div>
+                <% } %>
+                <% if (typeof message === 'string' && message.length > 0) { %>
+                    <div class="alert alert-danger text-center mt-3">
+                        <%= message %>
                     </div>
-               	</div>
+                <% } %>
+            </form>
+            <!-- Social Login Options -->
+            <div class="text-center mt-4">
+                <p>or</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="/auth/google" class="btn btn-danger">
+                        <i class="bi bi-google"></i> Login with Google
+                    </a>
+                    <a href="/auth/facebook" class="btn btn-primary">
+                        <i class="bi bi-facebook"></i> Login with Facebook
+                    </a>
+                </div>
+            </div>
+            <!-- Additional Links -->
+            <div class="text-center mt-4">
+                <p>
+                    <a href="/user/forgotPassword" class="text-decoration-none">Forgot your password?</a> &nbsp; | &nbsp;
+                    <a href="/user/signup" class="text-decoration-none">Create an account</a>
+                </p>
             </div>
         </div>
-        
     </div>
-    <!--End Body Content-->
-    
 
+    <!-- Footer (if any) -->
+    <%- include('./partials/footer.ejs') %>
+
+    <!-- Bootstrap Bundle JS (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
+    </script>
+    <!-- SweetAlert2 for Enhanced Alerts (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- JavaScript for Password Toggle and Validation -->
     <script>
-         const toggler = document.getElementById("togglePassword");
-  const inputField = document.getElementById("password");
-  console.log(toggler, inputField);
+        // Password Visibility Toggle
+        const toggler = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
 
-  toggler.addEventListener("click", () => {
-    if (inputField.getAttribute("type") === "password") {
-      inputField.setAttribute("type", "text");
-      toggler.classList.remove("bi-eye-slash");
-      toggler.classList.add("bi-eye");
-    } else {
-      inputField.setAttribute("type", "password");
-      toggler.classList.remove("bi-eye");
-      toggler.classList.add("bi-eye-slash");
-    }
-  });
-</script>
+        toggler.addEventListener("click", () => {
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            toggler.classList.toggle("bi-eye");
+            toggler.classList.toggle("bi-eye-slash");
+        });
 
-<!-- checking user credentials  for login-->
-<script>
-    function validateEmail(){
-      const email = document.getElementById("email").value;
-      const emailPattern = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
-      const emailError = document.getElementById("emailError");
+        // Form Validation
+        function validateForm(){
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const emailError = document.getElementById("emailError");
+            const passwordError = document.getElementById("passwordError");
+            let isValid = true;
 
-      emailError.textContent = "";
+            // Clear previous error messages
+            emailError.textContent = "";
+            passwordError.textContent = "";
 
-      if(!emailPattern.test(email)){
-        emailError.textContent = "invalid email";
-        return false
-      }
+            // Email Validation
+            const emailPattern = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
+            if(!emailPattern.test(email)){
+                emailError.textContent = "Please enter a valid email address.";
+                isValid = false;
+            }
 
-      return true;
-    }
+            // Password Validation
+            if(password.length < 6){
+                passwordError.textContent = "Password must be at least 6 characters long.";
+                isValid = false;
+            }
 
-    function validatePassword(){
-      const password = document.getElementById("password").value;
-      const passWordError = document.getElementById("passwordError");
+            return isValid;
+        }
+    </script>
 
-      passWordError.textContent = "";
-
-      if(password.trim()===""){
-        passWordError.textContent = "password cannot be empty";
-        return false;
-      }
-
-      return true;
-    }
-
-    function validateForm(){
-      const email = validateEmail();
-      const password = validatePassword();
-
-      return email && password;
-    }
-</script>
- <%- include('./partials/footer.ejs') %>
+</body>
+</html>

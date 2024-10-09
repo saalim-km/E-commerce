@@ -7,6 +7,7 @@ const multer = require('multer');
 const storage = require("../config/multer");
 const uploads = multer({storage : storage});
 const categoriesController = require("../controllers/categoriesController");
+const adminMiddleware = require("../middlewares/isAdmin");
 
 // login routes
 router.get('/login',adminController.loadLogin);
@@ -14,7 +15,7 @@ router.post('/login',adminController.adminLogin);
 
 
 // dashboard route
-router.get('/',adminController.dashboardLoad);
+router.get('/',adminMiddleware.isAdmin,adminController.dashboardLoad);
 
 
 // logout
@@ -22,9 +23,9 @@ router.get('/logout',adminController.Logout);
 // userList
 router.get('/users',userController.userList);
 // Block user
-router.get('/user/block/:id',userController.userBlock);
+router.post('/user/block',userController.userBlock);
 // unBlock user
-router.get("/user/unblock/:id",userController.userUnBlock);
+router.post("/user/unblock",userController.userUnBlock);
 
 
 
@@ -55,7 +56,7 @@ router.get("/product/block/:id",productController.unListProduct);
 router.get("/product/unBlock/:id",productController.listProduct);
 
 // product Edit
-router.get("/product/edit/:id",productController.loadEditPage)
+router.get("/product/edit/:id",adminMiddleware.isAdmin,productController.loadEditPage)
 router.post("/product/edit/:id",uploads.array("images",4),productController.editProduct);
 
 router.post("/product/remove-image",productController.removeImage);

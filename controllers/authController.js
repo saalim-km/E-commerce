@@ -79,7 +79,6 @@ const loadHome = async (req, res) => {
       console.log("before loading the home page", userData);
       return res.render("home", { user: userData, products });
     } else {
-      req.flash("error","you are blocked by admin");
       res.redirect("/user/login");
     }
   } catch (error) {
@@ -237,6 +236,49 @@ const userLogout = async (req, res) => {
     console.log(error);
   }
 };
+
+  // forogt passwor controllers
+const forgotPass = async(req,res)=> {
+  try {
+    if(req.session.user){
+      return res.redirect("/home");
+    }else{
+      res.render("forgotpass");
+    }
+  } catch (error) {
+    console.log("error while loading forgot pass page",error.message);
+  }
+}
+
+const verifyForgotEmail = async(req,res)=> {
+  try {
+    const {email} = req.body;
+    const userExists = await userModel.findOne({email});
+    if(userExists){
+      res.json({success : true});
+    }else{
+      res.json({success : false});
+    }
+  } catch (error) {
+      res.status(500).json({success : false});
+  }
+}
+
+const updatePassword = async(req,res)=> {
+  try {
+    const {password,email} = req.body;
+    const userId = await userModel.findOne({email});
+    const hashPass = await bcrypt.hash(password,10);
+    const userData = await userModel.findByIdAndUpdate(userId._id,{password : hashPass});
+    if(userData){
+      res.json({success : true});
+    }else{
+      res.json({success : false})
+    }
+  } catch (error) {
+    res.status(500).json({success : false});
+  }
+}
 module.exports = {
   landingPage,
   signupPage,
@@ -247,4 +289,7 @@ module.exports = {
   loadHome,
   verifyLogin,
   userLogout,
+  forgotPass,
+  verifyForgotEmail,
+  updatePassword,
 };

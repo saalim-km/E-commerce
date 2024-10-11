@@ -1,0 +1,159 @@
+<%- include('../auth/partials/header.ejs') %>
+<style>
+    .cart-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    .cart-items {
+        flex: 2;
+        padding-right: 20px;
+    }
+    .cart-totals {
+        flex: 1;
+        border: 1px solid #ddd;
+        padding: 20px;
+        text-align: center;
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .cart-item img {
+        width: 100px;
+        height: auto;
+    }
+    .quantity-input {
+        display: flex;
+        align-items: center;
+    }
+    .quantity-input button {
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        border: none;
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+    .quantity-input input {
+        width: 40px;
+        text-align: center;
+        margin: 0 10px;
+    }
+    .subtotal {
+        font-weight: bold;
+    }
+</style>
+
+<body>
+<div class="container mt-5">
+    <h2>Your Cart</h2>
+        <div class="cart-container">
+            <div class="cart-items">
+                <!-- Loop through each cart item -->
+                <% cart.forEach(function(item) { %>
+                    <div class="cart-item" style="border: 1px solid rgba(128, 128, 128, 0.431); padding: 10px;">
+                        <div class="product-info">
+                            <img src="/uploads/product-images/<%= item.productId.images[0] %>" alt="Product Image">
+                            <p><strong><%= item.productId.productName %></strong></p>
+                            <p>Size: <%= item.sizes[0].size %></p>
+                            <p>Category: <span class="badge bg-dark text-white"><%= item.categoryId.name %></span></p>
+                        </div>
+                        <!-- Product Price -->
+                        <div class="price">
+                            ₹<span class="product-price"><%= item.productId.regularPrice %></span>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="quantity-input">
+                            <button class="decrease-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">-</button>
+                            <input disabled type="text" value="<%= item.sizes[0].quantity %>" class="quantity" data-stock="<%= item.availableStock %>" data-id="<%= item._id %>">
+                            <button class="increase-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">+</button>
+                        </div>
+
+                        <!-- Subtotal for this item -->
+                        <div class="subtotal">
+                            ₹<span class="item-subtotal"><%= item.productId.regularPrice * item.sizes[0].quantity %></span>
+                        </div>
+
+                        <!-- Delete button -->
+                        <form action="/user/cart/delete/<%= item._id %>" method="post">
+                            <button type="submit" class="btn btn-danger delete-item"><i class="fa fa-trash"></i></button>
+                        </form>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Cart Totals Section -->
+            <div class="cart-totals">
+                <h4>Cart Totals</h4>
+                <p>Total: ₹<span id="cart-total">
+                    <%= cart.reduce((total, item) => total + (item.productId.regularPrice * item.sizes[0].quantity), 0).toFixed(2) %>
+                </span></p>
+                <% if (cart.length === 0) { %>
+                    <h1>No items in cart to checkout.</h1>
+                <% } else { %>
+                    <a href="/user/checkout">
+                        <button class="btn btn-dark">Proceed to Checkout</button>
+                    </a>
+                <% } %>
+            </div>
+        </div>
+</div>
+
+<!-- Toastify -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    const decreaseBtns = document.querySelectorAll('.decrease-btn');
+    const increaseBtns = document.querySelectorAll('.increase-btn');
+    const itemSubtotals = document.querySelectorAll('.item-subtotal');
+    const cartTotal = document.getElementById('cart-total');
+
+    decreaseBtns.forEach((btn) => {
+        btn.addEventListener('click', function() {
+            const cartItemId = this.getAttribute('data-id');
+            
+            const size = this.getAttribute('data-size');
+            updateCartQuantity(cartItemId, size, 'decrease');
+        });
+    });
+
+    increaseBtns.forEach((btn) => {
+        btn.addEventListener('click', function() {
+            const cartItemId = this.getAttribute('data-id');
+            const size = this.getAttribute('data-size');
+            updateCartQuantity(cartItemId, size, 'increase');
+        });
+    });
+
+    function updateCartQuantity(cartItemId, size, action) {
+        fetch(`/user/cart/updateQuantity`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ size, action , cartItemId : cartItemId}),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                Toastify({
+                    text: data.message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#f44336",
+                }).showToast();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    }
+</script>
+
+<%- include('../auth/partials/footer.ejs') %>

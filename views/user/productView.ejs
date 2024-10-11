@@ -60,7 +60,6 @@
             font-size: 1rem;
             margin-left: 10px;
         }
-
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .carousel-item img {
@@ -135,14 +134,17 @@
                     <h5>Select Size:</h5>
                     <div class="btn-group" role="group" aria-label="Size Selection">
                         <% product.sizes.forEach(sizeVariant => { %>
-                            <button type="button" class="btn btn-outline-primary size-option" data-size="<%= sizeVariant.size %>" data-stock="<%= sizeVariant.stock %>" <%= sizeVariant.stock === 0 ? 'disabled' : '' %>>
-                                <%= sizeVariant.size %> 
                                 <% if(sizeVariant.stock === 0){ %>
-                                    <span class="badge bg-danger ms-1">Out</span>
+                                    <button type="button" class="btn btn-outline-primary size-option" data-size="<%= sizeVariant.size %>" data-stock="<%= sizeVariant.stock %>">
+                                        <%= sizeVariant.size %> 
+                                        <span class="badge bg-danger ms-1">Stock Out</span>
+                                    </button>
                                 <% } else { %>
-                                    <span class="badge bg-success ms-1"><%= sizeVariant.stock %></span>
+                                    <button type="button" class="btn btn-outline-primary size-option" data-size="<%= sizeVariant.size %>" data-stock="<%= sizeVariant.stock %>">
+                                        <%= sizeVariant.size %> 
+                                        <span class="badge bg-success ms-1"><%= sizeVariant.stock %></span>
+                                    </button>
                                 <% } %>
-                            </button>
                         <% }) %>
                     </div>
                 </div>
@@ -163,78 +165,106 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-XoU2KQeh3B8ZEmFZ3lQm3icbjItgblgHZb+I56Pwz4eEM5G9tCCP+2W0k1MBHs2U" crossorigin="anonymous"></script>
 
-    <!-- SweetAlert2 and Toastify JS (Ensure they are included after jQuery) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- Custom JavaScript -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const sizeButtons = document.querySelectorAll('.size-option');
-            const addToCartBtn = document.getElementById('addToCartBtn');
+    <!-- script for validation add to cart -->
+     <script>
+        document.addEventListener("DOMContentLoaded",()=> {
+            const categoryId = '<%= product.category._id %>';
+            const productId = '<%= product._id %>';
+            
+            // selecting all button that has a class of size option
+            const sizeButtons = document.querySelectorAll(".size-option");
+            const addToCartBtn = document.getElementById("addToCartBtn");
+            console.log(addToCartBtn,sizeButtons[1]);
+            
             let selectedSize = null;
             let selectedStock = 0;
 
-            sizeButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    // Deselect all buttons
-                    sizeButtons.forEach(btn => btn.classList.remove('selected'));
+            sizeButtons.forEach((button)=> {
+                button.addEventListener("click",(e)=> {
+                    const selectedButton = e.target.closest('.size-option');
+                    if(selectedButton){
+                        // first deselecting all buttons
+                    sizeButtons.forEach((btn)=> btn.classList.remove("selected"));
 
-                    // Select the clicked button
-                    this.classList.add('selected');
+                    selectedButton.classList.add("selected");
+                    console.log(selectedButton);
 
-                    // Update selected size and stock
-                    selectedSize = this.getAttribute('data-size');
-                    selectedStock = parseInt(this.getAttribute('data-stock'));
+                    // getting the size and stock from data-size and data-stock attributes
+                    selectedSize = selectedButton.getAttribute('data-size');
+                    selectedStock = parseInt(selectedButton.getAttribute('data-stock'));
 
-                    // Enable or disable the Add to Cart button based on stock
-                    if (selectedStock > 0) {
+                    console.log(selectedSize,selectedStock);
+                    if(selectedStock > 0){
                         addToCartBtn.disabled = false;
-                    } else {
+                    }else{
                         addToCartBtn.disabled = true;
                         Toastify({
-                            text: "Selected size is out of stock.",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "right",
-                            backgroundColor: "#dc3545",
-                        }).showToast();
-                    }
-                });
-            });
-
-            addToCartBtn.addEventListener('click', function () {
-                if (!selectedSize) {
-                    Toastify({
-                        text: "Please select a size.",
+                        text: "Selected size is out of stock.",
                         duration: 3000,
                         gravity: "top",
                         position: "right",
                         backgroundColor: "#dc3545",
                     }).showToast();
-                    return;
-                }
-
-                // Implement your Add to Cart functionality here
-                // For demonstration, we'll show a success message
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Added to Cart!',
-                    text: `Size: ${selectedSize}`,
-                    showConfirmButton: false,
-                    timer: 1500,
-                    toast: true,
-                    position: 'top-end',
-                });
-
-                // Optionally, reset the selection
-                sizeButtons.forEach(btn => btn.classList.remove('selected'));
-                addToCartBtn.disabled = true;
-                selectedSize = null;
-                selectedStock = 0;
+                    }
+                    }
+                })
             });
-        });
+
+            addToCartBtn.addEventListener("click",()=> {
+                if(!selectedSize){
+                    Toastify({
+                        text: "please select a size.",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "#dc3545",
+                    }).showToast();
+                }else{
+                    $.ajax({
+                        url : "/user/cart",
+                        method : "POST",
+                        data : JSON.stringify({
+                            productId : productId,
+                            categoryId : categoryId,
+                            size : selectedSize,
+                            quantity : 1,
+                        }),
+                        contentType : "application/json",
+                        success : function (res){
+                            if(res.success){
+                                Toastify({
+                                    text: `${selectedSize},${1} Added to cart`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "green",
+                                }).showToast();
+
+
+                                sizeButtons.forEach((btn)=> btn.classList.remove("selected"));
+                                addToCartBtn.disabled = true;
+                                selectedSize = null;
+                                selectedStock = 0;
+                                setTimeout(()=>{
+                                    window.location.href = res.redirectUrl;
+                                },1000);
+                                }else{
+                                Toastify({
+                                    text: `Stock out please try again`,
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "right",
+                                    backgroundColor: "red",
+                                }).showToast();
+                            }
+                        }
+                    })
+                }
+            })
+        })
     </script>
 
 <%- include('../auth/partials/footer.ejs') %>

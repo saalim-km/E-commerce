@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        /* Styles for the order confirmation page */
+        .confirmation-container {
+            text-align: center;
+            padding: 50px;
+            font-family: Arial, sans-serif;
+        }
+        .confirmation-container h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: green;
+        }
+        .order-details {
+            margin: 20px auto;
+            max-width: 600px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .order-details h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .order-details p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .order-summary {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .order-summary p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .order-summary p span {
+            font-weight: bold;
+        }
+        .thank-you {
+            margin-top: 30px;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .order-success-icon {
+            font-size: 60px;
+            color: green;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="page-template belle">
+
+<div class="confirmation-container">
+    <div class="order-success-icon">✔️</div>
+    <h1>Thank you for your order!</h1>
+
+    <!-- Order details -->
+    <div class="order-details">
+        <h2>Order Confirmation</h2>
+        <p><strong>Order Id:</strong> <%= order._id %></p>
+        <p><strong>Order Date:</strong> <%= new Date(order.createdAt).toString() %></p>
+
+        <!-- Display order summary -->
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <p><span>Total Price:</span> ₹<%= order.totalAmount %></p>
+            <p><span>Shipping Address:</span> <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.pincode %></p>
+
+            <h4>Items Ordered:</h4>
+            <% order.products.forEach(function(item) { %>
+                <p><strong><%= item.productId.productName %></strong> (Size: <%= item.size %>)</p>
+                <p>Quantity: <%= item.quantity %>, Price: ₹<%= item.productId.regularPrice * item.quantity%>%></p>
+            <% }); %>
+        </div>
+
+        <!-- Payment method -->
+        <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+    </div>
+
+    <div class="thank-you">
+        <p>Your order has been successfully placed and will be processed soon.</p>
+        <p>You'll receive a confirmation email with further details.</p>
+    </div>
+
+    <a href="/home" class="btn btn-dark">Back to Home</a>
+</div>
+</body>
+</html>

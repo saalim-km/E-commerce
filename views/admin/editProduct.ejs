@@ -137,7 +137,7 @@
   <% product.sizes.forEach(size => { %>
     <div>
       <label class="mr-5" for="size_<%= size.size.toLowerCase() %>"> <%= size.size %> </label>
-      <input type="text" name="<%= size.size.toLowerCase() %>" id="size_<%= size.size.toLowerCase() %>" min="0" class="tiny-box" value="<%= size.stock %>" required>
+      <input type="number" name="<%= size.size.toLowerCase() %>" id="size_<%= size.size.toLowerCase() %>" min="0" class="tiny-box" value="<%= size.stock %>" required>
     </div>
   <% }) %>
 </div>
@@ -303,7 +303,7 @@ function addNewImageInput(index) {
  </script>
 
 
-<script>
+<!-- <script>
   // recent values for checking form validation
   const productName = document.getElementById("product_name").value;
   const description = document.getElementById("descriptionid").value;
@@ -332,7 +332,7 @@ function addNewImageInput(index) {
     }
     return true;
   }
-</script>
+</script> -->
 
 
 <!-- script file and jquery -->

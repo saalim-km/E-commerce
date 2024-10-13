@@ -38,5 +38,5 @@ router.get("/order/:id",userMiddleware.isLogin,userSideController.orderSuccess);
 // orders
 router.get("/orders/:id",userMiddleware.isLogin,userSideController.ordersPage);
 router.get("/ordersDetails/:id",userMiddleware.isLogin,userSideController.viewOrder)
-
+router.patch("/cancel_order",userSideController.cancelOrder)
 module.exports = router;

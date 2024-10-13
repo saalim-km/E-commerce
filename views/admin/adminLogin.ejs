@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link href="/backend/assets/css/main.css" rel="stylesheet" type="text/css" />
+    <!-- toastify -->
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Custom Styles (Optional) -->
     <style>
         body {
@@ -126,7 +129,6 @@
                     name="email"
                     class="form-control ps-5"
                     placeholder="you@example.com"
-                    required
                 >
             </div>
             <p class="error-message" id="emailError"></p>
@@ -140,7 +142,6 @@
                     name="password"
                     class="form-control ps-5"
                     placeholder="Enter your password"
-                    required
                 >
                 <i class="bi bi-eye-slash-fill position-absolute" id="togglePassword"
                     style="top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #6c63ff;"></i>
@@ -168,9 +169,8 @@
     <!-- Main Script -->
     <script src="/backend/assets/js/main.js" type="text/javascript"></script>
 
-    <!-- Custom Script for Form Validation and Interaction -->
+
     <script>
-        // Wait for the DOM to fully load
         document.addEventListener('DOMContentLoaded', function () {
             // Get form elements
             const emailInput = document.getElementById("email");
@@ -179,12 +179,12 @@
             const emailError = document.getElementById("emailError");
             const passwordError = document.getElementById("passwordError");
 
-            // Email Validation Function
+            // Email Validation 
             function validateEmail() {
                 const email = emailInput.value.trim();
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
 
-                // Reset previous errors
+                // resetting errors before checking condition
                 emailError.textContent = "";
                 emailInput.style.borderColor = "";
 
@@ -204,11 +204,11 @@
                 return true;
             }
 
-            // Password Validation Function
+            // Password Validation
             function validatePassword() {
                 const password = passwordInput.value.trim();
 
-                // Reset previous errors
+                // resetting errors before checking conditions
                 passwordError.textContent = "";
                 passwordInput.style.borderColor = "";
 
@@ -236,38 +236,27 @@
                 this.classList.toggle("bi-eye-slash-fill");
             });
 
-            // Form Validation on Submit
+
             function validateForm(e) {
                 const isEmailValid = validateEmail();
                 const isPasswordValid = validatePassword();
 
                 if (!isEmailValid || !isPasswordValid) {
-                    e.preventDefault(); // Prevent form submission
+                    e.preventDefault(); 
                     Toastify({
                         text: "Please fix the errors before submitting.",
                         duration: 3000,
                         gravity: "top",
-                        position: "right",
-                        backgroundColor: "#dc3545",
+                        position: "top",
+                        backgroundColor: "red",
                         stopOnFocus: true,
                     }).showToast();
                     return false;
                 }
-
-                // Optionally, show a success toast
-                Toastify({
-                    text: "Logging in...",
-                    duration: 1000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#28a745",
-                    stopOnFocus: true,
-                }).showToast();
-
                 return true;
             }
 
-            // Attach event listeners
+            // live form validation using evenListener
             emailInput.addEventListener("input", validateEmail);
             passwordInput.addEventListener("input", validatePassword);
             document.querySelector("form").addEventListener("submit", validateForm);

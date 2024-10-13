@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <link rel="stylesheet" href="/assets/css/style.css">
+    <!-- Toastify -->
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         /* Checkout page styles */
         .checkout-container {
@@ -67,7 +70,7 @@
     </style>
 </head>
 <body class="page-template belle">
-<form id="checkoutForm" action="/user/checkout" method="POST">
+<form id="checkoutForm" action="/user/checkout" method="POST" onsubmit="return validateForm()">
 <div class="pageWrapper">
 
     <%- include('partials/header'); %>
@@ -88,13 +91,14 @@
                                    value="<%= add._id %>" 
                                    <% if (index === 0) { %> checked <% } %> 
                                    required>
-                            <label class="form-check-label" for="address_<%= add._id %>">
-                                <%= add.street %>, <%= add.city %>, <%= add.pincode %>
+                            <label class="form-check-label col-lg-5" for="address_<%= add._id %>">
+                                <%= add.fullName%> , <%= add.house %> , <%= add.state %> , <%= add.pincode %>
                             </label>
                         </div>
                     <% }); %>
                 <% } else { %>
-                    <p>No saved addresses. <a href="/user/profile">Add an address</a></p>
+                    <h2>No Saved Address </h2>
+                    <a href="/user/address/<%= user._id %>" class="btn btn-small">Add an address</a>
                 <% } %>
             </div>
 
@@ -109,8 +113,8 @@
                                 <p><strong><%= item.productId.productName %></strong></p>
                                 <p>Size: <%= item.sizes[0].size %></p>
                                 <p>Quantity: <%= item.sizes[0].quantity %></p>
-                                <p>Price: ₹<%= item.productId.regularPrice %></p>
-                                <p>SubTotal: ₹<%= item.productId.regularPrice * item.sizes[0].quantity %></p>
+                                <p>Price: ₹<%= item.productId.salesPrice %></p>
+                                <p>SubTotal: ₹<%= item.productId.salesPrice * item.sizes[0].quantity %></p>
                             </div>
                         </div>
                     <% }); %>
@@ -133,7 +137,7 @@
                 <div class="payment-methods">
                     <h5>Payment Methods</h5>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" required>
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
                         <label class="form-check-label" for="cod">Cash on Delivery</label>
                     </div>
                     <div class="form-check">
@@ -143,14 +147,53 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-dark">Place Order</button>
+                <button id="placeOrderBtn" type="submit" class="btn btn-dark">Place Order</button>
             </div>
         <!-- End Form -->
     </div>
 </div>
 </form>
 
+<!-- toasktify -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const checkoutForm = document.getElementById("checkoutForm");
+
+        checkoutForm.addEventListener("submit", (event) => {
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+
+            // Validate if an address is selected
+            if (!selectedAddress) {
+                event.preventDefault();
+                Toastify({
+                    text: "Please select a shipping address.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    backgroundColor: "red",
+                }).showToast();
+                return;
+            }
+
+            // Validate if a payment method is selected
+            if (!selectedPaymentMethod) {
+                event.preventDefault();
+                Toastify({
+                    text: "Please select a payment method.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    backgroundColor: "red",
+                }).showToast();
+                return;
+            }
+        });
+    });
+</script>
+
 
 <%- include('../auth/partials/footer.ejs') %>
-</body>
-</html>

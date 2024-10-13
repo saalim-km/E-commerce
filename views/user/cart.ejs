@@ -62,7 +62,7 @@
                         </div>
                         <!-- Product Price -->
                         <div class="price">
-                            ₹<span class="product-price"><%= item.productId.regularPrice %></span>
+                            ₹<span class="product-price"><%= item.productId.salesPrice %></span>
                         </div>
 
                         <!-- Quantity -->
@@ -74,7 +74,7 @@
 
                         <!-- Subtotal for this item -->
                         <div class="subtotal">
-                            ₹<span class="item-subtotal"><%= item.productId.regularPrice * item.sizes[0].quantity %></span>
+                            ₹<span class="item-subtotal"><%= item.productId.salesPrice * item.sizes[0].quantity %></span>
                         </div>
 
                         <!-- Delete button -->
@@ -89,7 +89,7 @@
             <div class="cart-totals">
                 <h4>Cart Totals</h4>
                 <p>Total: ₹<span id="cart-total">
-                    <%= cart.reduce((total, item) => total + (item.productId.regularPrice * item.sizes[0].quantity), 0).toFixed(2) %>
+                    <%= cart.reduce((total, item) => total + (item.productId.salesPrice* item.sizes[0].quantity), 0).toFixed(2) %>
                 </span></p>
                 <% if (cart.length === 0) { %>
                     <h1>No items in cart to checkout.</h1>

@@ -106,12 +106,12 @@
 
     <div class="d-flex flex-column ml-5">
         <div class="breadcrumbs ml-5 mt-5">
-            <a href="/">Home</a> / <a href="/user/shop">Shop</a> / Oversized Fit
+            <a href="/">Home</a> / <a href="/user/shop">Shop</a>
         </div>
     
         <!-- Filter Button -->
          <div class="ml-5">
-            <button class="filter-btn  " onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>    
+            <button class="filter-btn" onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>    
          </div>
     </div>
     
@@ -137,15 +137,26 @@
         <input type="text" id="price-output" value="500" readonly style="border: none; font-weight: bold; margin-bottom: 10px;">
     </div>
 
+    <!-- Sorting Dropdown -->
+    <div class="container mt-3">
+        <label for="sort">Sort By:</label>
+        <select id="sort" class="form-select" onchange="sortProducts()">
+            <option value="default">Default</option>
+            <option value="price-low-high">Price: Low to High</option>
+            <option value="price-high-low">Price: High to Low</option>
+            <option value="name-az">Name: A - Z</option>
+            <option value="name-za">Name: Z - A</option>
+        </select>
+    </div>
+
     <!-- Product Grid -->
     <div class="product-grid container">
         <% products.forEach((product)=> { %>
         <div class="product-item pb-2" data-name="<%= product.productName %>" data-category="<%= product.category.name %>" data-price="<%= product.salesPrice %>">
             <a href="/user/products/<%= product._id %>" style="text-decoration: none;">
-                <!-- Product Image -->
+
                 <img src="/uploads/product-images/<%= product.images[0] %>" alt="<%= product.productName %>">
                 
-                <!-- Product Details -->
                 <div>
                     <h5 class="product-name"><%= product.productName %></h5>
                     <p class="price">₹<%= product.salesPrice %> <del>₹<%= product.regularPrice %></del></p>
@@ -167,6 +178,8 @@
                 filterPopup.style.display = "block";
             }
         }
+
+        
     </script>
 
 <%- include('../auth/partials/footer.ejs') %>

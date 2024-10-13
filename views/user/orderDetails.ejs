@@ -5,14 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- j query -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- toastify css -->
+    <link rel="stylesheet" href="css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         .order-header { background-color: #f8e6b2; padding: 10px; }
         .order-summary, .items { background-color: #f7f1f1; padding: 15px; }
         .cancel-btn { background-color: red; color: white; }
         .invoice-btn { background-color: black; color: white; }
-        .status-processing { background-color: yellow; padding: 2px 8px; border-radius: 5px; }
         .product-img {
             height: 100px;
+        }
+        .alert-success {
+            background-color: rgb(6, 161, 6);
+        }
+        .alert-warning {
+            background-color: rgb(161, 89, 6);
+        }
+        .alert-info {
+            background-color: rgb(192, 192, 35);
+        }
+        .alert-danger {
+            background-color: rgb(161, 6, 6);
+        }
+        .alert-processing {
+            background-color: rgb(226, 215, 7);
         }
     </style>
 </head>
@@ -28,9 +49,17 @@
                 <p><strong>ID:</strong> #<%= order._id %></p>
                 <p><strong>Order Date:</strong> <%= order.createdAt.toString() %></p>
                 <p><strong>Delivered Date:</strong> <%= order.deliveredDate ? order.deliveredDate.toDateString() : 'Not Dellivered' %></p>
-                <p><strong>Status:</strong> <span class="<%= order.status === 'Processing' ? 'status-processing' : '' %>"><%= order.status %></span></p>
+                <p><strong>Status:</strong>
+                    <span class=" badge rounded-pill 
+                        <%= order.status === 'Pending' ? 'alert-warning' : 
+                            order.status === 'Shipped' ? 'alert-success' : 
+                            order.status === 'Delivered' ? 'alert-success' : 
+                            order.status === 'Processing' ? 'alert-processing' : 
+                            'alert-danger' %>">
+                        <%= order.status%>
+                    </span>
+                </p>
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-                <p><strong>Payment Status:</strong> Pending</p>
             </div>
             <div class="col-md-6">
                 <h5>Delivery Address</h5>
@@ -44,7 +73,7 @@
         <div class="row mt-4 text-end">
             <div class="col-md-12">
                 <button class="btn invoice-btn">Download Invoice</button>
-                <% if (order.status !== 'Cancelled') { %>
+                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
                     <button class="btn cancel-btn" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                 <% } %>
             </div>
@@ -67,9 +96,9 @@
                         <tr>
                             <td><img class="product-img" src="/uploads/product-images/<%= item.productId.images[0]%>" alt=""></td>
                             <td><%= item.productId.productName %>  (<%= item.size %>)</td>
-                            <td>&#x20B9; <%= item.productId.regularPrice%></td>
+                            <td>&#x20B9; <%= item.productId.salesPrice%></td>
                             <td><%= item.quantity %></td>
-                            <td>&#x20B9; <%= item.quantity * item.productId.regularPrice %></td>
+                            <td>&#x20B9; <%= item.quantity * item.productId.salesPrice %></td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -80,26 +109,43 @@
         </div>
     </div>
 
+    <!-- toastify -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         function cancelOrder(orderId) {
-            if (confirm('Are you sure you want to cancel this order?')) {
-                fetch(`/order/cancel/${orderId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Order cancelled successfully');
-                        location.reload();
-                    } else {
-                        alert('Failed to cancel order');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            }
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Cancel Order"
+            }).then((result)=> {
+                if(result.isConfirmed){
+                    $.ajax({
+                        url : "/user/cancel_order",
+                        type : 'PATCH',
+                        data : JSON.stringify({
+                            id : orderId,
+                        }),
+                        contentType : "application/json",
+                        success : function(res){
+                            if(res.success){
+                                location.reload();
+                            }else{
+                                Toastify({
+                                    text: "order doesn't exists.",
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "red",
+                                }).showToast();
+                            }
+                        }
+                    })
+                }
+            })
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

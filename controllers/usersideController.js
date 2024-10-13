@@ -241,7 +241,7 @@ const loadCart = async (req, res) => {
             .find({ userId: userDetails._id })
             .populate({
                 path: 'productId',
-                select: 'productName regularPrice images sizes', // Select necessary fields
+                select: 'productName salesPrice images sizes', // Select necessary fields
             })
             .populate('categoryId');
 
@@ -297,6 +297,7 @@ const checkoutPage = async(req,res)=> {
         console.log("error while loading checkout page",error.message);
     }
 }
+
 const checkout = async(req,res)=> {
     try {
         console.log(req.body);
@@ -310,7 +311,7 @@ const checkout = async(req,res)=> {
         for(const item of cartItems){
             const itemProductId = item.productId;
             const product = await productModel.findById(itemProductId);
-            const itemTotal = product.regularPrice * item.quantity;
+            const itemTotal = product.salesPrice * item.quantity;
             totalPrice += itemTotal;
         }
         const order = new orderModel({
@@ -348,7 +349,6 @@ const orderSuccess = async(req,res)=> {
 const updateCartQuantity = async (req, res) => {
     try {
         const { size, action , cartItemId} = req.body;
-        console.log(cartItemId)
 
         const cartItem = await cartModel.findById(cartItemId).populate('productId');
         if (!cartItem) {
@@ -396,7 +396,7 @@ const ordersPage = async(req,res)=> {
         console.log("error while loading orders page",error.message);
     }
 }
-
+// View order Details
 const viewOrder = async(req,res)=> {
     try {
         const {id} = req.params;
@@ -405,9 +405,25 @@ const viewOrder = async(req,res)=> {
         const user = order.userId;
         const address = order.shippingAddress;
         const products = order.products;
-        res.render('orderDetail',{order , user , address , products});
+        res.render('orderDetails',{order , user , address , products});
     } catch (error) {
         console.log("error while loading view order page",error.message);
+    }
+}
+
+const cancelOrder = async(req,res)=> {
+    try {
+        const {id} = req.body;
+        console.log(id);
+        const orderUpdate = await orderModel.findByIdAndUpdate(id,{$set : {status : 'Cancelled'}});
+        if(orderUpdate){
+            res.json({success : true });
+        }else{
+            res.json({success : false});
+        }
+    } catch (error) {
+        console.log("error while updating order status",error.message);
+        res.status(500).json({success : false});
     }
 }
 module.exports = {
@@ -429,4 +445,5 @@ module.exports = {
     updateCartQuantity,
     ordersPage,
     viewOrder,
+    cancelOrder,
 }

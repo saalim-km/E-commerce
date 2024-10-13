@@ -3,6 +3,7 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 const userController = require('../controllers/userController');
 const productController = require("../controllers/productsController");
+const orderController = require("../controllers/orderController");
 const multer = require('multer');
 const storage = require("../config/multer");
 const uploads = multer({storage : storage});
@@ -49,7 +50,6 @@ router.get("/addproducts",productController.loadAddProduct);
 router.post("/addproducts",uploads.array("images",4),productController.addProduct);
 
 
-
 // products list
 router.get("/products",productController.productList);
 router.get("/product/block/:id",productController.unListProduct);
@@ -58,8 +58,13 @@ router.get("/product/unBlock/:id",productController.listProduct);
 // product Edit
 router.get("/product/edit/:id",adminMiddleware.isAdmin,productController.loadEditPage)
 router.post("/product/edit/:id",uploads.array("images",4),productController.editProduct);
-
 router.post("/product/remove-image",productController.removeImage);
+
+
+// orders
+router.get("/orders",adminMiddleware.isAdmin,orderController.loadOrders);
+router.get("/orders/:id",adminMiddleware.isAdmin,orderController.loadOtderDetails);
+router.post("/orders/update/:id",orderController.updateOrder);
 
 module.exports = router;
 

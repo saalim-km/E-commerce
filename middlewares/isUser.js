@@ -1,3 +1,5 @@
+const userModel = require('../models/address');
+
 const isLogin = async(req,res,next)=> {
     try {
         if(!req.session.user){

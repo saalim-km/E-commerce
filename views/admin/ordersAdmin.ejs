@@ -11,31 +11,21 @@
                 <div>
                     <h2 class="content-title card-title">Order List</h2>
                 </div>
-                <div>
-                    <input type="text" placeholder="Search order ID or Name" class="form-control bg-white" id="searchOrder">
-                </div>
             </div>
 
             <div class="card mb-4">
                 <header class="card-header">
                     <div class="row gx-3">
                         <div class="col-lg-6 col-md-6 me-auto">
-                            <input type="text" placeholder="Search by Name or Email..." class="form-control" id="searchUser">
+                            <input type="text" placeholder="Search by Name or Email..." class="form-control" id="searchUser" oninput="searchFilter()">
                         </div>
-                        <div class="col-lg-3 col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Filter by Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="shipped">Shipped</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-3 col-md-3">
-                            <select class="form-select" id="itemsPerPage">
-                                <option value="10">Show 10</option>
-                                <option value="20">Show 20</option>
-                                <option value="30">Show 30</option>
+                        <div class="col-lg-6 col-md-3">
+                            <select class="form-select" id="statusFilter" onchange="sortByStatus()">
+                                <option value="Default">Default</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
                     </div>
@@ -58,7 +48,7 @@
                             <tbody id="ordersTableBody">
                                 <!-- Loop through orders data -->
                                 <% orders.forEach(function(order) { %>
-                                <tr>
+                                <tr class="orders" data-status="<%=order.status%>" data-name="<%=order.userId.username%>" data-email="<%=order.userId.email%>">
                                     <td>#<%= order._id %></td>
                                     <td><%= order.userId.username %></td>
                                     <td><%= order.userId.email %></td>
@@ -82,10 +72,10 @@
                         </table>
                     </div>
 
-                    <!-- Pagination (Dynamic if necessary) -->
+                    <!-- Pagination-->
                     <nav aria-label="Page navigation">
                         <ul class="pagination justify-content-center">
-                            <!-- Add pagination links here if you have multiple pages -->
+                            <!-- pagination -->
                         </ul>
                     </nav>
                 </div>
@@ -94,43 +84,36 @@
     </main>
 
     <script>
-        // JavaScript for search and filter
-        document.getElementById('searchOrder').addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            filterOrders(searchValue, 'orderId');
-        });
+       function sortByStatus(){
+            const orders = document.querySelectorAll(".orders");
+            const statusFilter = document.getElementById('statusFilter').value;
 
-        document.getElementById('searchUser').addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            filterOrders(searchValue, 'customerName');
-        });
-
-        document.getElementById('statusFilter').addEventListener('change', function() {
-            const status = this.value;
-            filterOrders(status, 'status');
-        });
-
-        function filterOrders(value, type) {
-            const rows = document.querySelectorAll('#ordersTableBody tr');
-            rows.forEach(row => {
-                const orderId = row.cells[0].innerText.toLowerCase();
-                const customerName = row.cells[1].innerText.toLowerCase();
-                const status = row.cells[4].innerText.toLowerCase();
-
-                let shouldDisplay = true;
-                if (type === 'orderId' && !orderId.includes(value)) {
-                    shouldDisplay = false;
+            orders.forEach((item)=> {
+                if(statusFilter == 'Default'){
+                    item.classList.remove('d-none');
+                }else {
+                    if(statusFilter == item.dataset.status){
+                        item.classList.remove('d-none');
+                    }else{
+                        item.classList.add('d-none');
+                    }
                 }
-                if (type === 'customerName' && !customerName.includes(value)) {
-                    shouldDisplay = false;
-                }
-                if (type === 'status' && value !== '' && !status.includes(value)) {
-                    shouldDisplay = false;
-                }
+            })
+       }
 
-                row.style.display = shouldDisplay ? '' : 'none';
-            });
-        }
+       function searchFilter(){
+            const searchValue = document.getElementById('searchUser').value.toLowerCase()
+            const orders = document.querySelectorAll('.orders');
+            console.log(orders , searchValue);
+            
+            orders.forEach((item)=> {
+                if(item.dataset.name.toLowerCase().includes(searchValue) || item.dataset.email.toLowerCase().includes(searchValue)){
+                    item.classList.remove('d-none');
+                }else{
+                    item.classList.add('d-none');
+                }
+            })
+       }
     </script>
 
 

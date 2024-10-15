@@ -51,7 +51,7 @@
         <div class="col-lg-5 col-md-7 col-sm-10 login-container">
             <h2 class="text-center mb-4">Login</h2>
             <!-- Login Form -->
-            <form id="loginForm" action="/user/login" method="POST" onsubmit="return validateForm()">
+            <form id="loginForm"  onsubmit="return validateForm(event)">
                 <!-- Email Field -->
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
@@ -114,8 +114,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer (if any) -->
+    
     <%- include('./partials/footer.ejs') %>
 
     <!-- Bootstrap Bundle JS (includes Popper) -->
@@ -124,7 +123,11 @@
     </script>
     <!-- SweetAlert2 for Enhanced Alerts (Optional) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- JavaScript for Password Toggle and Validation -->
+
+    <!-- toastify -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- validation script -->
     <script>
         // Password Visibility Toggle
         const toggler = document.getElementById("togglePassword");
@@ -137,33 +140,96 @@
             toggler.classList.toggle("bi-eye-slash");
         });
 
-        // Form Validation
-        function validateForm(){
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value.trim();
+        // vaildation 
+        const emailInput = document.getElementById('email');
+
+        function validateEmail(){
+            const email = emailInput.value.trim();
             const emailError = document.getElementById("emailError");
-            const passwordError = document.getElementById("passwordError");
-            let isValid = true;
-
-            // Clear previous error messages
-            emailError.textContent = "";
-            passwordError.textContent = "";
-
-            // Email Validation
             const emailPattern = /^[^\s@]+@(gmail\.com|yahoo\.com|microsoft\.com)$/;
+
+            emailError.textContent = "";
+
+            if(email===""){
+                emailError.textContent = "email cannot be empty";
+                emailInput.style.border = "2px solid red";
+                return false;
+            }
+
             if(!emailPattern.test(email)){
                 emailError.textContent = "Please enter a valid email address.";
-                isValid = false;
+                emailInput.style.border = "2px solid red";
+                return false;
             }
 
-            // Password Validation
+            emailInput.style.border = "2px solid green";
+            return true;
+        }
+
+        function validatePassword(){
+            const password = passwordInput.value.trim();
+            const passwordError = document.getElementById("passwordError");
+
+            passwordError.textContent = "";
+
+            if(password==""){
+                passwordError.textContent = "Password cannot be empty";
+                passwordInput.style.border = "2px solid red";
+                return false;
+            }
             if(password.length < 6){
                 passwordError.textContent = "Password must be at least 6 characters long.";
-                isValid = false;
+                passwordInput.style.border = "2px solid red";
+                return false;
             }
 
-            return isValid;
+            passwordInput.style.border = "2px solid green";
+            return true;
         }
+        // Form Validation
+        function validateForm(e){
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            console.log(email , password);
+            
+            const result =  validateEmail() && validatePassword();
+            if(result){
+                $.ajax({
+                    url : "/user/login",
+                    type : "POST",
+                    data : JSON.stringify({
+                        email ,
+                        password 
+                    }),
+                    contentType : "application/json",
+                    success : function(res) {
+                        if(res.success){
+                            window.location.href = "/home";
+                        }else {
+                            Toastify({
+                            text: res.message,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "center",
+                            backgroundColor: "red",
+                        }).showToast();
+                        }
+                    },error : function () {
+                        Toastify({
+                            text: "An error occred please try again later",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "center",
+                            backgroundColor: "red",
+                        }).showToast();
+                    }
+                })
+            }
+        }
+
+        emailInput.addEventListener('input',validateEmail);
+        passwordInput.addEventListener('input',validatePassword);
     </script>
 
 </body>

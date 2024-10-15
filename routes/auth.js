@@ -3,10 +3,10 @@ const router = express.Router();
 const authContoller = require("../controllers/authController");
 const passport = require("passport");
 const userModel = require('../models/user');
-const user = require("../models/user");
+const userMiddleware = require('../middlewares/isUser');
 
 // signUp routes
-router.get("/", authContoller.landingPage);
+router.get("/",authContoller.landingPage);
 router.get("/user/signup",authContoller.signupPage);
 router.post("/user/signup", authContoller.sendOtp);
 router.post("/user/verify-otp", authContoller.verifyOtp);
@@ -44,6 +44,7 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
   const userData = await userModel.findOne({email});
   console.log(userData)
   console.log("before checking the condition");
+  
   if(userData.isBlocked==1){
     console.log("before redirecting user\n");
     req.logOut((err)=> {

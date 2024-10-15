@@ -49,6 +49,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
+// setting nocache (not for storing files in the browser).
 app.use(nocache());
 
 // connecting to database

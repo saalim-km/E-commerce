@@ -95,7 +95,7 @@
                                 </td>
                                 <td><%=item.productId.regularPrice%></td>
                                 <td><%= item.quantity%></td>
-                                <td class="text-end">&#x20B9;<%= item.productId.regularPrice * item.quantity%></td>
+                                <td class="text-end">&#x20B9;<%= item.productId.salesPrice * item.quantity%></td>
                             </tr>
                         <% }) %>
                     </tbody>

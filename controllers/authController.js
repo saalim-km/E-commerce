@@ -196,24 +196,24 @@ const verifyLogin = async (req, res) => {
     const { email, password } = req.body;
     console.log(email, password);
     const user = await userModel.findOne({ isAdmin: 0, email: email });
-    console.log(user);
     if (!user) {
-      req.flash("error","invalid email");
-      return res.redirect("/user/login");
+      return res.json({success : false , message : "User not found please SignUp"});
     }
+    else {
+      const passMatch = await bcrypt.compare(password, user.password);
+      console.log(user);
+      if(!passMatch){
+        return res.json({success : false , message : 'Password is not matching.'});
+      }
+    }
+    
     if (user.isBlocked) {
-      req.flash("error","user is blocked by admin");
-      return res.redirect("/user/login");
+      return res.json({success : false , message : "user is blocked by admin"});
+    }else {
+      req.session.user = user.email;
+      console.log("after verifying login", req.session.user);
+      return res.json({success : true});
     }
-
-    const passMatch = await bcrypt.compare(password, user.password);
-    if (!passMatch) {
-      req.flash("error","password didn't match");
-      return res.redirect("/user/login");
-    } 
-    req.session.user = user.email;
-    console.log("after verifying login", req.session.user);
-    res.redirect("/home");
   } catch (error) {
     console.log(error);
     res.render("login", { message: "login failed , please try again later" });
@@ -222,14 +222,6 @@ const verifyLogin = async (req, res) => {
 
 const userLogout = async (req, res) => {
   try {
-    // req.session.destroy((err) => {
-    //   if (err) {
-    //     console.log("session destroying failed", err.message);
-    //   } else {
-    //     console.log('Session destroyed :)');
-    //     res.redirect("/");
-    //   }
-    // });
     req.session.user = null;
     res.redirect("/");
   } catch (error) {

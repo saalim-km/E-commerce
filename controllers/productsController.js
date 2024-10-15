@@ -103,7 +103,7 @@ const productList = async(req,res)=> {
 
       const category = await categoryModel.find({isListed:true});
       const productData = await productModel.find().populate("category","name").skip((perpage * page) - perpage).limit(perpage);
-      const productCount = await productModel.countDocuments({isListed : true});
+      const productCount = await productModel.countDocuments({$or : [{isListed : true} , {isListed : false}]});
       res.render("productList",{
         products : productData,
         currentPage : page,

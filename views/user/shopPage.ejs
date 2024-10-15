@@ -106,7 +106,7 @@
 
     <div class="d-flex flex-column ml-5">
         <div class="breadcrumbs ml-5 mt-5">
-            <a href="/">Home</a> / <a href="/user/shop">Shop</a>
+            <a class="text-dark" href="/">Home</a> / <a class="text-dark" href="/user/shop">Shop</a>
         </div>
     
         <!-- Filter Button -->
@@ -114,40 +114,42 @@
             <button class="filter-btn" onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>    
          </div>
     </div>
-    
+
+    <div class="row container ml-5 mb-5">
+
+            <div class="col-lg-6">
+                <label for="search">Search Products:</label>
+                <input type="text" id="search" class="form-control" placeholder="Search for products..." oninput="searchProduct()">
+            </div>
+
+            <div class="col-lg-6">
+                <label for="sort">Sort By:</label>
+                <select id="sort" class="form-select" onchange="sortProducts()">
+                    <option value="default">Default</option>
+                    <option value="price-low-high">Price: Low to High</option>
+                    <option value="price-high-low">Price: High to Low</option>
+                    <option value="name-az">Name: A - Z</option>
+                    <option value="name-za">Name: Z - A</option>
+                </select>
+            </div>
+    </div>
+      
     <!-- Filter Popup -->
     <div class="filter-popup container" id="filter-popup">
-        <!-- Search Bar -->
-        <label for="search">Search Products:</label>
-        <input type="text" id="search" class="form-control" placeholder="Search for products..." oninput="filterProducts()">
 
         <!-- Category Filter -->
         <label for="category">Select Category:</label>
         <select id="category" class="form-select" onchange="filterProducts()">
-            <option value="all">All Categories</option>
-            <option value="glow">Glow in Dark</option>
-            <option value="printed">Full Printed Tshirts</option>
-            <option value="oversized">Oversized</option>
-            <option value="hoodie">Hoodie UV Light Reactive</option>
+            <option value="All Categories">All Categories</option>
+            <option value="Glow in Dark">Glow in Dark</option>
+            <option value="Full Printed TShirts">Full Printed TShirts</option>
+            <option value="Oversized Fit">Oversized Fit</option>
+            <option value="Hoodie UV Light Reactive">Hoodie UV Light Reactive</option>
         </select>
-
-        <!-- Price Range Filter -->
-        <label for="price">Price Range:</label>
-        <input type="range" id="price" class="form-range" min="500" max="5000" step="100" oninput="document.getElementById('price-output').value = this.value; filterProducts();">
-        <input type="text" id="price-output" value="500" readonly style="border: none; font-weight: bold; margin-bottom: 10px;">
     </div>
 
     <!-- Sorting Dropdown -->
-    <div class="container mt-3">
-        <label for="sort">Sort By:</label>
-        <select id="sort" class="form-select" onchange="sortProducts()">
-            <option value="default">Default</option>
-            <option value="price-low-high">Price: Low to High</option>
-            <option value="price-high-low">Price: High to Low</option>
-            <option value="name-az">Name: A - Z</option>
-            <option value="name-za">Name: Z - A</option>
-        </select>
-    </div>
+ 
 
     <!-- Product Grid -->
     <div class="product-grid container">
@@ -170,6 +172,8 @@
 
 
     <script>
+        // default order of products (if the user clicks on default on sort option
+        const defaultOrder = Array.from(document.querySelectorAll('.product-item'));
         function toggleFilter() {
             const filterPopup = document.getElementById("filter-popup");
             if (filterPopup.style.display === "block") {
@@ -179,7 +183,89 @@
             }
         }
 
-        
+        // filtering products based on categories or searc input
+        function filterProducts(){
+            const products = document.querySelectorAll('.product-item');
+            const selectValue = document.getElementById('category').value;
+            
+            products.forEach((item)=> {
+                if(selectValue == "All Categories"){
+                    item.classList.remove("d-none");
+                }else{
+                    if(selectValue !== item.dataset.category){
+                        item.classList.add("d-none");
+                    }else{
+                        item.classList.remove("d-none");
+                    }
+                }
+            });
+        }
+
+        // sorting products
+        function sortProducts(){
+            const productGrid = document.querySelector('.product-grid');
+
+            // calling the filterproducts for fetching the category it it is selected
+            filterProducts();
+            const sortValue = document.getElementById('sort').value;
+            const products = document.querySelectorAll('.product-item');
+            const productArr = Array.from(products);
+
+            if(sortValue == 'default'){
+                productGrid.innerHTML = "";
+                defaultOrder.forEach((item)=> {
+                    productGrid.appendChild(item);
+                })
+            }else if(sortValue == 'price-low-high'){
+                productGrid.innerHTML = "";
+                productArr.sort((a,b)=> {
+                    return a.dataset.price - b.dataset.price;
+                });
+                productArr.forEach((item)=> {
+                    productGrid.appendChild(item);
+                })
+            }else if(sortValue == 'price-high-low'){
+                productGrid.innerHTML = "";
+                productArr.sort((a,b)=> {
+                    return b.dataset.price - a.dataset.price;
+                });
+                productArr.forEach((item)=> {
+                    productGrid.appendChild(item);
+                })
+            }else if(sortValue == 'name-az'){
+                productGrid.innerHTML = "";
+                productArr.sort((a,b)=> {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                })
+                productArr.forEach((item)=> {
+                    productGrid.appendChild(item);
+                })
+            }else if(sortValue == 'name-za'){
+                productGrid.innerHTML = "";
+                productArr.sort((a,b)=> {
+                    return b.dataset.name.localeCompare(a.dataset.name);
+                })
+                productArr.forEach((item)=> {
+                    productGrid.appendChild(item);
+                })
+            }
+            console.log(defaultOrder,productArr);
+        }
+
+        function searchProduct(){
+            const products = document.querySelectorAll('.product-item');
+            const searchValue = document.getElementById('search').value.toLowerCase();
+            console.log(searchValue);
+
+            products.forEach((item)=> {
+                if(!item.dataset.name.toLowerCase().includes(searchValue)){
+                    item.classList.add('d-none');
+                }else {
+                    item.classList.remove('d-none');
+                }
+            })
+            
+        }
     </script>
 
 <%- include('../auth/partials/footer.ejs') %>

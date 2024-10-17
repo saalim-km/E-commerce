@@ -313,32 +313,46 @@
         }
 
         function validateHouseName() {
-            const house = houseName.value.trim();
-            error1.textContent = "";
+        const house = houseName.value.trim();
+        const housePattern = /^[a-zA-Z\s]+$/; 
+        error1.textContent = "";
 
-            if (house === "") {
-                error1.textContent = "House Name cannot be empty.";
-                houseName.style.border = "2px solid red";
-                return false;
-            }
-
-            houseName.style.border = "2px solid green";
-            return true;
+        if (house === "") {
+            error1.textContent = "House Name cannot be empty.";
+            houseName.style.border = "2px solid red";
+            return false;
         }
 
-        function validateStreetName() {
-            const street = streetName.value.trim();
-            error2.textContent = "";
-
-            if (street === "") {
-                error2.textContent = "Street Name cannot be empty.";
-                streetName.style.border = "2px solid red";
-                return false;
-            }
-
-            streetName.style.border = "2px solid green"
-            return true;
+        if (!housePattern.test(house)) {
+            error1.textContent = "Only alphabets and spaces allowed.";
+            houseName.style.border = "2px solid red";
+            return false;
         }
+
+        houseName.style.border = "2px solid green";
+        return true;
+    }
+
+    function validateStreetName() {
+        const street = streetName.value.trim();
+        const streetPattern = /^[a-zA-Z\s]+$/; 
+        error2.textContent = "";
+
+        if (street === "") {
+            error2.textContent = "Street Name cannot be empty.";
+            streetName.style.border = "2px solid red";
+            return false;
+        }
+
+        if (!streetPattern.test(street)) {
+            error2.textContent = "Only alphabets and spaces allowed.";
+            streetName.style.border = "2px solid red";
+            return false;
+        }
+
+        streetName.style.border = "2px solid green"
+        return true;
+    }
 
         function validateCity() {
             const cityValue = city.value.trim();
@@ -377,48 +391,62 @@
         }
 
         function validatePinCode() {
-            const pin = pinCode.value.trim();
-            const pinPattern = /^\d{6}$/;
+        const pin = pinCode.value.trim();
+        const pinPattern = /^\d{6}$/;
+        const repeatPattern = /(\d)\1{2}/; 
 
-            error5.textContent = "";
+        error5.textContent = "";
 
-            if (pin === "") {
-                error5.textContent = "Pin-Code cannot be empty.";
-                pinCode.style.border = "2px solid red";
-                return false;
-            }
-
-            if (!pinPattern.test(pin)) {
-                error5.textContent = "Enter a valid 6-digit Pin-Code.";
-                pinCode.style.border = "2px solid red";
-                return false;
-            }
-
-            pinCode.style.border = "2px solid green";
-            return true;
+        if (pin === "") {
+            error5.textContent = "Pin-Code cannot be empty.";
+            pinCode.style.border = "2px solid red";
+            return false;
         }
 
-        function validatePhoneNumber() {
-            const phone = phoneNumber.value.trim();
-            const phonePattern = /^\d{10}$/;
-
-            error6.textContent = "";
-
-            if (phone === "") {
-                error6.textContent = "Phone Number cannot be empty.";
-                phoneNumber.style.border = "2px solid red";
-                return false;
-            }
-
-            if (!phonePattern.test(phone)) {
-                error6.textContent = "Enter a valid 10-digit Phone Number.";
-                phoneNumber.style.border = "2px solid red";
-                return false;
-            }
-
-            phoneNumber.style.border = "2px solid green";
-            return true;
+        if (!pinPattern.test(pin)) {
+            error5.textContent = "Enter a valid 6-digit Pin-Code.";
+            pinCode.style.border = "2px solid red";
+            return false;
         }
+
+        if (repeatPattern.test(pin)) {
+            error5.textContent = "Pin-Code cannot have 3 repeating digits.";
+            pinCode.style.border = "2px solid red";
+            return false;
+        }
+
+        pinCode.style.border = "2px solid green";
+        return true;
+    }
+
+    function validatePhoneNumber() {
+        const phone = phoneNumber.value.trim();
+        const phonePattern = /^\d{10}$/;
+        const repeatPattern = /(\d)\1{3}/; // Checks for 4 consecutive repeating digits
+
+        error6.textContent = "";
+
+        if (phone === "") {
+            error6.textContent = "Phone Number cannot be empty.";
+            phoneNumber.style.border = "2px solid red";
+            return false;
+        }
+
+        if (!phonePattern.test(phone)) {
+            error6.textContent = "Enter a valid 10-digit Phone Number.";
+            phoneNumber.style.border = "2px solid red";
+            return false;
+        }
+
+        if (repeatPattern.test(phone)) {
+            error6.textContent = "Phone Number cannot have 4 repeating digits.";
+            phoneNumber.style.border = "2px solid red";
+            return false;
+        }
+
+        phoneNumber.style.border = "2px solid green";
+        return true;
+    }
 
         function resetForm() {
             form.reset();
@@ -488,7 +516,6 @@
                 const pincode = pinCode.value.trim();
                 const phone = phoneNumber.value.trim();
                 const altPhone = altPhoneNumber.value.trim();
-
                 $.ajax({
                     url : "/user/address",
                     type : "POST",
@@ -541,7 +568,17 @@
 
         function deleteAdd(name,id){
             const addressContainer = document.getElementById(`address${id}`);
-            $.ajax({
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if(result.isConfirmed){
+                    $.ajax({
                 url : "/user/address/delete",
                 type : "POST",
                 data : JSON.stringify({
@@ -569,7 +606,9 @@
                             backgroundColor: "red",
                         }).showToast();
                 }
-            })
+                })
+                }
+            });
         }
         // Added event listeners for live form validation
         addressName.addEventListener("input", validateUsername);

@@ -144,9 +144,11 @@ const listProduct = async(req,res)=> {
 const loadEditPage = async(req,res)=> {
   try {
     const productId = req.params.id;
-    const productData = await productModel.findById(productId);
-    const category = await categoryModel.find({isListed : true})
-    res.render("editProduct",{product : productData , category})
+    const productData = await productModel.findById(productId).populate('category');
+    const productCat = productData.category;
+    const category = await categoryModel.find({isListed : true});
+    console.log(`the product's data${productData}`,`the product category${productCat}`);
+    res.render("editProduct",{product : productData , category , productCat : productCat})
   } catch (error) {
     console.log("error while loading product edit page",error.message);
   }
@@ -166,7 +168,7 @@ const editProduct = async (req, res) => {
       category,
     } = req.body;
 
-    // Extract sizes directly from req.body
+    
     const productSizes = [
       { size: 'S', stock: req.body.s },
       { size: 'M', stock: req.body.m },

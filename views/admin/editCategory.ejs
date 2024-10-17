@@ -1,4 +1,5 @@
 <%- include('./partials/header.ejs') %>
+
 <section class="content-main">
     <div class="content-header">
         <h2 class="content-title card-title">Edit Category</h2>
@@ -9,11 +10,28 @@
             <form action="/admin/categories/edit/<%= category._id %>" method="POST" onsubmit="return validateForm()">
                 <div class="mb-3">
                     <label for="category_name" class="form-label">Name</label>
-                    <input onchange="validateInput()" type="text" placeholder="Category Name" class="form-control" id="name" name="name" value="<%= category.name %>" />
+                    <input 
+                        onchange="validateInput()" 
+                        type="text" 
+                        placeholder="Category Name" 
+                        class="form-control" 
+                        id="name" 
+                        name="name" 
+                        value="<%= category.name %>" 
+                    />
+                    <!-- Error message container for Name -->
+                    <div id="name-error" class="error-message" style="color: red; margin-top: 5px;"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Description</label>
-                    <textarea id="description" class="form-control" name="description"><%= category.description %></textarea>
+                    <textarea 
+                        id="description" 
+                        class="form-control" 
+                        name="description" 
+                        oninput="validateDescription()"
+                    ><%= category.description %></textarea>
+                    <!-- Error message container for Description -->
+                    <div id="description-error" class="error-message" style="color: red; margin-top: 5px;"></div>
                 </div>
                 <div class="d-grid">
                     <div>
@@ -31,31 +49,108 @@
 </section>
 
 
-<script>
-    const name = document.getElementById("name").value
-    const description = document.getElementById("description").value;
-    console.log(`name : ${name} , description : ${description}`);
 
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Initialize variables to store initial form values
+    let initialName = "";
+    let initialDescription = "";
+
+    // Capture initial values when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        initialName = document.getElementById("name").value.trim();
+        initialDescription = document.getElementById("description").value.trim();
+    });
+
+    // Main form validation function
     function validateForm(){
-        const errorMess = document.getElementById("errorMess");
-        const updatedName = document.getElementById("name").value
-        const updateDescription = document.getElementById("description").value;
-        console.log(`updated name : ${updatedName} , update description : ${updateDescription}`);
-        
-        if(name===updatedName && description===updateDescription){
+        // Get error message containers
+        const descriptionError = document.getElementById('description-error');
+        const nameError = document.getElementById('name-error');
+
+        // Define regex patterns
+        const namePattern = /^[A-Za-z\s]+$/;
+        const descPattern = /^[A-Za-z\s]+$/;
+
+        // Get current input values
+        const name = document.getElementById("name").value.trim();
+        const description = document.getElementById("description").value.trim();
+
+        // Clear previous error messages
+        descriptionError.textContent = "";
+        nameError.textContent = "";
+
+        // Check if no changes have been made
+        if(name === initialName && description === initialDescription){
             Swal.fire({
-                toast : true,
-                position : "top-end",
-                title : "make any changes to update.",
+                toast: true,
+                position: "top-end",
+                icon: "warning",
+                title: "Make any changes to update.",
                 showConfirmButton: false,
                 timer: 2500,
                 timerProgressBar: true,
-                background : "red",
-                color : "white",
-            })
+                background: "#f0ad4e", // Changed to a warning color
+                color: "white",
+            });
             return false;
         }
-        return true;
+
+        let isValid = true;
+
+        // Validate Description
+        if(description === ''){
+            descriptionError.textContent = "Description cannot be empty.";
+            isValid = false;
+        }
+        else if(!descPattern.test(description)){
+            descriptionError.textContent = "Description can only contain alphabets and spaces.";
+            isValid = false;
+        }
+
+        // Validate Name
+        if(name === ''){
+            nameError.textContent = "Name cannot be empty.";
+            isValid = false;
+        }
+        else if(!namePattern.test(name)){
+            nameError.textContent = "Name can only contain alphabets and spaces.";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Function to display error messages (not used in current logic but kept for potential enhancements)
+    function displayErrorMessage(elementId, message) {
+        const element = document.getElementById(elementId);
+        if(element){
+            element.textContent = message;
+        }
+    }
+
+    // Function to clear all error messages (not used in current logic but kept for potential enhancements)
+    function clearErrorMessages(){
+        const errorElements = document.querySelectorAll('.error-message');
+        errorElements.forEach(elem => {
+            elem.textContent = '';
+        });
+    }
+
+    // Real-time validation for the Name field
+    function validateInput(){
+        const nameInput = document.getElementById("name").value.trim();
+        const nameError = document.getElementById('name-error');
+        nameError.textContent = '';
+
+        if(nameInput === ""){
+            nameError.textContent = "Name cannot be empty.";
+        } 
+        else if(!/^[A-Za-z\s]+$/.test(nameInput)){
+            nameError.textContent = "Name can only contain alphabets and spaces.";
+        }
     }
 </script>
+
 <%- include('./partials/footer.ejs') %>

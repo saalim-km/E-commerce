@@ -126,7 +126,7 @@
             <div class="col-lg-6 col-md-6 col-sm-12 product-info">
                 <h3><%= product.productName %></h3>
                 <p class="text-muted">Category: <%= product.category.name %></p>
-                <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPrice %></span> <del>₹<%= product.regularPrice %></del></p>
+                <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPrice %></span></p>
                 <p><strong>Description:</strong> <%= product.description %></p>
 
                 <!-- Sizes Selection with Stock -->
@@ -186,7 +186,7 @@
                 button.addEventListener("click",(e)=> {
                     const selectedButton = e.target.closest('.size-option');
                     if(selectedButton){
-                        // first deselecting all buttons
+                    // first deselecting all buttons
                     sizeButtons.forEach((btn)=> btn.classList.remove("selected"));
 
                     selectedButton.classList.add("selected");

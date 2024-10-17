@@ -29,8 +29,9 @@
     border-radius: 5px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
-
 </style>
+
+
 <section class="content-main">
     <% if (message.success) { %>
      <div class="alert alert-success"><%= message.success %></div>
@@ -62,14 +63,14 @@
                      <div class="col-lg-4">
                         <div class="mb-4">
                            <label class="form-label">Regular price</label>
-                           <input placeholder="$" name="regularPrice" type="text" class="form-control border">
+                           <input maxlength="4" placeholder="$" name="regularPrice" type="text" class="form-control border">
                            <div id="regularPrice-error" class="error-message"></div>
                         </div>
                      </div>
                      <div class="col-lg-4">
                         <div class="mb-4">
                            <label class="form-label">Sale price</label>
-                           <input placeholder="$" name="salesPrice" type="text" class="form-control border">
+                           <input maxlength="4" placeholder="$" name="salesPrice" type="text" class="form-control border">
                         </div>
                         <div id="salePrice-error" class="error-message"></div>
                      </div>
@@ -91,26 +92,34 @@
                         </div>
                      </div>
                   </div>
-                  <div class="product-form  mb-3">
-                     <div class=" d-flex flex-row gap-4 align-item-center">
-                        <div>
-                           <label class="mr-5" for="size_s"> S </label>
-                           <input type="text" name="sizes[s]" id="size_s" min="0" maxlength="2" class="tiny-box">
-                        </div>
-                        <div>
-                           <label class="mr-5" for="size_m"> M </label>
-                           <input type="text" name="sizes[m]" id="size_m" min="0" maxlength="2" class="tiny-box">
-                        </div>
-                        <div>
-                           <label class="mr-5" for="size_l"> L </label>
-                           <input type="text" name="sizes[l]" id="size_l" min="0" maxlength="2" class="tiny-box">
-                        </div>
-                        <div>
-                           <label class="mr-5" for="size_xl"> XL </label>
-                           <input type="text" name="sizes[xl]" id="size_xl" min="0" maxlength="2" class="tiny-box">
-                        </div>
+
+                  <div class="product-form mb-3">
+                     <div class="d-flex flex-row gap-4 align-item-center">
+                         <div>
+                             <label class="mr-5" for="size_s">S</label>
+                             <input type="text" name="sizes[s]" id="size_s" min="0" maxlength="2" class="tiny-box">
+                             <div id="size_s-error" class="error-message"></div>
+                         </div>
+                         <div>
+                             <label class="mr-5" for="size_m">M</label>
+                             <input type="text" name="sizes[m]" id="size_m" min="0" maxlength="2" class="tiny-box">
+                             <div id="size_m-error" class="error-message"></div>
+                         </div>
+                         <div>
+                             <label class="mr-5" for="size_l">L</label>
+                             <input type="text" name="sizes[l]" id="size_l" min="0" maxlength="2" class="tiny-box">
+                             <div id="size_l-error" class="error-message"></div>
+                         </div>
+                         <div>
+                             <label class="mr-5" for="size_xl">XL</label>
+                             <input type="text" name="sizes[xl]" id="size_xl" min="0" maxlength="2" class="tiny-box">
+                             <div id="size_xl-error" class="error-message"></div>
+                         </div>
                      </div>
-                  </div>
+                 </div>
+                 
+
+
                   <div class="card mb-2">
                      <!-- selecting images -->
                      <div class="card-header">
@@ -277,65 +286,96 @@
 
     function validateForm() {
     clearErrorMessages();
-    const name = document.getElementsByName('productName')[0].value;
-    const description = document.getElementById('descriptionid').value;
-    const price = document.getElementsByName('regularPrice')[0].value;
-    const saleprice = document.getElementsByName('salesPrice')[0].value;
-    const category = document.getElementsByName('category')[0].value;
-    const images = document.getElementById('input1')
-    const quantity = document.getElementsByName('quantity')
-    let isValid = true
-    if (name.trim() === "") {
-        displayErrorMessage('productName-error', 'Please enter a product name.');
+    
+    const name = document.getElementsByName('productName')[0].value.trim();
+    const description = document.getElementById('descriptionid').value.trim();
+    const price = document.getElementsByName('regularPrice')[0].value.trim();
+    const saleprice = document.getElementsByName('salesPrice')[0].value.trim();
+    const category = document.getElementsByName('category')[0].value.trim();
+    const sizes = {
+        s: document.getElementById('size_s').value.trim(),
+        m: document.getElementById('size_m').value.trim(),
+        l: document.getElementById('size_l').value.trim(),
+        xl: document.getElementById('size_xl').value.trim(),
+    };
+    const images = [
+        document.getElementById('input1').files[0],
+        document.getElementById('input2').files[0],
+        document.getElementById('input3').files[0]
+    ];
+
+    let isValid = true;
+
+    // Validate product name (alphabets and spaces only, no empty input)
+    if (!/^[A-Za-z\s]+$/.test(name)) {
+        displayErrorMessage('productName-error', 'Product name should only contain alphabets and spaces.');
         isValid = false;
     }
 
-    if (description.trim() === "") {
-        displayErrorMessage('description-error', 'Please enter a product description.');
-        isValid = false;
-    }
+    // Validate description (alphabets, numbers, and spaces only, no empty input)
+    if (!/^[A-Za-z\s]+$/.test(description)) {
+    displayErrorMessage('description-error', 'Description should only contain alphabets and spaces.');
+    isValid = false;
+}
 
-    if (parseInt(quantity) < 0) {
-        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-        isValid = false;
-    }
+    // Validate regular price (non-negative, must be greater than zero)
+    if (!/^\d+$/.test(price) || parseInt(price) < 500) {
+    displayErrorMessage('regularPrice-error', 'Please enter a valid price of at least 500 (no decimals allowed).');
+    isValid = false;
+}
 
-    if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-        isValid = false;
-    }
+   // Validate sale price (must be a whole number, at least 500, and not empty)
+   if (!/^\d+$/.test(saleprice) || parseInt(saleprice) < 500) {
+      displayErrorMessage('salePrice-error', 'Please enter a valid sale price of at least 500 (no decimals allowed).');
+      isValid = false;
+   }
 
-    if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-        displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-        isValid = false;
-    }
+    // Ensure regular price is greater than sale price
     if (parseFloat(price) <= parseFloat(saleprice)) {
         displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
         isValid = false;
     }
 
-    if (images.files.length === 0) {
-        displayErrorMessage("images-error", 'Please select an image.');
+    for (let size in sizes) {
+    // Ensure stock for sizes contains only numbers and is greater than zero
+    if (!/^\d+$/.test(sizes[size]) || parseInt(sizes[size]) <= 0) {
+        displayErrorMessage('size_' + size + '-error', `Stock for size ${size.toUpperCase()} must be a valid number greater than zero.`);
         isValid = false;
     }
+}
+
+    // Validate images (ensure 3 images are uploaded and they are of correct type)
+    if (images.some(image => !validateImageType(image))) {
+        displayErrorMessage('images-error', 'Please upload 3 images (JPEG, PNG, JPG only).');
+        isValid = false;
+    }
+
     return isValid;
 }
 
+// Function to validate image file type
+function validateImageType(file) {
+    if (!file) return false;  // Ensure file is selected
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    return validImageTypes.includes(file.type);
+}
 
+// Function to display error messages
 function displayErrorMessage(elementId, message) {
     var errorElement = document.getElementById(elementId);
     errorElement.innerText = message;
     errorElement.style.display = "block";
 }
 
-
+// Function to clear all error messages before validation
 function clearErrorMessages() {
     const errorElements = document.getElementsByClassName('error-message');
     Array.from(errorElements).forEach(element => {
         element.innerText = '';
+        element.style.display = 'none';
     });
-    const errorMessage = document.getElementById('errorMessage');
 }
+
 </script>
      
 <%- include("./partials/footer.ejs") %>

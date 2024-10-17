@@ -304,7 +304,7 @@
             const updatedPhone = document.getElementById("phone").value
             const nameError = document.getElementById("N");
             const phoneError = document.getElementById("P");
-            const phoneRegexPattern = /^\d{10}$/;
+            const phoneRegexPattern = /^(?!.*(\d)\1{9})(?!.*(\d)\2{3})\d{10}$/;
             const userNamePattern = /^[a-zA-Z\s]{4,16}$/;
 
 
@@ -333,7 +333,7 @@
                 return false;
             }
             if(!phoneRegexPattern.test(updatedPhone)){
-                phoneError.textContent = "mobile number must be 10 digit";
+                phoneError.textContent = "invalid phone number ";
                 return false;
             }
             if(!userNamePattern.test(updateName)){

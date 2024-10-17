@@ -71,6 +71,7 @@ const updateCategory = async (req, res) => {
 
     const categoryData = await Category.findById(id);
     const existingCat = await Category.findOne({name});
+    
       if(categoryData.name==name && categoryData.description!==description){
         const categoryUpdate = await Category.findByIdAndUpdate(id,{
           description : description,

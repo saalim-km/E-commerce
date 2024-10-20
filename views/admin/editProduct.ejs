@@ -48,7 +48,7 @@
       <div class="col-lg-6">
          <div class="card mb-4">
             <div class="card-body">
-               <form method="post" action="/admin/product/edit/<%= product._id%>" enctype="multipart/form-data" onsubmit="return validateForm()">
+               <form method="post" action="/admin/product/edit/<%= product._id%>" enctype="multipart/form-data" onsubmit="return validateForm(event)">
                   <div class="mb-4">
                      <label for="product_name" class="form-label">Product Name</label>
                      <input type="text" placeholder="Type here" name="productName" class="form-control border" id="product_name" value="<%= product.productName %>">
@@ -63,14 +63,14 @@
                      <div class="col-lg-4">
                         <div class="mb-4">
                            <label class="form-label">Regular price</label>
-                           <input maxlength="4" placeholder="$" name="regularPrice" type="text" class="form-control border" value="<%= product.regularPrice %>">
+                           <input maxlength="4" placeholder="$" name="regularPrice" type="text" class="form-control border" value="<%= product.regularPrice %>" id="regular_price">
                            <div id="regularPrice-error" class="error-message"></div>
                         </div>
                      </div>
                      <div class="col-lg-4">
                         <div class="mb-4">
                            <label class="form-label">Sale price</label>
-                           <input maxlength="4" placeholder="$" name="salesPrice" type="text" class="form-control border" value="<%= product.salesPrice %>">
+                           <input maxlength="4" placeholder="$" name="salesPrice" type="text" class="form-control border" value="<%= product.salesPrice %>" id="sales_price">
                         </div>
                         <div id="salePrice-error" class="error-message"></div>
                      </div>
@@ -94,17 +94,19 @@
                     </div>
                  </div>
                  
-                 <div class="d-flex flex-row gap-4 align-item-center mb-4">
-                  <% product.sizes.forEach(size => { %>
-                    <div>
-                      <label class="mr-5" for="size_<%= size.size.toLowerCase() %>"> <%= size.size %> </label>
-                      <input type="number" name="<%= size.size.toLowerCase() %>" id="size_<%= size.size.toLowerCase() %>" min="0" class="tiny-box" value="<%= size.stock %>">
-                      <div style="color: red;" id="size_<%= size.size.toLowerCase() %>-error" class="error-message"></div>
-                    </div>
-                  <% }) %>
-                </div>  
+                 <label class="mt-3" for="sizes">Sizes</label>
+                  <div class="d-flex flex-row gap-4 align-item-center mb-4">
+                    <% product.sizes.forEach(size => { %>
+                      <div>
+                        <label class="mr-5" for="size_<%= size.size.toLowerCase() %>"> <%= size.size %> </label>
+                        <input type="number" name="<%= size.size.toLowerCase() %>" id="size_<%= size.size.toLowerCase() %>" min="0" class="tiny-box" value="<%= size.stock %>">
+                      </div>
+                      <small style="color: red;" id="size_<%= size.size.toLowerCase() %>-error" class="error-message"></small>
+                    <% }) %>
+                  </div>
+  
 
-
+            <p id = "error-message"></p>
                 <div class="form-group">
                   <h3>Product Images</h3>
                   <div class="image-section" id="imageSection">
@@ -129,13 +131,14 @@
 </section>
 
 
+
 <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 
 
 
 <script>
   checkImageCount();
-  function removeImage(imageName, index) {
+function removeImage(imageName, index) {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -178,7 +181,7 @@
     });
   }
 
-  function checkImageCount() {
+function checkImageCount() {
   const imageSection = document.getElementById("imageSection");
   const images = imageSection.getElementsByClassName("image-container");  
     if(images.length == 3){
@@ -197,17 +200,20 @@
       }
     }
     }
-  }
+}
+
+
 function addNewImageInput(index) {
     const newImageInput = document.createElement('div');
     newImageInput.innerHTML = `
       <div class="card mb-2">
         <div class="card-header">
           <h4>Choose images</h4>
+          <p class="img-error" id="img-error${index + 1}"></p>
         </div>
         <div class="card-body align-items-center" style="margin-bottom: 20px;">
           <img src="" alt="" id="imgView${index + 1}">
-          <input class="form-control img-input" type="file" name="images" id="input${index + 1}" accept="image/png, image/jpeg, image/jpg" onchange="viewImage${index + 1}(event),viewImage(event, ${index + 1})">
+          <input class="form-control img-input" type="file" name="images" id="input${index + 1}" accept="image/png, image/jpeg, image/jpg" onchange="viewImage${index + 1}(event), viewImage(event, ${index + 1})">
         </div>
         <div class="image-cropper d-flex align-items-center" style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
            <img src="" id="croppedImg${index + 1}" alt="">
@@ -216,22 +222,22 @@ function addNewImageInput(index) {
       </div>
     `;
     document.getElementById('imageSection').appendChild(newImageInput);
-  }
+}
 
 
-    function viewImage1(){
+function viewImage1(){
         document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0]);
     } 
 
-    function viewImage2(){
+function viewImage2(){
         document.getElementById("imgView2").src = URL.createObjectURL(event.target.files[0]);
     }
 
-    function viewImage3(){
+function viewImage3(){
         document.getElementById("imgView3").src = URL.createObjectURL(event.target.files[0]);
     }
 
-    function viewImage(event, index) {
+function viewImage(event, index) {
     let input = event.target;
     let reader = new FileReader();
 
@@ -283,10 +289,10 @@ function addNewImageInput(index) {
 
 
 
-    const seletectedImages = [];
-    document.getElementById("input1").addEventListener("change",handleFileSelect);
+const seletectedImages = [];
+document.getElementById("input1").addEventListener("change",handleFileSelect);
 
-    function handleFileSelect(event){
+function handleFileSelect(event){
         const addedImagesContainer = document.getElementById("addedImagesContainer");
         addedImagesContainer.innerHTML = "";
         const files = event.target.files;
@@ -317,19 +323,118 @@ function addNewImageInput(index) {
             thumbnail.appendChild(removeIcon);
             addedImagesContainer.appendChild(thumbnail);
         }
+}
+
+
+
+function validateForm(e) {
+  // error display elements
+    const nError = document.getElementById('productName-error');
+    const dError = document.getElementById('description-error');
+    const rpgError = document.getElementById('regularPrice-error');
+    const spError = document.getElementById('salePrice-error');
+
+    // values
+    const productName = document.getElementById('product_name').value.trim();
+    const description = document.getElementById('descriptionid').value.trim();
+    const regularPrice = document.getElementById('regular_price').value.trim();
+    const salesPrice = document.getElementById('sales_price').value.trim();
+    const sizeInputs = document.querySelectorAll('.tiny-box');
+    const images = document.querySelectorAll('.img-input'); // All image input fields
+    const errorImg = document.getElementById('error-message'); // General error message element
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+    // flag
+    let formValid = true;
+
+
+    nError.textContent = "";
+    dError.textContent = "";
+    rpgError.textContent = "";
+    spError.textContent = "";
+    errorImg.textContent = "";
+
+    sizeInputs.forEach(input => {
+    const errorElement = document.getElementById(`${input.id}-error`);
+    if (errorElement) {
+      errorElement.textContent = '';
+    }
+    });
+
+    sizeInputs.forEach(input => {
+    const sizeValue = input.value.trim();
+    if (!/^\d+$/.test(sizeValue) || parseInt(sizeValue) <= 0) {
+      const errorElement = document.getElementById(`${input.id}-error`);
+      if (errorElement) {
+        errorElement.textContent = "Stock must be greater than zero.";
+      }
+      formValid = false; 
+    }
+  });
+
+
+    if(productName === ""){
+      nError.textContent = "name cannot be empty";
+      nError.style.color = "red";
+      formValid = false;
     }
 
-
-
-
-
-
-
-
-
-    function validateForm() {
-      return true;
+    if(!/^[A-Za-z\s]+$/.test(productName)) {
+      nError.textContent = "Product name should only contain alphabets and spaces";
+      nError.style.color = "red";
+      formValid = false;
     }
+
+    if(description === ""){
+      dError.textContent = "description cannot be empty";
+      dError.style.color = "red";
+      formValid = false;
+    }
+
+    if(!/^[A-Za-z\s]+$/.test(description)){
+      dError.textContent = "Description should only contain alphabets and spaces";
+      dError.style.color = "red";
+      formValid = false;
+    }
+
+    if (!/^\d+$/.test(regularPrice) || parseInt(regularPrice) < 500) {
+    rpgError.textContent = 'Please enter a valid price of at least 500 (no decimals allowed).';
+    formValid = false;
+    }
+
+    if (!/^\d+$/.test(salesPrice) || parseInt(salesPrice) < 500) {
+      spError.textContent = 'Please enter a valid sale price of at least 500 (no decimals allowed).';
+      formValid = false;
+   }
+
+   if (parseFloat(regularPrice) <= parseFloat(salesPrice)) {
+        rpgError.textContent = 'Regular price must be greater than sale price.';
+        formValid = false;
+    }
+
+    // Check each image input
+    for (let i = 0; i < images.length; i++) {
+        const file = images[i].files[0];
+        
+        // Check if an image is selected
+        if (!file) {
+            errorImg.innerText = 'You must upload exactly 3 images.';
+            errorImg.style.color = "red";
+            return false; // Stop form submission if an image is missing
+        }
+
+        if (!validImageTypes.includes(file.type)) {
+            errorImg.innerText = 'Invalid file type. Only JPEG, PNG, or JPG are allowed.';
+            errorImg.style.color = "red";
+            return false; // Stop form submission if the image type is invalid
+        }
+
+    }
+
+    return formValid;
+}
+
+
 </script>
      
 <%- include("./partials/footer.ejs") %>

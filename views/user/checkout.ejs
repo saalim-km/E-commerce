@@ -98,7 +98,7 @@
                     <% }); %>
                 <% } else { %>
                     <h2>No Saved Address </h2>
-                    <a href="/user/address/<%= user._id %>" class="btn btn-small">Add an address</a>
+                    <a href="/user/address" class="btn btn-small">Add an address</a>
                 <% } %>
             </div>
 
@@ -126,6 +126,7 @@
                     <input type="hidden" name="cartItems[<%= index %>][productId]" value="<%= item.productId._id %>">
                     <input type="hidden" name="cartItems[<%= index %>][quantity]" value="<%= item.sizes[0].quantity %>">
                     <input type="hidden" name="cartItems[<%= index %>][size]" value="<%= item.sizes[0].size %>">
+                    <input type="hidden" name="cartItems[<%= index %>][price]" value="<%= item.productId.salesPrice%>">
                 <% }); %>
 
                 <!-- Coupon Input -->

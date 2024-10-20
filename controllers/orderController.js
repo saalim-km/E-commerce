@@ -1,9 +1,10 @@
 const orderModel = require("../models/order");
+const productModel = require("../models/product");
 const { findByIdAndUpdate } = require("../models/user");
 
 const loadOrders = async(req,res)=> {
     try {
-        const orders = await orderModel.find().populate('userId');
+        const orders = await orderModel.find().populate('userId').sort({createdAt : -1});
         res.render("ordersAdmin" , {orders});
     } catch (error) {
         console.log("error while loading orders page")
@@ -28,14 +29,39 @@ const updateOrder = async(req,res)=> {
     try {
         const {status} = req.body;
         const {id} = req.params;
-        const order = await orderModel.findByIdAndUpdate(id,{$set : {status : status}});
-        req.flash(`success","order status update to ${status}`);
-        res.redirect("/admin/orders");
+        if(status == 'Cancelled') {
+            const order = await orderModel.findById(id);
+            const orderUpdate = await orderModel.findByIdAndUpdate(id,{$set : {status : 'Cancelled'}});
+            if(orderUpdate) {
+                for(const product of order.products) {
+                    const productId = product.productId;
+                    const size = product.size;
+                    const quantity = product.quantity
+
+                    await productModel.updateOne(
+                        {
+                            _id : productId,
+                            'sizes.size' : size,
+                        },
+                        {
+                            $inc : {'sizes.$.stock' : quantity}
+                        }
+                    );
+                }
+                res.redirect("/admin/orders");
+            }
+        }else {
+            const order = await orderModel.findByIdAndUpdate(id,{$set : {status : status}});
+            req.flash(`success","order status update to ${status}`);
+            res.redirect("/admin/orders");
+        }
     } catch (error) {
         req.flash("error",`error while updating the cart ${error.message}`);
         console.log("error while updating order",error.message);
     }
 }
+
+
 module.exports = {
     loadOrders,
     loadOtderDetails,

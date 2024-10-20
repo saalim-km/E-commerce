@@ -131,61 +131,26 @@
 
     <!-- Main Content -->
     <div class="container my-5 d-md-flex">
-        <!-- Address List -->
-        <div class="col-md-5 col-sm-12 me-md-5 mb-4 address-container">
-            <div class="col-md-12 bg-white d-flex justify-content-center align-items-center border rounded-4 sticky-top mb-3"
-                style="height: 50px; z-index: 1;">
-                <h5 class="viga m-0">Addresses</h5>
-            </div>
-            <% if (message.success) { %>
-                <div class="alert alert-success"><%= message.success %></div>
-            <% } %>
-            <% if (message.error) { %>
-                <div class="alert alert-success"><%= message.error %></div>
-            <% } %>
-            <div class="address-list" id="addressWrapper">
-                    <% address.forEach((add, index) => { %>
-                        <div class="card address-card" id="address<%= add._id %>">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title"><%= add.fullName %></h5>
-                                    <div>
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="deleteAdd('<%= add.fullName %>','<%= add._id %>')">Delete</button>
-                                        <a href = "/user/edit_Address/<%= add._id %>" class="btn btn-warning btn-sm">Edit</a>
-                                    </div>
-                                </div>
-                                <p class="card-text m-0"><strong>Address:</strong> <%= add.house + ", " + add.street %></p>
-                                <p class="card-text m-0"><strong>Location:</strong> <%= add.city + ", " + add.state + " - " + add.pincode %></p>
-                                <p class="card-text m-0"><strong>Phone:</strong> <%= add.phone %></p>
-                                <% if(add.altPhone) { %>
-                                    <p class="card-text m-0"><strong>Alt Phone:</strong> <%= add.altPhone %></p>
-                                <% } %>
-                            </div>
-                        </div>
-                    <% }) %>
-            </div>
-        </div>
-
         <!-- Address Form -->
         <div class="col-md-6 col-sm-12 address-form">
-            <form id="addressForm" onsubmit="return validateAddressForm(event)">
-                <h3 class="viga mb-4 text-center">Add New Address</h3>
+            <form id="addressForm" action="/user/edit_Address/<%=address._id%>" method="post" onsubmit="return validateAddressForm()">
+                <h3 class="viga mb-4 text-center">Edit Address</h3>
                 <!-- Full Name -->
                 <div class="mb-3">
                     <label for="addressName" class="form-label">Full Name <small class="badge bg-danger" id="FN"></small></label>
-                    <input type="text" id="addressName" name="name" class="form-control" placeholder="Enter your full name">
+                    <input type="text" id="addressName" name="name" class="form-control" value="<%= address.fullName %>">
                     <p class="error-message" id="userNameErr"></p>
                 </div>
                 <!-- House and Street Name -->
                 <div class="row mb-3">
                     <div class="col">
                         <label for="houseName" class="form-label">House Name <small class="badge bg-danger" id="HN"></small></label>
-                        <input type="text" id="houseName" name="house" class="form-control" placeholder="Enter house name">
+                        <input type="text" id="houseName" name="house" class="form-control" value="<%= address.house %>">
                         <p class="error-message" id="error1"></p>
                     </div>
                     <div class="col">
                         <label for="streetName" class="form-label">Street Name <small class="badge bg-danger" id="SN"></small></label>
-                        <input type="text" id="streetName" name="street" class="form-control" placeholder="Enter street name">
+                        <input type="text" id="streetName" name="street" class="form-control" value="<%= address.street %>">
                         <p class="error-message" id="error2"></p>
                     </div>
                 </div>
@@ -193,13 +158,13 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="city" class="form-label">City <small class="badge bg-danger" id="C"></small></label>
-                        <input type="text" id="city" name="city" class="form-control" placeholder="Enter city">
+                        <input type="text" id="city" name="city" class="form-control" value="<%= address.city %>">
                         <p class="error-message" id="error3"></p>
                     </div>
                     <div class="col-md-6">
                         <label for="state" class="form-label">State <small class="badge bg-danger" id="S"></small></label>
                         <select id="state" name="state" class="form-select">
-                            <option value="" disabled selected>- Select State -</option>
+                            <option value="<%= address.state %>" selected><%= address.state %></option>
                             <option value="Andhra Pradesh">Andhra Pradesh</option>
                             <option value="Arunachal Pradesh">Arunachal Pradesh</option>
                             <option value="Assam">Assam</option>
@@ -242,28 +207,35 @@
                 <!-- Pin-Code -->
                 <div class="mb-3">
                     <label for="pinCode" class="form-label">Pin-Code <small class="badge bg-danger" id="PC"></small></label>
-                    <input type="number" id="pinCode" name="pincode" class="form-control" placeholder="Enter Pin-Code">
+                    <input type="number" id="pinCode" name="pincode" class="form-control" value="<%= address.pincode %>">
                     <p class="error-message" id="error5"></p>
                 </div>
                 <!-- Phone Numbers -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="phoneNumber" class="form-label">Phone Number <small class="badge bg-danger" id="PN"></small></label>
-                        <input type="number" id="phoneNumber" name="phone" class="form-control" placeholder="Enter phone number">
+                        <input type="number" id="phoneNumber" name="phone" class="form-control" value="<%= address.phone %>">
                         <p class="error-message" id="error6"></p>
                     </div>
                     <div class="col-md-6">
                         <label for="altPhoneNumber" class="form-label">Alt Phone Number  <small>( "optional" )</small></label>
-                        <input type="number" id="altPhoneNumber" name="altphone" class="form-control" placeholder="Enter alternate phone number">
-                        <p class="error-message" id="error7"></p>
+                        <% if (address.altPhone) { %>
+                            <input type="number" id="altPhoneNumber" name="altphone" class="form-control" value="<%= address.altPhone %>"> 
+                            <p class="error-message" id="error7"></p> 
+                        <% } else { %>
+                            <input type="number" id="altPhoneNumber" name="altphone" class="form-control" placeholder="enter alt phone number"> 
+                            <p class="error-message" id="error7"></p> 
+                        <% } %>
                     </div>
                 </div>
                 <!-- Form Buttons -->
-                <div class="text-end">
+                <div class="text-start mb-3">
                     <button id="formSubmit" class="btn btn-dark px-5" type="submit">Submit</button>
-                    <button class="btn btn-secondary px-2" type="reset" >Reset</button>
                 </div>
             </form>
+            <a href="/user/address">
+                <button class="btn btn-secondary px-2" type="reset" >Cancel</button>
+            </a>
         </div>
     </div>
 
@@ -277,7 +249,8 @@
     <!-- Toastify JS -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- Form Validation Script -->
+
+
     <script>
         // Getting all elements for validation
         const form = document.getElementById("addressForm");
@@ -300,7 +273,7 @@
 
         // Validation Functions
 
-        function validateUsername() {
+    function validateUsername() {
             const username = addressName.value.trim();
             const userPattern = /^[a-zA-Z\s]{4,14}$/;
             const isValid = userPattern.test(username);
@@ -322,7 +295,7 @@
             return true;
         }
 
-        function validateHouseName() {
+    function validateHouseName() {
         const house = houseName.value.trim();
         const housePattern = /^[a-zA-Z\s]+$/; 
         error1.textContent = "";
@@ -364,7 +337,7 @@
         return true;
     }
 
-        function validateCity() {
+    function validateCity() {
             const cityValue = city.value.trim();
             const cityPattern = /^[a-zA-Z\s]{2,}$/;
 
@@ -386,7 +359,7 @@
             return true;
         }
 
-        function validateState() {
+    function validateState() {
             const stateValue = state.value;
             error4.textContent = "";
 
@@ -400,7 +373,7 @@
             return true;
         }
 
-        function validatePinCode() {
+    function validatePinCode() {
         const pin = pinCode.value.trim();
         const pinPattern = /^\d{6}$/;
         const repeatPattern = /(\d)\1{2}/; 
@@ -458,8 +431,7 @@
         return true;
     }
 
-        function resetForm() {
-            form.reset();
+    function resetForm() {
 
             // Remove validation borders
             addressName.style.border = "";
@@ -480,36 +452,8 @@
             error6.textContent = "";
         }
 
-        function addAddressToList(address){
-            const addressWrapper = document.getElementById("addressWrapper");
-
-            // creating a div for newly added address
-            const card = document.createElement("div");
-            card.className = "card address-card";
-            card.id = `address${address._id}`;
-
-            card.innerHTML = `
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title">${address.fullName}</h5>
-                            <div>
-                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteAdd('${address.fullName}','${address._id}')">Delete</button>
-                                <a href = "/user/edit_Address/${address._id}" class="btn btn-warning btn-sm">Edit</a>
-                            </div>
-                    </div>
-                    <p class="card-text m-0"><strong>Address:</strong> ${address.house}, ${address.street}</p>
-                    <p class="card-text m-0"><strong>Location:</strong> ${address.city}, ${address.state} - ${address.pincode}</p>
-                    <p class="card-text m-0"><strong>Phone:</strong> ${address.phone}</p>
-                    ${address.altPhone ? `<p class="card-text m-0"><strong>Alt Phone:</strong> ${address.altPhone}</p>` : ""}
-                </div>
-            `;
-
-            addressWrapper.appendChild(card);
-        }
-
         // Validation and Submission Handler
-        function validateAddressForm(e) {
-            e.preventDefault();
+    function validateAddressForm() {
             const isUsernameValid = validateUsername();
             const isHouseValid = validateHouseName();
             const isStreetValid = validateStreetName();
@@ -519,116 +463,7 @@
             const isPhoneValid = validatePhoneNumber();
 
             const result = isUsernameValid && isHouseValid && isStreetValid && isCityValid && isStateValid && isPinValid && isPhoneValid;
-
-            if(result){
-                const name = addressName.value.trim();
-                const house = houseName.value.trim();
-                const street = streetName.value.trim();
-                const cityVal = city.value.trim();
-                const stateVal = state.value.trim();
-                const pincode = pinCode.value.trim();
-                const phone = phoneNumber.value.trim();
-                const altPhone = altPhoneNumber.value.trim();
-                $.ajax({
-                    url : "/user/address",
-                    type : "POST",
-                    data : JSON.stringify({
-                        name,
-                        house,
-                        street,
-                        city: cityVal,
-                        state: stateVal,
-                        pincode,
-                        phone,
-                        altPhone,
-                    }),
-                    contentType : "application/json",
-                    success : function(res){
-                        if(res.success){
-                            Toastify({
-                            text: "address added.",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "center",
-                            backgroundColor: "green",
-                            }).showToast();
-                            addAddressToList(res.address);
-
-                            // Reset the form and validation
-                            resetForm();
-                        }else{
-                            Toastify({
-                            text: "address name already exists.",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "center",
-                            backgroundColor: "red",
-                            }).showToast();
-                        }
-                    },
-                    error : function(err){
-                        Toastify({
-                            text: "An error occured while adding address.",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "center",
-                            backgroundColor: "red",
-                        }).showToast();
-                    }
-                })
-            }
-        }
-
-        function deleteAdd(name,id){
-            const addressContainer = document.getElementById(`address${id}`);
-            Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, delete it!"
-            }).then((result) => {
-                if(result.isConfirmed){
-                    $.ajax({
-                url : "/user/address/delete",
-                type : "POST",
-                data : JSON.stringify({
-                    addId : id,
-                }),
-                contentType : "application/json",
-                success : function (res){
-                    addressContainer.remove();
-                    if(res.success){
-                        Toastify({
-                            text: "Address deleted.",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "center",
-                            backgroundColor: "red",
-                        }).showToast();
-                    }else {
-                        Toastify({
-                            text: res.message,
-                            duration: 3000,
-                            gravity: "top",
-                            position: "center",
-                            backgroundColor: "red",
-                        }).showToast();
-                    }
-                },error: function (err){
-                    Toastify({
-                            text: "An error occured while adding address.",
-                            duration: 3000,
-                            gravity: "top",
-                            position: "center",
-                            backgroundColor: "red",
-                        }).showToast();
-                }
-                })
-                }
-            });
+            return result;
         }
 
         // Added event listeners for live form validation

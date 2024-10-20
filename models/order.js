@@ -21,12 +21,15 @@ const orderSchema = new mongoose.Schema({
                 type : String,
                 enum : ['S','M','L','XL'],
                 required : true,
+            },
+            price : {
+                type : Number,
+                required : true,
             }
         }
     ],
     shippingAddress : {
-        type : mongoose.Types.ObjectId,
-        ref : "Address",
+        type : Object,
         required : true,
     },
     paymentMethod : {

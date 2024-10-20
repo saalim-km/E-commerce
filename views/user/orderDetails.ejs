@@ -47,7 +47,9 @@
             <div class="col-md-6 order-summary">
                 <h5>Order Summary</h5>
                 <p><strong>ID:</strong> #<%= order._id %></p>
-                <p><strong>Order Date:</strong> <%= order.createdAt.toString() %></p>
+                <p><strong>Order Date:</strong> 
+                    <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+                </p>
                 <p><strong>Delivered Date:</strong> <%= order.deliveredDate ? order.deliveredDate.toDateString() : 'Not Dellivered' %></p>
                 <p><strong>Status:</strong>
                     <span class=" badge rounded-pill 
@@ -62,11 +64,11 @@
                 <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
             </div>
             <div class="col-md-6">
-                <h5>Delivery Address</h5>
-                <p><strong>Name:</strong> <%= user.username %></p>
-                <p><strong>Email:</strong> <%= user.email %></p>
-                <p><strong>Address:</strong> <%= address.house %> , <%= address.street %>, <%= address.city %>, <%= address.state %>, <%= address.pincode %></p>
-                <p><strong>Phone:</strong> <%= address.phone %></p>
+                    <h5>Delivery Address</h5>
+                    <p><strong>Name:</strong> <%= user.username %></p>
+                    <p><strong>Email:</strong> <%= user.email %></p>
+                    <p><strong>Address:</strong> <%= address.house %> , <%= address.street %>, <%= address.city %>, <%= address.state %>, <%= address.pincode %></p>
+                    <p><strong>Phone:</strong> <%= address.phone %></p>
             </div>
         </div>
 
@@ -96,9 +98,9 @@
                         <tr>
                             <td><img class="product-img" src="/uploads/product-images/<%= item.productId.images[0]%>" alt=""></td>
                             <td><%= item.productId.productName %>  (<%= item.size %>)</td>
-                            <td>&#x20B9; <%= item.productId.salesPrice%></td>
+                            <td>&#x20B9; <%= item.price%></td>
                             <td><%= item.quantity %></td>
-                            <td>&#x20B9; <%= item.quantity * item.productId.salesPrice %></td>
+                            <td>&#x20B9; <%= item.quantity * item.price %></td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -125,7 +127,7 @@
                 if(result.isConfirmed){
                     $.ajax({
                         url : "/user/cancel_order",
-                        type : 'PATCH',
+                        type : 'PUT',
                         data : JSON.stringify({
                             id : orderId,
                         }),

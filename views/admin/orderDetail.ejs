@@ -15,18 +15,25 @@
                     </span> <br>
                     <small class="text-muted">Order ID: <%= order._id %></small>
                 </div>
-                <form action="/admin/orders/update/<%=order._id%>" method="post">
+                
+                <form action="/admin/orders/update/<%= order._id %>" method="post">
                     <div class="col-lg-6 col-md-6 ms-auto text-md-end">
-                        <select name="status" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
-                            <option value="Pending">Pending</option>
-                            <option value="Processing">Processing</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
+                      <select name="status" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
+                        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %> >Pending</option>
+                        <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %> >Processing</option>
+                        <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %> >Shipped</option>
+                        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %> >Delivered</option>
+                        <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                      </select>
+                  
+                      <% if (order.status === 'Cancelled' || order.status === 'Delivered') { %>
+                        <button disabled class="btn btn-primary" type="submit">Save</button>
+                      <% } else { %>
                         <button class="btn btn-primary" type="submit">Save</button>
+                      <% } %>
                     </div>
-                </form>
+                  </form>
+
             </div>
         </header>
 
@@ -93,9 +100,9 @@
                                 <td>
                                     <%=item.productId.productName%>
                                 </td>
-                                <td><%=item.productId.regularPrice%></td>
+                                <td><%=item.price%></td>
                                 <td><%= item.quantity%></td>
-                                <td class="text-end">&#x20B9;<%= item.productId.salesPrice * item.quantity%></td>
+                                <td class="text-end">&#x20B9;<%= item.price * item.quantity%></td>
                             </tr>
                         <% }) %>
                     </tbody>

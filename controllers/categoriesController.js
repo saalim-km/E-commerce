@@ -6,7 +6,7 @@ const getAllCategories = async (req, res) => {
     if(!req.session.admin){
       return res.redirect("/admin/login");
     }else{
-    const categories = await Category.find();
+    const categories = await Category.find().sort({createdAt : -1});
 
     if (categories.length === 0) {
       req.flash("info", "No categories found. Please add some categories.");

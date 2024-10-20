@@ -74,9 +74,8 @@ const loadHome = async (req, res) => {
     const userData = await userModel.findOne({email : req.session.user});
     if (req.session.user && userData.isBlocked==0) {
       const user = req.session.user;
-      console.log(user);
       const userData = await userModel.findOne({ email: user });
-      console.log("before loading the home page", userData);
+      console.log("before loading the home page", user);
       return res.render("home", { user: userData, products });
     } else {
       res.redirect("/user/login");
@@ -228,6 +227,8 @@ const userLogout = async (req, res) => {
     console.log(error);
   }
 };
+
+
 
   // forogt passwor controllers
 const forgotPass = async(req,res)=> {

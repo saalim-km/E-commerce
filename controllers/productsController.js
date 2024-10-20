@@ -1,5 +1,6 @@
 const productModel = require("../models/product");
 const categoryModel = require("../models/category");
+const cartModel = require('../models/cart');
 const path = require("path");
 const sharp = require("sharp");
 
@@ -102,7 +103,7 @@ const productList = async(req,res)=> {
       const page = req.query.page || 1;
 
       const category = await categoryModel.find({isListed:true});
-      const productData = await productModel.find().populate("category","name").skip((perpage * page) - perpage).limit(perpage);
+      const productData = await productModel.find().populate("category","name").skip((perpage * page) - perpage).limit(perpage).sort({createdAt : -1});
       const productCount = await productModel.countDocuments({$or : [{isListed : true} , {isListed : false}]});
       res.render("productList",{
         products : productData,
@@ -147,6 +148,7 @@ const loadEditPage = async(req,res)=> {
     const productData = await productModel.findById(productId).populate('category');
     const productCat = productData.category;
     const category = await categoryModel.find({isListed : true});
+    
     console.log(`the product's data${productData}`,`the product category${productCat}`);
     res.render("editProduct",{product : productData , category , productCat : productCat})
   } catch (error) {
@@ -154,12 +156,38 @@ const loadEditPage = async(req,res)=> {
   }
 }
 
+const updateCartsWithReducedStock = async (productId, updatedSizes) => {
+  // Find all carts with the affected product
+  const carts = await cartModel.find({ productId });
+
+  for (const cart of carts) {
+    let cartUpdated = false;
+
+    // Loop through the sizes in the cart
+    for (const cartItem of cart.sizes) {
+      const updatedSize = updatedSizes.find(size => size.size === cartItem.size);
+
+      if (updatedSize && updatedSize.stock < cartItem.quantity) {
+        // If the stock is less than what's in the cart, reduce the quantity
+        cartItem.quantity = updatedSize.stock;
+        cartUpdated = true;
+      }
+    }
+
+    // Save the cart if it was updated
+    if (cartUpdated) {
+      await cart.save();
+      console.log(`Cart for user ${cart.userId} updated due to stock change.`);
+    }
+  }
+};
+
 
 const editProduct = async (req, res) => {
   try {
-    console.log("request body : ",req.body);
+    console.log("request body : ", req.body);
     console.log(req.files);
-    
+
     const {
       productName,
       regularPrice,
@@ -168,12 +196,12 @@ const editProduct = async (req, res) => {
       category,
     } = req.body;
 
-    
-    const productSizes = [
-      { size: 'S', stock: req.body.s },
-      { size: 'M', stock: req.body.m },
-      { size: 'L', stock: req.body.l },
-      { size: 'XL', stock: req.body.xl },
+    // Collect the new sizes and stocks
+    const updatedSizes = [
+      { size: 'S', stock: parseInt(req.body.s) },
+      { size: 'M', stock: parseInt(req.body.m) },
+      { size: 'L', stock: parseInt(req.body.l) },
+      { size: 'XL', stock: parseInt(req.body.xl) },
     ];
 
     const productId = req.params.id;
@@ -193,11 +221,11 @@ const editProduct = async (req, res) => {
             "product-images",
             req.files[i].filename
           );
-          
+
           const sharpingImg = await sharp(originalImagePath)
             .resize({ width: 440, height: 440 })
             .toFile(resizedImagePath);
-          
+
           if (!sharpingImg) {
             req.flash("error", "Error while resizing the image. Please try again.");
             return res.redirect("/admin/product/edit/" + productId);
@@ -209,17 +237,37 @@ const editProduct = async (req, res) => {
 
       const categoryObj = await categoryModel.findOne({ name: category });
       const categoryId = categoryObj._id;
+
+      // Detect if any stock size is reduced
+      let stockReduced = false;
+      const oldSizes = productExists.sizes;
+      const sizesToUpdate = updatedSizes.map((newSize) => {
+        const oldSize = oldSizes.find(size => size.size === newSize.size);
+        if (oldSize && oldSize.stock > newSize.stock) {
+          stockReduced = true; // Mark if stock has reduced
+        }
+        return newSize;
+      });
+
       // Update the product with new values
       productExists.productName = productName;
       productExists.regularPrice = regularPrice;
       productExists.salesPrice = salesPrice;
       productExists.description = description;
       productExists.images = images;
-      productExists.category = categoryId; 
-      productExists.sizes = productSizes;
+      productExists.category = categoryId;
+      productExists.sizes = sizesToUpdate;
 
       const result = await productExists.save();
+
       console.log("Product updated in database", result);
+
+      // If stock is reduced, update the relevant carts
+      if (stockReduced) {
+        console.log('Stock reduced, updating cart quantities...');
+        await updateCartsWithReducedStock(productId, sizesToUpdate);
+      }
+
       req.flash("success", "Product updated successfully");
       res.redirect("/admin/products");
     } else {
@@ -232,6 +280,7 @@ const editProduct = async (req, res) => {
     res.redirect("/admin/products");
   }
 };
+
 
 const removeImage = async(req,res)=> {
   try {

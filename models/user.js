@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const address = require('../models/address');
 
 const userSchema = new mongoose.Schema({
     username : {
@@ -33,7 +34,8 @@ const userSchema = new mongoose.Schema({
     isBlocked : {
         type : Number,
         default : 0,
-    },    
+    },
+    addresses : [address.schema]
 },{timestamps : true});
 
 module.exports = mongoose.model('Users',userSchema);

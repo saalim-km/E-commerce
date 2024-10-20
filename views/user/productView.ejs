@@ -169,7 +169,7 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <!-- script for validation add to cart -->
-     <script>
+    <script>
         document.addEventListener("DOMContentLoaded",()=> {
             const categoryId = '<%= product.category._id %>';
             const productId = '<%= product._id %>';
@@ -253,7 +253,7 @@
                                 },1000);
                                 }else{
                                 Toastify({
-                                    text: `Stock out please try again`,
+                                    text: res.message,
                                     duration: 3000,
                                     gravity: "top",
                                     position: "right",

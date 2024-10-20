@@ -128,7 +128,8 @@
                      <div class="border row">
                         <div id="addedImagesContainer" class="thumbnails-container"></div>
                      </div>
-                     <div class="row">
+
+                    <div class="row">
                         <div class="card-body align-items-center" style="margin-bottom: 20px;">
                            <img src="" alt="" id="imgView1">
                            <input class="form-control" type="file" name="images" id="input1" accept="image/png, image/jpeg, image/jpg" onchange="viewImage1(event), viewImage(event, 1)">
@@ -138,8 +139,9 @@
                            <img src="" id="croppedImg1" alt="">
                            <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
                         </div>
-                     </div>
-                     <div class="row">
+                    </div>
+
+                    <div class="row">
                         <div class="card-body align-items-center" style="margin-bottom: 20px;">
                            <img src="" alt="" id="imgView2">
                            <input class="form-control" type="file" name="images" id="input2" accept="image/png, image/jpeg, image/jpg" onchange="viewImage2(event),viewImage(event, 2)">
@@ -148,8 +150,9 @@
                            <img src="" id="croppedImg2" alt="">
                            <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
                         </div>
-                     </div>
-                     <div class="row">
+                    </div>
+
+                    <div class="row">
                         <div class="card-body align-items-center" style="margin-bottom: 20px;">
                            <img src="" alt="" id="imgView3">
                            <input class="form-control" type="file" name="images" id="input3" accept="image/png, image/jpeg, image/jpg" onchange="viewImage3(event),viewImage(event, 3)">
@@ -158,8 +161,8 @@
                            <img src="" id="croppedImg3" alt="">
                            <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
                         </div>
-                     </div>
-                  </div>
+                    </div>
+                </div>
             </div>
             <div>
             <button class="btn btn-md rounded font-sm hover-up" type="submit">Publish</button>
@@ -316,13 +319,13 @@
     if (!/^[A-Za-z\s]+$/.test(description)) {
     displayErrorMessage('description-error', 'Description should only contain alphabets and spaces.');
     isValid = false;
-}
+    }
 
     // Validate regular price (non-negative, must be greater than zero)
     if (!/^\d+$/.test(price) || parseInt(price) < 500) {
     displayErrorMessage('regularPrice-error', 'Please enter a valid price of at least 500 (no decimals allowed).');
     isValid = false;
-}
+    }
 
    // Validate sale price (must be a whole number, at least 500, and not empty)
    if (!/^\d+$/.test(saleprice) || parseInt(saleprice) < 500) {
@@ -342,7 +345,7 @@
         displayErrorMessage('size_' + size + '-error', `Stock for size ${size.toUpperCase()} must be a valid number greater than zero.`);
         isValid = false;
     }
-}
+    }
 
     // Validate images (ensure 3 images are uploaded and they are of correct type)
     if (images.some(image => !validateImageType(image))) {

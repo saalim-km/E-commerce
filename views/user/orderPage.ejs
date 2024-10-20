@@ -65,7 +65,9 @@
     <div class="order-details">
         <h2>Order Confirmation</h2>
         <p><strong>Order Id:</strong> <%= order._id %></p>
-        <p><strong>Order Date:</strong> <%= new Date(order.createdAt).toString() %></p>
+        <p><strong>Order Date:</strong> 
+            <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+        </p>
 
         <!-- Display order summary -->
         <div class="order-summary">

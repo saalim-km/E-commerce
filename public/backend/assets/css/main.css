@@ -3953,7 +3953,7 @@ body.offcanvas-active {
 }
 
 .navbar-aside {
-  max-width: 300px;
+  max-width: 280px;
   display: block;
   position: fixed;
   top: 0;

@@ -37,10 +37,18 @@ router.post("/cart/updateQuantity",userSideController.updateCartQuantity);
 router.get("/checkout",userMiddleware.isLogin,userSideController.checkoutPage);
 router.post('/checkout',userSideController.checkout);
 router.get("/order/:id",userMiddleware.isLogin,userSideController.orderSuccess);
+router.post('/online_order',userSideController.onlineOrder);
+router.post('/verify_order',userSideController.verifyOrder);
 
 
 // orders
 router.get("/orders",userMiddleware.isLogin,userSideController.ordersPage);
 router.get("/ordersDetails/:id",userMiddleware.isLogin,userSideController.viewOrder);
-router.put("/cancel_order",userSideController.cancelOrder)
+router.put("/cancel_order",userSideController.cancelOrder);
+router.put('/return_order',userSideController.returnOrder);
+
+
+// cancel and order individual items
+router.put('/order_cancel' , userSideController.cancelItem);
+router.put('/order_return' , userSideController.returnItem);
 module.exports = router;

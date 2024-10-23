@@ -62,13 +62,6 @@
                   <div class="row">
                      <div class="col-lg-4">
                         <div class="mb-4">
-                           <label class="form-label">Regular price</label>
-                           <input maxlength="4" placeholder="$" name="regularPrice" type="text" class="form-control border">
-                           <div id="regularPrice-error" class="error-message"></div>
-                        </div>
-                     </div>
-                     <div class="col-lg-4">
-                        <div class="mb-4">
                            <label class="form-label">Sale price</label>
                            <input maxlength="4" placeholder="$" name="salesPrice" type="text" class="form-control border">
                         </div>
@@ -292,9 +285,9 @@
     
     const name = document.getElementsByName('productName')[0].value.trim();
     const description = document.getElementById('descriptionid').value.trim();
-    const price = document.getElementsByName('regularPrice')[0].value.trim();
     const saleprice = document.getElementsByName('salesPrice')[0].value.trim();
     const category = document.getElementsByName('category')[0].value.trim();
+    
     const sizes = {
         s: document.getElementById('size_s').value.trim(),
         m: document.getElementById('size_m').value.trim(),
@@ -321,23 +314,12 @@
     isValid = false;
     }
 
-    // Validate regular price (non-negative, must be greater than zero)
-    if (!/^\d+$/.test(price) || parseInt(price) < 500) {
-    displayErrorMessage('regularPrice-error', 'Please enter a valid price of at least 500 (no decimals allowed).');
-    isValid = false;
-    }
-
    // Validate sale price (must be a whole number, at least 500, and not empty)
    if (!/^\d+$/.test(saleprice) || parseInt(saleprice) < 500) {
       displayErrorMessage('salePrice-error', 'Please enter a valid sale price of at least 500 (no decimals allowed).');
       isValid = false;
    }
 
-    // Ensure regular price is greater than sale price
-    if (parseFloat(price) <= parseFloat(saleprice)) {
-        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-        isValid = false;
-    }
 
     for (let size in sizes) {
     // Ensure stock for sizes contains only numbers and is greater than zero

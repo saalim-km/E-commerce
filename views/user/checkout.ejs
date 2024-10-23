@@ -70,10 +70,10 @@
     </style>
 </head>
 <body class="page-template belle">
-<form id="checkoutForm" action="/user/checkout" method="POST" onsubmit="return validateForm()">
+<form id="checkoutForm" action="/user/checkout" method="POST" >
 <div class="pageWrapper">
 
-    <%- include('partials/header'); %>
+    <%- include('../auth/partials/header'); %>
 
     <!-- Checkout Section -->
     <div class="checkout-container">
@@ -113,20 +113,23 @@
                                 <p><strong><%= item.productId.productName %></strong></p>
                                 <p>Size: <%= item.sizes[0].size %></p>
                                 <p>Quantity: <%= item.sizes[0].quantity %></p>
-                                <p>Price: ₹<%= item.productId.salesPrice %></p>
-                                <p>SubTotal: ₹<%= item.productId.salesPrice * item.sizes[0].quantity %></p>
+                                <p>Price: ₹<%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice%></p>
+                                <p>SubTotal: ₹<%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount * item.sizes[0].quantity : item.productId.salesPrice * item.sizes[0].quantity%></p>
                             </div>
                         </div>
                     <% }); %>
                 </div>
-                <p><strong>Total:</strong> ₹<%= cart.reduce((total, item) => total + (item.productId.regularPrice * item.sizes[0].quantity), 0) %></p>
+                <p><strong>Total:</strong> ₹<%= cart.reduce((total, item) => {
+                    const itemPrice = item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice;
+                    return total + (itemPrice * item.sizes[0].quantity);
+                }, 0) %></p>
 
                 <!-- Hidden Input for Cart Items -->
                 <% cart.forEach(function(item, index) { %>
                     <input type="hidden" name="cartItems[<%= index %>][productId]" value="<%= item.productId._id %>">
                     <input type="hidden" name="cartItems[<%= index %>][quantity]" value="<%= item.sizes[0].quantity %>">
                     <input type="hidden" name="cartItems[<%= index %>][size]" value="<%= item.sizes[0].size %>">
-                    <input type="hidden" name="cartItems[<%= index %>][price]" value="<%= item.productId.salesPrice%>">
+                    <input type="hidden" name="cartItems[<%= index %>][price]" value="<%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice%>">
                 <% }); %>
 
                 <!-- Coupon Input -->
@@ -142,8 +145,8 @@
                         <label class="form-check-label" for="cod">Cash on Delivery</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="stripe" value="Stripe">
-                        <label class="form-check-label" for="stripe">Stripe</label>
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="Razorpay" value="Razorpay">
+                        <label class="form-check-label" for="Razorpay">Razorpay</label>
                     </div>
                 </div>
 
@@ -155,9 +158,17 @@
 </div>
 </form>
 
-<!-- toasktify -->
+<!-- sweet alert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- toastify -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
+<!-- j query -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- razorpay -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -167,7 +178,6 @@
             const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
             const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
 
-            // Validate if an address is selected
             if (!selectedAddress) {
                 event.preventDefault();
                 Toastify({
@@ -175,12 +185,12 @@
                     duration: 3000,
                     gravity: "top",
                     position: "center",
-                    backgroundColor: "red",
+                    backgroundColor : "#f44336",
+                    close : true,
                 }).showToast();
                 return;
             }
 
-            // Validate if a payment method is selected
             if (!selectedPaymentMethod) {
                 event.preventDefault();
                 Toastify({
@@ -188,9 +198,72 @@
                     duration: 3000,
                     gravity: "top",
                     position: "center",
-                    backgroundColor: "red",
+                    backgroundColor : "#f44336",
+                    close : true,
                 }).showToast();
                 return;
+            }
+
+            if (selectedPaymentMethod.value === "Razorpay") {
+                event.preventDefault();  
+
+                var formData = $(checkoutForm).serialize(); 
+                console.log(formData);
+                
+                $.ajax({
+                    url: "/user/online_order",
+                    type: "POST",
+                    data: JSON.stringify({
+                        formData,
+                    }),
+                    success: function(res) {
+                        if (res.success) {
+                            var options = {
+                                "key": ""+res.key_id+"",
+                                "amount": ""+res.amount+"",
+                                "currency": "INR",
+                                "handler": function (response) {
+                                   $.ajax({
+                                        url : "/user/verify_order",
+                                        type : 'POST',
+                                        data : JSON.stringify({
+                                            formData,
+                                        }),
+                                        success : function (res) {
+                                            if(res.success){
+                                                window.location.href = "/home";
+                                            }else {
+                                                Toastify({
+                                                    text: "something went wrong please try again later",
+                                                    duration: 3000,
+                                                    gravity: "top",
+                                                    position: "center",
+                                                    backgroundColor: "red",
+                                                }).showToast();
+                                            }
+                                        }
+                                   })
+                                }
+                                };
+                            var razorpayObject = new Razorpay(options);
+                            razorpayObject.on('payment.failed', function (response) {
+                                Swal.fire({
+                                title: "Payment Failed",
+                                icon: "error",
+                                confirmButtonColor: "#3085d6",
+                                confirmButtonText: "Go to cart"
+                            }).then((result)=> {
+                                if(result.isConfirmed){
+                                    window.location.href = "/user/cart"
+                                }
+                            })
+                            });
+                            razorpayObject.open();
+                        } else {
+                            alert(res.msg);
+                        }
+                    }
+                });
             }
         });
     });

@@ -66,6 +66,14 @@ router.get("/orders",adminMiddleware.isAdmin,orderController.loadOrders);
 router.get("/orders/:id",adminMiddleware.isAdmin,orderController.loadOtderDetails);
 router.post("/orders/update/:id",orderController.updateOrder);
 
+
+// offer 
+router.get("/add_offer",adminMiddleware.isAdmin,productController.addOfferPage);
+router.post("/add_offer/:id",productController.addOffer)
+
+// avtivate && de_activate offer
+router.post("/deactivate_offer/:id",productController.deactivate_offer);
+router.post("/activate_offer/:id",productController.activate_offer)
 module.exports = router;
 
 

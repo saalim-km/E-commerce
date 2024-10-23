@@ -6,7 +6,15 @@ const categoryModel = require("../models/address");
 const cartModel = require("../models/cart");
 const orderModel = require("../models/order");
 const product = require("../models/product");
+const Razorpay = require('razorpay'); 
 const { ObjectId } = require("mongoose").Types;
+
+// Razor pay configuration
+const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = process.env;
+const razorpayInstance = new Razorpay({
+    key_id: RAZORPAY_ID_KEY,
+    key_secret: RAZORPAY_SECRET_KEY
+});
 
 const productView = async(req,res)=> {
     try {
@@ -154,7 +162,7 @@ const addAddress = async(req,res)=> {
                 house : house,
             }
 
-            user.addresses.push(newAddress)
+            user.addresses.push(newAddress);
             const userData = await user.save();
             const latestAddress = userData.addresses[userData.addresses.length-1];
             if(userData) {
@@ -270,6 +278,7 @@ const updateEditAdd = async (req, res) => {
 
 
 
+
 // cart 
 const addCart = async(req, res) => {
     try {
@@ -379,7 +388,7 @@ const loadCart = async (req, res) => {
             .find({ userId: userDetails._id })
             .populate({
                 path: 'productId',
-                select: 'productName salesPrice images sizes', // Select necessary fields
+                select: 'productName salesPrice images sizes salesPriceAfterDiscount offerStatus productOffer', 
             })
             .populate('categoryId');
 
@@ -442,6 +451,8 @@ const checkout = async(req,res)=> {
         const {selectedAddress,cartItems,couponCode,paymentMethod} = req.body;
         console.log(selectedAddress)
         const addressId = new ObjectId(selectedAddress);
+
+        // selecting Address
         const address = await userModel.aggregate([
             {
                 "$unwind" : "$addresses"
@@ -455,10 +466,11 @@ const checkout = async(req,res)=> {
         console.log(cartItems);
         let totalPrice = 0;
 
+        // Total Amount
         for(const item of cartItems){
             const itemProductId = item.productId;
             const product = await productModel.findById(itemProductId);
-            const itemTotal = product.salesPrice * item.quantity;
+            const itemTotal = product.salesPriceAfterDiscount ? product.salesPriceAfterDiscount * item.quantity : product.salesPrice * item.quantity;
             totalPrice += itemTotal;
         }
         const order = new orderModel({
@@ -470,6 +482,7 @@ const checkout = async(req,res)=> {
         });
         const orderDetails = await order.save();
 
+        // Decreasing the quantity from stock 
         for(let product of cartItems){
             console.log(product);
             const productId = product.productId;
@@ -531,6 +544,118 @@ const updateCartQuantity = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error." });
     }
 };
+
+
+// online order
+const onlineOrder = async(req,res)=> {
+    try {
+        console.log(req.body)
+        const userData = await userModel.findOne({email : req.session.user});
+        console.log(userData)
+        const {selectedAddress,cartItems,couponCode,paymentMethod} = req.body;
+        const addressId = new ObjectId(selectedAddress);
+        const address = await userModel.aggregate([
+            {
+                "$unwind" : "$addresses"
+            },
+            {
+                "$match" : {
+                    "addresses._id" : addressId
+                }
+            }
+        ]);
+
+        let totalPrice = 0;
+
+        for(const item of cartItems){
+            const itemProductId = item.productId;
+            const product = await productModel.findById(itemProductId);
+            const itemTotal = product.salesPriceAfterDiscount ? product.salesPriceAfterDiscount * item.quantity : product.salesPrice * item.quantity;
+            totalPrice += itemTotal;
+        }
+
+        const amount = totalPrice * 100;
+
+        const options = {
+            amount: amount,
+            currency: 'INR',
+            receipt: 'razorUser@gmail.com'
+        }
+
+        razorpayInstance.orders.create(options, 
+            (err, order)=>{
+                if(!err){
+                    res.status(200).send({
+                        success:true,
+                        msg:'Order Created',
+                        amount:amount,
+                        key_id:RAZORPAY_ID_KEY,
+                    });
+                }
+                else{
+                    res.status(400).send({success:false,msg:'Something went wrong!'});
+                }
+            }
+        );
+
+    } catch (error) {
+        console.log("error while creating online order",error.message);
+    }
+}
+// after payment successfull
+const verifyOrder = async(req,res)=> {
+    try {
+        const userData = await userModel.findOne({email : req.session.user});
+        console.log(userData)
+        const {selectedAddress,cartItems,couponCode,paymentMethod} = req.body;
+        const addressId = new ObjectId(selectedAddress);
+        const address = await userModel.aggregate([
+            {
+                "$unwind" : "$addresses"
+            },
+            {
+                "$match" : {
+                    "addresses._id" : addressId
+                }
+            }
+        ]);
+
+        let totalPrice = 0;
+
+        for(const item of cartItems){
+            const itemProductId = item.productId;
+            const product = await productModel.findById(itemProductId);
+            const itemTotal = product.salesPrice * item.quantity;
+            totalPrice += itemTotal;
+        }
+
+        // creating order and saving database
+        const order = new orderModel({
+            userId : userData._id,
+            products : cartItems,
+            shippingAddress : address[0].addresses,
+            paymentMethod : 'Razorpay',
+            totalAmount : totalPrice,
+        });
+        const orderDetails = await order.save();
+
+        for(let product of cartItems){
+            console.log(product);
+            const productId = product.productId;
+            const updateProduct = await productModel.updateOne({_id:productId ,'sizes.size' : product.size},{$inc : {'sizes.$.stock' : -product.quantity}});
+        }
+
+        const cartDelete = await cartModel.deleteMany({userId : userData._id});
+        console.log(cartDelete);
+        if(orderDetails && cartDelete){
+            res.json({success : true})
+        }else {
+            res.json({success : false});
+        }
+    } catch (error) {
+        console.log("error while creating order",error.message);
+    }
+}
 
 
 // orders
@@ -599,6 +724,129 @@ const cancelOrder = async(req,res)=> {
     }
 }
 
+// return order
+const returnOrder = async(req,res)=> {
+    try {
+        const {id} = req.body;
+        console.log(id);
+        const order = await orderModel.findById(id); 
+        const orderUpdate = await orderModel.findByIdAndUpdate(id,{$set : {status : 'Returned'}});
+        console.log(orderUpdate)
+
+        if(orderUpdate) {
+            for(const product of order.products){
+                const productId = product.productId;
+                const size = product.size;
+                const quantity = product.quantity;
+
+                await productModel.updateOne(
+                    {
+                        _id : productId,
+                        'sizes.size' : size
+                    },
+                    {
+                        $inc : {'sizes.$.stock' : quantity}
+                    }
+                );
+            }
+
+            res.json({success : true});
+        }else {
+            res.json({success : false});   
+        }
+    } catch (error) {
+        console.log("error wile returnin order",error.message);
+    }
+}
+
+
+
+// cancel and reutrn for individual items
+const cancelItem = async(req,res)=> {
+    try {
+        const  {itemId , id} = req.body;
+        const item = new ObjectId(itemId)
+        const cancelItem = await orderModel.aggregate([
+            {
+                "$unwind" : "$products"
+            },
+            {
+                "$match" : {
+                    "products._id" : item
+                }
+            }
+        ]);
+        const productUpdata = await productModel.updateOne(
+            {
+                _id : cancelItem[0].products.productId,
+                "sizes.size" : cancelItem[0].products.size
+            },
+            {
+                $inc : {'sizes.$.stock' : cancelItem[0].products.quantity}
+            }
+        );
+        console.log(productUpdata);
+        const orderUpdata = await orderModel.updateOne(
+            {
+                _id : id
+            },
+            {
+                $pull : {products : {_id : item}}
+            }
+        );
+        console.log(orderUpdata);
+        if(orderUpdata) {
+            res.status(200).json({success : true});
+        }else {
+            res.status(500).json({success : false});
+        }
+    } catch (error) {
+        console.log("error while canceling item ",error.message);
+    }
+}
+const returnItem = async(req,res)=> {
+    try {
+        const  {itemId , id} = req.body;
+        const item = new ObjectId(itemId)
+        const cancelItem = await orderModel.aggregate([
+            {
+                "$unwind" : "$products"
+            },
+            {
+                "$match" : {
+                    "products._id" : item
+                }
+            }
+        ]);
+        const productUpdata = await productModel.updateOne(
+            {
+                _id : cancelItem[0].products.productId,
+                "sizes.size" : cancelItem[0].products.size
+            },
+            {
+                $inc : {'sizes.$.stock' : cancelItem[0].products.quantity}
+            }
+        );
+        console.log(productUpdata);
+        const orderUpdata = await orderModel.updateOne(
+            {
+                _id : id
+            },
+            {
+                $pull : {products : {_id : item}}
+            }
+        );
+        console.log(orderUpdata);
+        if(orderUpdata) {
+            res.status(200).json({success : true});
+        }else {
+            res.status(500).json({success : false});
+        }
+    } catch (error) {
+        console.log("error while returning item ",error.message);
+        res.status(500).json({success : false});
+    }
+}
 module.exports = {
     productView,
     shopList,
@@ -620,5 +868,10 @@ module.exports = {
     viewOrder,
     cancelOrder,
     editAddPage,
-    updateEditAdd
+    updateEditAdd,
+    cancelItem,
+    returnOrder,
+    returnItem,
+    onlineOrder,
+    verifyOrder
 }

@@ -67,41 +67,34 @@ const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description } = req.body;
-    console.log(name,description);
 
     const categoryData = await Category.findById(id);
-    const existingCat = await Category.findOne({name});
-    
-      if(categoryData.name==name && categoryData.description!==description){
-        const categoryUpdate = await Category.findByIdAndUpdate(id,{
-          description : description,
-        })
-        req.flash("success","category updated description");
-        return res.redirect("/admin/categories");
-      }
-      if(categoryData.name!==name && categoryData.description==description){
-        const categoryUpdate = await Category.findByIdAndUpdate(id,{
-          name : name,
-        })
-        req.flash("success","category updated name");
-        return res.redirect("/admin/categories");
-      }
-      
-      if(categoryData.name!==name && categoryData.description!==description){
-        const categoryUpdate = await Category.findByIdAndUpdate(id,{
-          name : name,
-          description : description,
-        })
-        req.flash("success","category updated description and name");
-        return res.redirect("/admin/categories");
-      }
+    if (!categoryData) {
+      req.flash("error", "Category not found");
+      return res.redirect("/admin/categories");
+    }
+
+    const existingCat = await Category.findOne({ name, _id: { $ne: id } });
+    if (existingCat) {
+      req.flash("error", "Category name already exists");
+      return res.redirect("/admin/categories");
+    }
+
+    const update = {
+      name : name,
+      description : description,
+    };
+
+      await Category.findByIdAndUpdate(id, update);
+      req.flash("success", "Category updated successfully");
+
+    res.redirect("/admin/categories");
   } catch (error) {
     console.error(error.message);
     req.flash("error", "Could not update category");
     res.redirect("/admin/categories");
   }
 };
-
 
 const toggleCategoryStatus = async (req, res) => {
   const { id } = req.params;

@@ -4,6 +4,7 @@ const cartModel = require('../models/cart');
 const path = require("path");
 const sharp = require("sharp");
 
+
 const loadAddProduct = async (req, res) => {
   try {
     if (!req.session.admin) {
@@ -24,7 +25,7 @@ const addProduct = async (req, res) => {
     console.log(req.files);
     const {
       productName,
-      regularPrice,
+      product_offer,
       salesPrice,
       description,
       category,
@@ -73,7 +74,7 @@ const addProduct = async (req, res) => {
 
       const newProduct = new productModel({
         productName,
-        regularPrice,
+        product_offer,
         salesPrice,
         description,
         images: images,
@@ -92,6 +93,8 @@ const addProduct = async (req, res) => {
     console.log("error while adding products", error.message);
   }
 };
+
+
 
 // products list
 const productList = async(req,res)=> {
@@ -141,6 +144,8 @@ const listProduct = async(req,res)=> {
   }
 }
 
+
+
 // loading edit page
 const loadEditPage = async(req,res)=> {
   try {
@@ -182,7 +187,6 @@ const updateCartsWithReducedStock = async (productId, updatedSizes) => {
   }
 };
 
-
 const editProduct = async (req, res) => {
   try {
     console.log("request body : ", req.body);
@@ -190,7 +194,7 @@ const editProduct = async (req, res) => {
 
     const {
       productName,
-      regularPrice,
+      product_offer,
       salesPrice,
       description,
       category,
@@ -251,7 +255,7 @@ const editProduct = async (req, res) => {
 
       // Update the product with new values
       productExists.productName = productName;
-      productExists.regularPrice = regularPrice;
+      productExists.product_offer = product_offer;
       productExists.salesPrice = salesPrice;
       productExists.description = description;
       productExists.images = images;
@@ -281,7 +285,6 @@ const editProduct = async (req, res) => {
   }
 };
 
-
 const removeImage = async(req,res)=> {
   try {
     console.log(req.body);
@@ -298,6 +301,139 @@ const removeImage = async(req,res)=> {
     res.status(500).json({success : false , message : "error removing image",error});
   }
 }
+
+
+// Product offer 
+const addOfferPage = async(req,res)=> {
+  try {
+    const products = await productModel.find();
+    res.render('addOffer',{products : products});
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+const addOffer = async(req,res)=> {
+  try {
+    console.log(req.body)
+    const {id} = req.params;
+
+    const  {offerPercentage , expiryDate} =  req.body;
+
+    // product data
+    const productData = await productModel.findById(id);
+    // discount percentage %
+    const offerDisconutPercentage = parseInt(offerPercentage);
+    // getting product sales price
+    const salesPrice = productData.salesPrice;
+    // calculating salesPriceAferDiscount
+    const salesPriceAfterDiscount = Math.trunc(salesPrice - (salesPrice / 100 * offerDisconutPercentage));
+
+
+    const newOffer = {
+      discountPercentage : offerDisconutPercentage,
+      offerStartDate : new Date().toISOString(),
+      offerExpiryDate : expiryDate,
+    }
+
+    if(productData.productOffer.length >= 1){
+      const existingOfferId = productData.productOffer[0]._id;
+      const offerUpdate = await productModel.updateOne(
+        {
+          _id : id,
+          "productOffer._id" : existingOfferId,
+        },
+        {
+          $set : {
+            "productOffer.$.discountPercentage" : offerDisconutPercentage,
+            "productOffer.$.offerStartDate" : new Date().toISOString(),
+            "productOffer.$.offerExpiryDate" : expiryDate,
+          }
+        }
+      );
+
+      const productUpdate = await productModel.findByIdAndUpdate(id,{$set : {salesPriceAfterDiscount : salesPriceAfterDiscount}});
+      if(offerUpdate){
+        req.flash("success" , "Offer Updated");
+        return res.redirect("/admin/add_offer");
+      }
+    }
+
+
+    // saving the salesPriceAfterDiscount and offer object
+    const productUpdate = await productModel.findByIdAndUpdate(id,{$set : {salesPriceAfterDiscount : salesPriceAfterDiscount}});
+    productData.productOffer.push(newOffer);
+    const result = await productData.save();
+
+    console.log(result);
+
+    if(result){
+      req.flash("success","Offer added successfully")
+      res.redirect("/admin/add_offer");
+    }else {
+      req.flash("error","Offer already exists on this product");
+    }
+
+  } catch (error) {
+    req.flash("error","error while adding offer");
+    console.log(error.message)
+    return res.redirect("/admin/add_offer");
+  }
+}
+
+
+// activate && de_activate offer
+const deactivate_offer = async(req,res)=> {
+  try {
+    const {id} = req.params;
+    const product = await productModel.findById(id);
+    const offerId = product.productOffer[0]._id;
+    const result = await productModel.updateOne(
+      {
+        _id : id,
+        "productOffer._id" : offerId
+      },
+      {
+        $set : {
+          "productOffer.$.offerStatus" : false,
+        }
+      }
+    )
+    console.log(result);
+    req.flash("success","Offer De-Activated");
+    return res.redirect("/admin/add_offer");
+  } catch (error) {
+    req.flash("error" , "an error occured please try again later");
+    res.redirect("/admin/add_offer");
+    console.log(error.message);
+  }
+}
+
+const activate_offer = async(req,res)=> {
+  try {
+    const {id} = req.params;
+    const product = await productModel.findById(id);
+    const offerId = product.productOffer[0]._id;
+    const result = await productModel.updateOne(
+      {
+        _id : id,
+        "productOffer._id" : offerId
+      },
+      {
+        $set : {
+          "productOffer.$.offerStatus" : true,
+        }
+      }
+    )
+    console.log(result);
+    req.flash("success","Offer Activated");
+    return res.redirect("/admin/add_offer");
+  } catch (error) {
+    req.flash("error" , "an error occured please try again later");
+    res.redirect("/admin/add_offer");
+    console.log(error.message);
+  }
+}
 module.exports = {
   loadAddProduct,
   addProduct,
@@ -306,5 +442,9 @@ module.exports = {
   listProduct,
   loadEditPage,
   editProduct,
-  removeImage
+  removeImage,
+  addOfferPage,
+  addOffer,
+  deactivate_offer,
+  activate_offer,
 };

@@ -52,7 +52,8 @@
 
         .product-price {
             font-size: 1.5rem;
-            color: #28a745;
+            color: black;
+            font-weight: 500;
         }
 
         .product-price del {
@@ -79,6 +80,11 @@
             .carousel-item img {
                 height: 300px;
             }
+        }
+        .discount {
+            color: green;
+            font-size: 1.4em;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -126,7 +132,11 @@
             <div class="col-lg-6 col-md-6 col-sm-12 product-info">
                 <h3><%= product.productName %></h3>
                 <p class="text-muted">Category: <%= product.category.name %></p>
-                <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPrice %></span></p>
+                <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
+                    <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPriceAfterDiscount %></span> <del class="mr-3">₹<%= product.salesPrice %></del>  <span class="discount">%<%= product.productOffer[0].discountPercentage %>  off</span></p>
+                <% } else {%>
+                    <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPrice %></span></p>
+                <% } %>     
                 <p><strong>Description:</strong> <%= product.description %></p>
 
                 <!-- Sizes Selection with Stock -->

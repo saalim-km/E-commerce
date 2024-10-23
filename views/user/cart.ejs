@@ -62,7 +62,7 @@
                         </div>
                         <!-- Product Price -->
                         <div class="price">
-                            ₹<span class="product-price"><%= item.productId.salesPrice %></span>
+                            ₹<span class="product-price"><%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice %></span>
                         </div>
 
                         <!-- Quantity -->
@@ -74,7 +74,11 @@
 
                         <!-- Subtotal for this item -->
                         <div class="subtotal">
-                            ₹<span class="item-subtotal"><%= item.productId.salesPrice * item.sizes[0].quantity %></span>
+                            <% if (item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus) { %>
+                                ₹<span class="item-subtotal"><%= item.productId.salesPriceAfterDiscount * item.sizes[0].quantity %></span>  
+                            <% } else {%>
+                                ₹<span class="item-subtotal"><%= item.productId.salesPrice * item.sizes[0].quantity %></span>  
+                            <% } %>
                         </div>
 
                         <!-- Delete button -->
@@ -89,8 +93,12 @@
             <div class="cart-totals">
                 <h4>Cart Totals</h4>
                 <p>Total: ₹<span id="cart-total">
-                    <%= cart.reduce((total, item) => total + (item.productId.salesPrice* item.sizes[0].quantity), 0).toFixed(2) %>
+                    <%= cart.reduce((total, item) => {
+                        const itemPrice = item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice;
+                        return total + (itemPrice * item.sizes[0].quantity);
+                    }, 0) %>
                 </span></p>
+            
                 <% if (cart.length === 0) { %>
                     <h1>No items in cart to checkout.</h1>
                 <% } else { %>
@@ -99,6 +107,7 @@
                     </a>
                 <% } %>
             </div>
+
         </div>
 </div>
 

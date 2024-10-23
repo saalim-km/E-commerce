@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
 const category = require('./category');
+const offer = require('./offerModel');
 
 const productSchema = new mongoose.Schema({
     productName : {
         type : String,
-        required : true,
-    },
-    regularPrice : {
-        type : Number,
         required : true,
     },
     salesPrice : {
@@ -36,6 +33,10 @@ const productSchema = new mongoose.Schema({
         required : true,
         default : "Available",
     },
+    salesPriceAfterDiscount : {
+        type : Number,
+    },
+    productOffer : [offer.schema],
     sizes : [
         {
             size : {

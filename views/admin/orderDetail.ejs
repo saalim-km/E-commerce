@@ -19,20 +19,39 @@
                 <form action="/admin/orders/update/<%= order._id %>" method="post">
                     <div class="col-lg-6 col-md-6 ms-auto text-md-end">
                       <select name="status" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
-                        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %> >Pending</option>
-                        <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %> >Processing</option>
-                        <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %> >Shipped</option>
-                        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %> >Delivered</option>
-                        <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %> >Cancelled</option>
+                        <!-- Only show options that are valid for forward progression -->
+                        <% if (order.status === 'Pending') { %>
+                          <option value="Pending" selected>Pending</option>
+                          <option value="Processing">Processing</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Cancelled">Cancelled</option>
+                        <% } else if (order.status === 'Processing') { %>
+                          <option value="Processing" selected>Processing</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Cancelled">Cancelled</option>
+                        <% } else if (order.status === 'Shipped') { %>
+                          <option value="Shipped" selected>Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Cancelled">Cancelled</option>
+                        <% } else if (order.status === 'Delivered') { %>
+                          <option value="Delivered" selected>Delivered</option>
+                        <% } else if (order.status === 'Cancelled') { %>
+                          <option value="Cancelled" selected>Cancelled</option>
+                        <% } else if (order.status === 'Returned') { %>
+                          <option value="Returned" selected>Returned</option>
+                        <% } %>
                       </select>
                   
+                      <!-- Disable the Save button for Cancelled and Delivered orders -->
                       <% if (order.status === 'Cancelled' || order.status === 'Delivered') { %>
                         <button disabled class="btn btn-primary" type="submit">Save</button>
                       <% } else { %>
                         <button class="btn btn-primary" type="submit">Save</button>
                       <% } %>
                     </div>
-                  </form>
+                  </form>                  
 
             </div>
         </header>

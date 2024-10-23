@@ -50,18 +50,18 @@
                 <p><strong>Order Date:</strong> 
                     <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
                 </p>
-                <p><strong>Delivered Date:</strong> <%= order.deliveredDate ? order.deliveredDate.toDateString() : 'Not Dellivered' %></p>
                 <p><strong>Status:</strong>
                     <span class=" badge rounded-pill 
                         <%= order.status === 'Pending' ? 'alert-warning' : 
                             order.status === 'Shipped' ? 'alert-success' : 
                             order.status === 'Delivered' ? 'alert-success' : 
                             order.status === 'Processing' ? 'alert-processing' : 
+                            order.status === 'Returned' ? 'alert-success' : 
                             'alert-danger' %>">
                         <%= order.status%>
                     </span>
                 </p>
-                <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                <p><strong>Payment Method</strong> <%= order.paymentMethod %></p>
             </div>
             <div class="col-md-6">
                     <h5>Delivery Address</h5>
@@ -74,13 +74,20 @@
 
         <div class="row mt-4 text-end">
             <div class="col-md-12">
-                <button class="btn invoice-btn">Download Invoice</button>
-                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
-                    <button class="btn cancel-btn" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                <button class="btn invoice-btn btn-dark">Download Invoice</button>
+        
+                <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== "Returned") { %>
+                    <!-- Show general cancel button if only one item and order not cancelled/delivered -->
+                    <button class="btn cancel-btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                <% } %>
+        
+                <% if (order.status === 'Delivered') { %>
+                    <!-- Show general return button if the order is delivered -->
+                    <button class="btn return-btn btn-success" onclick="returnOrder('<%= order._id %>')">Return Order</button>
                 <% } %>
             </div>
         </div>
-
+        
         <div class="items mt-4">
             <h5>Items Ordered</h5>
             <table class="table text-start">
@@ -91,16 +98,28 @@
                         <th>Unit Price</th>
                         <th>Quantity</th>
                         <th>Subtotal</th>
+                        <% if (products.length > 1 && order.status !== 'Cancelled' && order.status !== 'Returned') { %>
+                        <th>Action</th> <!-- Added Action column for cancel/return -->
+                        <% } %>
                     </tr>
                 </thead>
                 <tbody>
                     <% products.forEach(item => { %>
                         <tr>
-                            <td><img class="product-img" src="/uploads/product-images/<%= item.productId.images[0]%>" alt=""></td>
+                            <td><img class="product-img" src="/uploads/product-images/<%= item.productId.images[0] %>" alt=""></td>
                             <td><%= item.productId.productName %>  (<%= item.size %>)</td>
-                            <td>&#x20B9; <%= item.price%></td>
+                            <td>&#x20B9; <%= item.price %></td>
                             <td><%= item.quantity %></td>
                             <td>&#x20B9; <%= item.quantity * item.price %></td>
+                            <td>
+                                <% if (products.length > 1 && order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned') { %> 
+                                        <button class="btn cancel-btn" onclick="cancelItemOne('<%= order._id %>','<%= item._id %>','<%= item.productId.productName%>')">Cancel</button>
+                                <% } %>
+        
+                                <% if (products.length > 1 && order.status === 'Delivered') { %> 
+                                        <button class="btn return-btn btn-success" onclick="returnItemOne('<%= order._id %>','<%= item._id %>','<%= item.productId.productName%>')">Return</button>
+                                <% } %>
+                            </td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -108,7 +127,6 @@
             <div class="text-end">
                 <h5>Total: &#x20B9; <%= order.totalAmount %></h5>
             </div>
-        </div>
     </div>
 
     <!-- toastify -->
@@ -134,7 +152,17 @@
                         contentType : "application/json",
                         success : function(res){
                             if(res.success){
-                                location.reload();
+                                Swal.fire({
+                                title: "Order Cancelled",
+                                text : `Order Id : #${orderId}`,
+                                icon: "success",
+                                confirmButtonColor: "#3085d6",
+                                confirmButtonText: "ok"
+                            }).then((result)=> {
+                                if(result.isConfirmed){
+                                    location.reload();
+                                }
+                            })
                             }else{
                                 Toastify({
                                     text: "order doesn't exists.",
@@ -149,7 +177,157 @@
                 }
             })
         }
+
+        function returnOrder(orderId){
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Return Order"
+            }).then((result)=> {
+                if(result.isConfirmed){
+                    $.ajax({
+                        url : "/user/return_order",
+                        type : 'PUT',
+                        data : JSON.stringify({
+                            id : orderId,
+                        }),
+                        contentType : "application/json",
+                        success : function(res){
+                            if(res.success){
+                                Swal.fire({
+                                title: "Item Returned",
+                                text : `Order Id : #${orderId}`,
+                                icon: "success",
+                                confirmButtonColor: "#3085d6",
+                                confirmButtonText: "ok"
+                            }).then((result)=> {
+                                if(result.isConfirmed){
+                                    location.reload();
+                                }
+                            })
+                            }else{
+                                Toastify({
+                                    text: "order doesn't exists.",
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "red",
+                                }).showToast();
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+        function cancelItemOne(orderId , itemId , productName){
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "cancel item"
+            }).then((result)=> {
+                if(result.isConfirmed){
+                    $.ajax({
+                        url : "/user/order_cancel",
+                        type : 'PUT',
+                        data : JSON.stringify({
+                            id : orderId,
+                            itemId : itemId,
+                        }),
+                        contentType : "application/json",
+                        success : function(res){
+                            if(res.success){
+                                Swal.fire({
+                                title: "Item Cancelled",
+                                text : `Product : ${productName}`,
+                                icon: "success",
+                                confirmButtonColor: "#3085d6",
+                                confirmButtonText: "ok"
+                            }).then((result)=> {
+                                if(result.isConfirmed){
+                                    location.reload();
+                                }
+                            })
+                            }else{
+                                Toastify({
+                                    text: "order doesn't exists.",
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "red",
+                                }).showToast();
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+        function returnItemOne(orderId , itemId,productName) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Return item"
+            }).then((result)=> {
+                if(result.isConfirmed){
+                    $.ajax({
+                        url : "/user/order_cancel",
+                        type : 'PUT',
+                        data : JSON.stringify({
+                            id : orderId,
+                            itemId : itemId,
+                        }),
+                        contentType : "application/json",
+                        success : function(res){
+                            if(res.success){
+                                Swal.fire({
+                                title: "Item Returned",
+                                text : `Product : ${productName}`,
+                                icon: "success",
+                                confirmButtonColor: "#3085d6",
+                                confirmButtonText: "ok"
+                            }).then((result)=> {
+                                if(result.isConfirmed){
+                                    location.reload();
+                                }
+                            })
+                            }else{
+                                Toastify({
+                                    text: "order doesn't exists.",
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "red",
+                                }).showToast();
+                            }
+                        },error : function (res) {
+                            Toastify({
+                                text: "An error occured please try again later.",
+                                duration: 3000,
+                                gravity: "top",
+                                position: "center",
+                                backgroundColor: "red",
+                            }).showToast();
+                        }
+                    })
+                }
+            })
+        }
     </script>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

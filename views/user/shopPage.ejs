@@ -97,6 +97,10 @@
         .product-item:hover .add-to-cart-btn {
             bottom: 10px;
         }
+        .price {
+            color: black;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 
@@ -161,7 +165,11 @@
                 
                 <div>
                     <h5 class="product-name"><%= product.productName %></h5>
-                    <p class="price">₹<%= product.salesPrice %> <del>₹<%= product.regularPrice %></del></p>
+                    <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
+                        <p class="price" style="color: black;">₹<%= product.salesPriceAfterDiscount%> <del style="color: gray;">₹<%= product.salesPrice%></del>  <span style="color: green; font-weight: 600;"> %<%= product.productOffer[0].discountPercentage %></span></p>
+                    <% } else {%>
+                        <p class="price" style="color: black;">₹<%= product.salesPrice%></p>
+                    <% } %>
                     <p class="category">Category: <%= product.category.name %></p>
                     <a href="/user/products/<%= product._id %>" class="btn btn-primary mt-3">View Product</a>
                 </div>

@@ -1,0 +1,126 @@
+<%- include('../auth/partials/header.ejs') %>
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+  }
+  .wishlist-page {
+    margin-top: 50px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    padding: 30px;
+  }
+  .table thead th {
+    font-weight: bold;
+    border-bottom: 2px solid #dee2e6;
+    text-transform: uppercase;
+    color: #495057;
+  }
+  .table td {
+    vertical-align: middle;
+  }
+  .product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .product-name {
+    font-weight: 500;
+    color: #212529;
+  }
+  .product-price {
+    font-weight: bold;
+    color: black;
+  }
+  .btn-remove {
+    background-color: #dc3545;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+  }
+  .btn-remove:hover {
+    background-color: #c82333;
+  }
+  .empty-wishlist {
+    text-align: center;
+    padding: 50px 0;
+  }
+  .empty-wishlist i {
+    font-size: 48px;
+    color: #6c757d;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container wishlist-page my-5">
+  <h2 class="mb-4">My Wishlist</h2>
+
+  <% if (wishlist && wishlist.products && wishlist.products.length > 0) { %>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% wishlist.products.forEach(product => { %>
+              <tr>
+                <td>
+                  <a href="/user/products/<%= product.productId._id %>">
+                    <div class="d-flex align-items-center">
+                      <!-- Access the image and name from the populated productId field -->
+                      <img src="/uploads/product-images/<%= product.productId.images[0] %>" class="product-image mr-3" alt="<%= product.productId.productName %>">
+                      <span class="product-name"><%= product.productId.productName %></span>
+                    </div>
+                  </a>
+                </td>
+                <td class="product-price">₹<%= product.productId.salesPrice.toFixed(2) %></td>
+                <td>
+                  <% if (product.productId.sizes.some(size => size.stock > 0)) { %>
+                    <span class="badge badge-success">In Stock</span>
+                  <% } else { %>
+                    <span class="badge badge-danger">Out of Stock</span>
+                  <% } %>
+                </td>
+                <td>
+                  <!-- Use the populated productId to remove the product from the wishlist -->
+                  <a href="/user/wishlist/remove/<%= product.productId._id %>" class="btn-remove" title="Remove from wishlist">&times;</a>
+                </td>
+              </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty-wishlist">
+      <i class="bi bi-heart"></i>
+      <h3>Your wishlist is empty</h3>
+      <p>Add items that you like to your wishlist</p>
+      <a href="/user/shop" class="btn btn-primary mt-3">Continue Shopping</a>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  // Add smooth scrolling animation
+  window.addEventListener('load', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+<%- include('../auth/partials/footer.ejs') %>

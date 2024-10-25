@@ -1,32 +1,37 @@
 <%- include('./partials/header.ejs') %>
-    
-    <!--Body Content-->
-    <div id="page-content">
-    	<!--Home slider-->
-    	<div class="slideshow slideshow-wrapper pb-section">
-        	<div class="home-slideshow">
-            	<div class="slide">
-                	<div class="blur-up lazyload">
-                        <img class="blur-up lazyload" data-src="/assets/images/slideshow-banners/banner1.jpg" src="/assets/images/slideshow-banners/banner1.jpg" alt="Shop Our New Collection" title="Shop Our New Collection" />
-                        <div class="slideshow__text-wrap slideshow__overlay classic middle">
-                            <div class="slideshow__text-content middle">
-                            	<div class="container">
-                                    <div class="wrap-caption right">
-                                        <h2 class="h1 mega-title slideshow__title">Our New Collection</h2>
-                                        <span class="mega-subtitle slideshow__subtitle">Save up to 50% Off</span>
-                                        <a href="/user/shop" class="btn btn-primary">Shop Now</a>
-                                    </div>
+
+<!--Body Content-->
+<div id="page-content" class="fade-in">
+    <!--Home slider-->
+    <div class="slideshow slideshow-wrapper pb-section">
+        <div class="home-slideshow">
+            <div class="slide">
+                <div class="blur-up lazyload">
+                    <img loading="lazy" class="blur-up lazyload" data-src="/assets/images/slideshow-banners/1.jpg" src="/assets/images/slideshow-banners/1.jpg" alt="Shop Our New Collection" title="Shop Our New Collection" />
+                    <div class="slideshow__text-wrap slideshow__overlay classic middle">
+                        <div class="slideshow__text-content middle">
+                            <div class="container">
+                                <div class="wrap-caption right">
+                                    <h2 class="h1 mega-title slideshow__title">Our New Collection</h2>
+                                    <span class="mega-subtitle slideshow__subtitle">Save up to 50% Off</span>
+                                    <a href="/user/shop" class="btn btn-primary animated-button">Shop Now</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="slide">
-                	<div class="blur-up lazyload">
-                        <img class="blur-up lazyload" data-src="/assets/images/slideshow-banners/home2-default-banner2.jpg" src="/assets/images/slideshow-banners/home2-default-banner2.jpg" alt="Summer Bikini Collection" title="Summer Bikini Collection" />
-                        <div class="slideshow__text-wrap slideshow__overlay classic middle">
-                            <div class="slideshow__text-content middle">
-                            	<div class="container">
+            </div>
+
+            <div class="slide">
+                <div class="blur-up lazyload">
+                    <img loading="lazy" class="blur-up lazyload" data-src="/assets/images/slideshow-banners/2.jpg" src="/assets/images/slideshow-banners/2.jpg" alt="Summer Bikini Collection" title="Summer Bikini Collection" />
+                    <div class="slideshow__text-wrap slideshow__overlay classic middle">
+                        <div class="slideshow__text-content middle">
+                            <div class="container">
+                                <div class="wrap-caption right">
+                                    <h2 class="h1 mega-title slideshow__title">Summer Collection</h2>
+                                    <span class="mega-subtitle slideshow__subtitle">Explore Now</span>
+                                    <a href="/user/shop" class="btn btn-primary animated-button">Shop Now</a>
                                 </div>
                             </div>
                         </div>
@@ -34,46 +39,89 @@
                 </div>
             </div>
         </div>
-        <!--End Home slider-->
-        
     </div>
-    <!--End Body Content-->
-    
-    <!--Scoll Top-->
+    <!--End Home slider-->
+
     <span id="site-scroll"><i class="icon anm anm-angle-up-r"></i></span>
 
-      <div class="container my-4"></div>
-        <h1 class="text-center mb-5">New Arrivals</h1>
+    <div class="container my-4"></div>
+    <h1 class="text-center mb-5">New Arrivals</h1>
 
-        <!-- Product Grid -->
-        <div class="row container-fluid pb-4">
-            <% products.forEach((product)=> { %>
+    <!-- Product Grid -->
+    <div class="row container-fluid pb-4">
+        <% products.forEach((product) => { %>
+            <div class="col-md-3 mb-4">
                 <a href="/user/products/<%= product._id %>" style="text-align: none;">
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <!-- Product Image -->
-                            <img src="/uploads/product-images/<%= product.images[0] %>" class="card-img-top" alt="<%= product.productName %>">
-                            
-                            <!-- Product Details -->
-                            <div  class="card-body">
-                                <h5 class="card-title"><%= product.productName %></h5>
-                                <p class="card-text">Price: ₹<%= product.salesPrice %> <del>₹<%= product.regularPrice %></del></p>
-                                <p class="card-text">Category: <%= product.category.name %></p>
-
-                                <a href="/user/products/<%= product._id %>" class="btn btn-primary mt-3">View Product</a>
-                            </div>
+                    <div class="card h-100">
+                        <!-- Product Image -->
+                        <img loading="lazy" src="/uploads/product-images/<%= product.images[0] %>" class="card-img-top" alt="<%= product.productName %>">
+                        <!-- Product Details -->
+                        <div class="card-body">
+                            <h5 class="card-title"><%= product.productName %></h5>
+                            <p class="card-text">Price: ₹<%= product.salesPrice %> <del>₹<%= product.regularPrice %></del></p>
+                            <p class="card-text">Category: <%= product.category.name %></p>
+                            <a href="/user/products/<%= product._id %>" class="btn btn-primary animated-button mt-4">View Product</a>
                         </div>
                     </div>
                 </a>
-            <% }) %>
-        </div>
+            </div>
+        <% }) %>
     </div>
 
+    <div class="d-flex justify-content-center">   
+        <a href="/user/shop" class="btn btn-primary animated-button mt-4">View All Products  </a>
+    </div>
+</div>
 
-
-
-
-    
-    
-
+<!--Footer-->
 <%- include('./partials/footer.ejs') %>
+
+<!-- CSS Styles -->
+<style>
+    .animated-button {
+        position: relative;
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: rgb(20, 19, 19);
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: color 0.4s;
+    }
+    .card {
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .animated-button::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+    }
+
+    .animated-button:hover {
+        color: white;
+    }
+
+    .animated-button:hover::after {
+        transform: scaleX(1);
+    }
+</style>
+
+<!-- JavaScript -->
+ <script>
+    window.addEventListener('load', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+ </script>

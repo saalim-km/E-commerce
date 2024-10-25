@@ -1,279 +1,259 @@
 <%- include('../auth/partials/header.ejs') %>
 
-    <style>
-        /* Basic Styles */
-        .breadcrumbs {
-            font-size: 14px;
-            margin-bottom: 20px;
-            color: #555;
-        }
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+  }
+  .filters-row {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .form-select, .form-control {
+    border-radius: 20px;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 1rem;
+  }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+  .product-item {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+  }
+  .product-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  .product-item img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+  }
+  .product-info {
+    padding: 1.5rem;
+  }
+  .product-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  .price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #e74c3c;
+  }
+  .category {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+  }
+  .animated-button {
+        position: relative;
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: rgb(20, 19, 19);
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: color 0.4s;
+    }
+    .animated-button::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+    }
 
-        .breadcrumbs a {
-            text-decoration: none;
-            color: #007bff;
-        }
+    .cardd {
+        transition: transform 0.3s ease;
+    }
+    .cardd:hover {
+        transform: translateY(-10px);
+    }
+    .animated-button:hover {
+        color: white;
+    }
 
-        .breadcrumbs a:hover {
-            text-decoration: underline;
-        }
+    .animated-button:hover::after {
+        transform: scaleX(1);
+    }
+  .btn-view-product:hover {
+    background-color: #2980b9;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .product-item {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+  }
+  .pagination li {
+    margin: 0 0.25rem;
+  }
+  .pagination a {
+    display: block;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: #3498db;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  .pagination a:hover,
+  .pagination .active a {
+    background-color: #3498db;
+    color: white;
+  }
+  .pagination .disabled a {
+    color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+  }
+</style>
 
-        /* Filter button */
-        .filter-btn {
-            position: relative;
-            background-color: #fff;
-            border: 2px solid #000;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
+<div class="container mt-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Shop</li>
+    </ol>
+  </nav>
 
-        .filter-btn:hover {
-            background-color: #000;
-            color: #fff;
-        }
-
-        .filter-popup {
-            display: none;
-            background-color: #fff;
-            border: 1px solid #000;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .filter-popup label {
-            font-weight: bold;
-        }
-
-        .filter-popup input,
-        .filter-popup select {
-            margin-bottom: 10px;
-        }
-
-        /* Product Grid */
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .product-item {
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: solid 1px rgba(128, 128, 128, 0.316);
-        }
-
-        .product-item img {
-            width: 100%;
-            height: auto;
-        }
-
-        .product-item .product-name {
-            margin-top: 10px;
-            font-size: 18px;
-        }
-
-        .product-item .price {
-            color: #888;
-        }
-
-        /* Hover effect */
-        .add-to-cart-btn {
-            position: absolute;
-            bottom: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #000;
-            color: #fff;
-            padding: 10px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .product-item:hover .add-to-cart-btn {
-            bottom: 10px;
-        }
-        .price {
-            color: black;
-            font-size: 1.1em;
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- Breadcrumbs -->
-
-    <div class="d-flex flex-column ml-5">
-        <div class="breadcrumbs ml-5 mt-5">
-            <a class="text-dark" href="/">Home</a> / <a class="text-dark" href="/user/shop">Shop</a>
-        </div>
-    
-        <!-- Filter Button -->
-         <div class="ml-5">
-            <button class="filter-btn" onclick="toggleFilter()">FILTER <i class="fas fa-filter"></i></button>    
-         </div>
-    </div>
-
-    <div class="row container ml-5 mb-5">
-
-            <div class="col-lg-6">
-                <label for="search">Search Products:</label>
-                <input type="text" id="search" class="form-control" placeholder="Search for products..." oninput="searchProduct()">
-            </div>
-
-            <div class="col-lg-6">
-                <label for="sort">Sort By:</label>
-                <select id="sort" class="form-select" onchange="sortProducts()">
-                    <option value="default">Default</option>
-                    <option value="price-low-high">Price: Low to High</option>
-                    <option value="price-high-low">Price: High to Low</option>
-                    <option value="name-az">Name: A - Z</option>
-                    <option value="name-za">Name: Z - A</option>
-                </select>
-            </div>
-    </div>
-      
-    <!-- Filter Popup -->
-    <div class="filter-popup container" id="filter-popup">
-
-        <!-- Category Filter -->
-        <label for="category">Select Category:</label>
-        <select id="category" class="form-select" onchange="filterProducts()">
-            <option value="All Categories">All Categories</option>
-            <option value="Glow in Dark">Glow in Dark</option>
-            <option value="Full Printed TShirts">Full Printed TShirts</option>
-            <option value="Oversized Fit">Oversized Fit</option>
-            <option value="Hoodie UV Light Reactive">Hoodie UV Light Reactive</option>
+  <div class="filters-row">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="category" class="form-label">Category:</label>
+        <select id="category" class="form-select" onchange="applyFilters()">
+          <option value="All Categories" <%= currentCategory === 'All Categories' ? 'selected' : '' %>>All Categories</option>
+          <% categories.forEach(category => { %>
+            <option value="<%= category._id %>" <%= currentCategory ==  category._id ? 'selected' : '' %>><%= category.name %></option>
+          <% }) %>
         </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="sort" class="form-label">Sort By:</label>
+        <select id="sort" class="form-select" onchange="applyFilters()">
+          <option value="default" <%= currentSort === 'default' ? 'selected' : '' %>>Default</option>
+          <option value="price-low-high" <%= currentSort === 'price-low-high' ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="price-high-low" <%= currentSort === 'price-high-low' ? 'selected' : '' %>>Price: High to Low</option>
+          <option value="name-az" <%= currentSort === 'name-az' ? 'selected' : '' %>>Name: A - Z</option>
+          <option value="name-za" <%= currentSort === 'name-za' ? 'selected' : '' %>>Name: Z - A</option>
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="search" class="form-label">Search:</label>
+        <input type="text" id="search" class="form-control" value="<%= searchQuery %>" placeholder="Search products..." oninput="applyFilters()">
+      </div>
     </div>
+  </div>
 
-    <!-- Sorting Dropdown -->
- 
-
-    <!-- Product Grid -->
-    <div class="product-grid container">
-        <% products.forEach((product)=> { %>
-        <div class="product-item pb-2" data-name="<%= product.productName %>" data-category="<%= product.category.name %>" data-price="<%= product.salesPrice %>">
-            <a href="/user/products/<%= product._id %>" style="text-decoration: none;">
-
-                <img src="/uploads/product-images/<%= product.images[0] %>" alt="<%= product.productName %>">
-                
-                <div>
-                    <h5 class="product-name"><%= product.productName %></h5>
-                    <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
-                        <p class="price" style="color: black;">₹<%= product.salesPriceAfterDiscount%> <del style="color: gray;">₹<%= product.salesPrice%></del>  <span style="color: green; font-weight: 600;"> %<%= product.productOffer[0].discountPercentage %></span></p>
-                    <% } else {%>
-                        <p class="price" style="color: black;">₹<%= product.salesPrice%></p>
-                    <% } %>
-                    <p class="category">Category: <%= product.category.name %></p>
-                    <a href="/user/products/<%= product._id %>" class="btn btn-primary mt-3">View Product</a>
+  <div class="product-grid">
+    <% products.forEach((product, index) => { %>
+        <div class="cardd">
+            <a href="/user/products/<%= product._id %>">
+                <div class="product-item" style="animation-delay: <%= index * 0.1 %>s;">
+                    <img src="/uploads/product-images/<%= product.images[0] %>" alt="<%= product.productName %>" class="img-fluid">
+                    <div class="product-info">
+                      <h5 class="product-name"><%= product.productName %></h5>
+                      <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
+                        <p class="price">₹<%= product.salesPriceAfterDiscount %> <del class="text-muted">₹<%= product.salesPrice %></del> <span class="text-success font-weight-bold">%<%= product.productOffer[0].discountPercentage %> OFF</span></p>
+                      <% } else { %>
+                        <p class="price">₹<%= product.salesPrice %></p>
+                      <% } %>
+                      <p class="category mb-3" style="color: rgb(54, 54, 54); font-size: 1em; font-weight: 600;"><%= product.category.name %></p>
+                      <a href="/user/products/<%= product._id %>" class="btn animated-button w-100">View Product</a>
+                    </div>
                 </div>
             </a>
         </div>
-        <% }) %>
-    </div>
+    <% }) %>
+  </div>
 
+  <% if (pagination.totalPages > 1) { %>
+    <nav aria-label="Product pagination">
+      <ul class="pagination">
+        <% if (pagination.currentPage > 1) { %>
+          <li>
+            <a href="?page=1<%= currentCategory !== 'All Categories' ? '&category=' + currentCategory : '' %><%= currentSort !== 'default' ? '&sort=' + currentSort : '' %><%= searchQuery ? '&search=' + searchQuery : '' %>" aria-label="First page">&laquo;</a>
+          </li>
+          <li>
+            <a href="?page=<%= pagination.currentPage - 1 %><%= currentCategory !== 'All Categories' ? '&category=' + currentCategory : '' %><%= currentSort !== 'default' ? '&sort=' + currentSort : '' %><%= searchQuery ? '&search=' + searchQuery : '' %>" aria-label="Previous page">&lsaquo;</a>
+          </li>
+        <% } %>
+        
+        <% for (let i = Math.max(1, pagination.currentPage - 2); i <= Math.min(pagination.totalPages, pagination.currentPage + 2); i++) { %>
+          <li class="<%= pagination.currentPage === i ? 'active' : '' %>">
+            <a href="?page=<%= i %><%= currentCategory !== 'All Categories' ? '&category=' + currentCategory : '' %><%= currentSort !== 'default' ? '&sort=' + currentSort : '' %><%= searchQuery ? '&search=' + searchQuery : '' %>"><%= i %></a>
+          </li>
+        <% } %>
+        
+        <% if (pagination.currentPage < pagination.totalPages) { %>
+          <li>
+            <a href="?page=<%= pagination.currentPage + 1 %><%= currentCategory !== 'All Categories' ? '&category=' + currentCategory : '' %><%= currentSort !== 'default' ? '&sort=' + currentSort : '' %><%= searchQuery ? '&search=' + searchQuery : '' %>" aria-label="Next page">&rsaquo;</a>
+          </li>
+          <li>
+            <a href="?page=<%= pagination.totalPages %><%= currentCategory !== 'All Categories' ? '&category=' + currentCategory : '' %><%= currentSort !== 'default' ? '&sort=' + currentSort : '' %><%= searchQuery ? '&search=' + searchQuery : '' %>" aria-label="Last page">&raquo;</a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  <% } %>
+</div>
 
-    <script>
-        // default order of products (if the user clicks on default on sort option
-        const defaultOrder = Array.from(document.querySelectorAll('.product-item'));
-        function toggleFilter() {
-            const filterPopup = document.getElementById("filter-popup");
-            if (filterPopup.style.display === "block") {
-                filterPopup.style.display = "none";
-            } else {
-                filterPopup.style.display = "block";
-            }
-        }
+<script>
+  function applyFilters() {
+    const category = document.getElementById('category').value;
+    const sort = document.getElementById('sort').value;
+    const search = document.getElementById('search').value;
 
-        // filtering products based on categories or searc input
-        function filterProducts(){
-            const products = document.querySelectorAll('.product-item');
-            const selectValue = document.getElementById('category').value;
-            
-            products.forEach((item)=> {
-                if(selectValue == "All Categories"){
-                    item.classList.remove("d-none");
-                }else{
-                    if(selectValue !== item.dataset.category){
-                        item.classList.add("d-none");
-                    }else{
-                        item.classList.remove("d-none");
-                    }
-                }
-            });
-        }
+    let url = '/user/shop?page=1'; 
+    if (category !== 'All Categories') url += `&category=${encodeURIComponent(category)}`;
+    if (sort !== 'default') url += `&sort=${sort}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
 
-        // sorting products
-        function sortProducts(){
-            const productGrid = document.querySelector('.product-grid');
+    window.location.href = url;
+  }
 
-            // calling the filterproducts for fetching the category it it is selected
-            filterProducts();
-            const sortValue = document.getElementById('sort').value;
-            const products = document.querySelectorAll('.product-item');
-            const productArr = Array.from(products);
-
-            if(sortValue == 'default'){
-                productGrid.innerHTML = "";
-                defaultOrder.forEach((item)=> {
-                    productGrid.appendChild(item);
-                })
-            }else if(sortValue == 'price-low-high'){
-                productGrid.innerHTML = "";
-                productArr.sort((a,b)=> {
-                    return a.dataset.price - b.dataset.price;
-                });
-                productArr.forEach((item)=> {
-                    productGrid.appendChild(item);
-                })
-            }else if(sortValue == 'price-high-low'){
-                productGrid.innerHTML = "";
-                productArr.sort((a,b)=> {
-                    return b.dataset.price - a.dataset.price;
-                });
-                productArr.forEach((item)=> {
-                    productGrid.appendChild(item);
-                })
-            }else if(sortValue == 'name-az'){
-                productGrid.innerHTML = "";
-                productArr.sort((a,b)=> {
-                    return a.dataset.name.localeCompare(b.dataset.name);
-                })
-                productArr.forEach((item)=> {
-                    productGrid.appendChild(item);
-                })
-            }else if(sortValue == 'name-za'){
-                productGrid.innerHTML = "";
-                productArr.sort((a,b)=> {
-                    return b.dataset.name.localeCompare(a.dataset.name);
-                })
-                productArr.forEach((item)=> {
-                    productGrid.appendChild(item);
-                })
-            }
-            console.log(defaultOrder,productArr);
-        }
-
-        function searchProduct(){
-            const products = document.querySelectorAll('.product-item');
-            const searchValue = document.getElementById('search').value.toLowerCase();
-            console.log(searchValue);
-
-            products.forEach((item)=> {
-                if(!item.dataset.name.toLowerCase().includes(searchValue)){
-                    item.classList.add('d-none');
-                }else {
-                    item.classList.remove('d-none');
-                }
-            })
-            
-        }
-    </script>
+  // Add smooth scrolling animation
+  window.addEventListener('load', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
 
 <%- include('../auth/partials/footer.ejs') %>

@@ -62,13 +62,6 @@
                   <div class="row">
                      <div class="col-lg-4">
                         <div class="mb-4">
-                           <label class="form-label">Regular price</label>
-                           <input maxlength="4" placeholder="$" name="regularPrice" type="text" class="form-control border" value="<%= product.regularPrice %>" id="regular_price">
-                           <div id="regularPrice-error" class="error-message"></div>
-                        </div>
-                     </div>
-                     <div class="col-lg-4">
-                        <div class="mb-4">
                            <label class="form-label">Sale price</label>
                            <input maxlength="4" placeholder="$" name="salesPrice" type="text" class="form-control border" value="<%= product.salesPrice %>" id="sales_price">
                         </div>
@@ -331,13 +324,11 @@ function validateForm(e) {
   // error display elements
     const nError = document.getElementById('productName-error');
     const dError = document.getElementById('description-error');
-    const rpgError = document.getElementById('regularPrice-error');
     const spError = document.getElementById('salePrice-error');
 
     // values
     const productName = document.getElementById('product_name').value.trim();
     const description = document.getElementById('descriptionid').value.trim();
-    const regularPrice = document.getElementById('regular_price').value.trim();
     const salesPrice = document.getElementById('sales_price').value.trim();
     const sizeInputs = document.querySelectorAll('.tiny-box');
     const images = document.querySelectorAll('.img-input'); // All image input fields
@@ -350,7 +341,6 @@ function validateForm(e) {
 
     nError.textContent = "";
     dError.textContent = "";
-    rpgError.textContent = "";
     spError.textContent = "";
     errorImg.textContent = "";
 
@@ -379,8 +369,8 @@ function validateForm(e) {
       formValid = false;
     }
 
-    if(!/^[A-Za-z\s]+$/.test(productName)) {
-      nError.textContent = "Product name should only contain alphabets and spaces";
+    if (!/^[A-Za-z0-9\s\W]+$/.test(productName)) {
+      nError.textContent = "Product name should only contain alphabets, numbers, and special characters";
       nError.style.color = "red";
       formValid = false;
     }
@@ -391,15 +381,10 @@ function validateForm(e) {
       formValid = false;
     }
 
-    if(!/^[A-Za-z\s]+$/.test(description)){
-      dError.textContent = "Description should only contain alphabets and spaces";
+    if(!/^[A-Za-z0-9\s\W]+$/.test(description)){
+      dError.textContent = "Description should only contain alphabets, numbers, and special characters";
       dError.style.color = "red";
       formValid = false;
-    }
-
-    if (!/^\d+$/.test(regularPrice) || parseInt(regularPrice) < 500) {
-    rpgError.textContent = 'Please enter a valid price of at least 500 (no decimals allowed).';
-    formValid = false;
     }
 
     if (!/^\d+$/.test(salesPrice) || parseInt(salesPrice) < 500) {
@@ -407,10 +392,6 @@ function validateForm(e) {
       formValid = false;
    }
 
-   if (parseFloat(regularPrice) <= parseFloat(salesPrice)) {
-        rpgError.textContent = 'Regular price must be greater than sale price.';
-        formValid = false;
-    }
 
     // Check each image input
     for (let i = 0; i < images.length; i++) {

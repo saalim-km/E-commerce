@@ -1,280 +1,304 @@
 <%- include('../auth/partials/header.ejs') %>
-    <style>
-        /* Enhanced Carousel Styling */
+<style>
+    /* Enhanced Carousel Styling */
+    .carousel-item img {
+        height: 600px;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .carousel-zoom {
+        overflow: hidden;
+    }
+
+    .carousel-zoom img {
+        transition: transform 0.5s ease;
+    }
+
+    .carousel-zoom:hover img {
+        transform: scale(1.5);
+    }
+
+    /* Modern Size Selection */
+    .size-option {
+        margin: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .size-option .btn {
+        min-width: 60px;
+        transition: all 0.3s ease;
+    }
+
+    .size-option .btn.selected {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+
+    /* Improved Add to Cart and Wishlist Buttons */
+    #addToCartBtn, #addToWishlistBtn {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+    }
+
+    #addToCartBtn:hover, #addToWishlistBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    #addToWishlistBtn {
+        background-color: #28a745;
+        color: white;
+    }
+
+    #addToWishlistBtn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    /* Enhanced Product Information */
+    .product-info h3 {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .product-info p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .product-price {
+        font-size: 1.8rem;
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .product-price del {
+        color: #6c757d;
+        font-size: 1.2rem;
+        margin-left: 10px;
+    }
+
+    .discount {
+        color: #dc3545;
+        font-size: 1.2em;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
         .carousel-item img {
-            height: 650px;
-            object-fit: cover;
-            transition: transform 0.3s ease-in-out;
+            height: 400px;
         }
 
-        .carousel-item img:hover {
-            transform: scale(1.05);
-        }
-
-        /* Modern Size Selection */
-        .size-option {
-            margin: 5px;
-        }
-
-        .size-option .btn {
-            min-width: 60px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .size-option .btn.selected {
-            background-color: #007bff;
-            color: #fff;
-            border-color: #007bff;
-        }
-
-        /* Improved Add to Cart Button */
-        #addToCartBtn {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        #addToCartBtn:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-
-        /* Enhanced Product Information */
         .product-info h3 {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 1.8rem;
         }
 
-        .product-info p {
+        #addToCartBtn, #addToWishlistBtn {
             font-size: 1rem;
         }
+    }
+</style>
 
-        .product-price {
-            font-size: 1.5rem;
-            color: black;
-            font-weight: 500;
-        }
+<div class="container mt-5">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/user/shop">Shop</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
+        </ol>
+    </nav>
 
-        .product-price del {
-            color: #6c757d;
-            font-size: 1rem;
-            margin-left: 10px;
-        }
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .carousel-item img {
-                height: 400px;
-            }
-
-            .product-info h3 {
-                font-size: 1.5rem;
-            }
-
-            #addToCartBtn {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .carousel-item img {
-                height: 300px;
-            }
-        }
-        .discount {
-            color: green;
-            font-size: 1.4em;
-            font-weight: 600;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container mt-5">
-        <!-- Breadcrumbs -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/user/shop">Shop</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><%= product.productName %></li>
-            </ol>
-        </nav>
-
-        <div class="row">
-            <!-- Image Carousel -->
-            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
-                <div id="productCarousel" class="carousel slide" data-ride="carousel">
-                    <ol class="carousel-indicators">
-                        <% for(let i = 0; i < product.images.length; i++) { %>
-                            <li data-target="#productCarousel" data-slide-to="<%= i %>" class="<%= i === 0 ? 'active' : '' %>" aria-current="<%= i === 0 ? 'true' : 'false' %>" aria-label="Slide <%= i + 1 %>"></li>
-                        <% } %>
-                    </ol>
-                    <div class="carousel-inner">
-                        <% product.images.forEach((image, index) => { %>
-                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                                <img src="/uploads/product-images/<%= image %>" alt="Product Image <%= index + 1 %>" class="d-block w-100 zoomable">
+    <div class="row">
+        <!-- Image Carousel -->
+        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+            <div id="productCarousel" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                    <% for(let i = 0; i < product.images.length; i++) { %>
+                        <li data-target="#productCarousel" data-slide-to="<%= i %>" class="<%= i === 0 ? 'active' : '' %>"></li>
+                    <% } %>
+                </ol>
+                <div class="carousel-inner">
+                    <% product.images.forEach((image, index) => { %>
+                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                            <div class="carousel-zoom d-flex justify-content-center align-items-center" style="height: 600px;">
+                                <img src="/uploads/product-images/<%= image %>" alt="Product Image <%= index + 1 %>" class="d-block">
                             </div>
-                        <% }) %>
-                    </div>
-                    <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                    <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Next</span>
-                    </a>
+                        </div>
+                    <% }) %>
                 </div>
-            </div>
-
-            <!-- Product Information -->
-            <div class="col-lg-6 col-md-6 col-sm-12 product-info">
-                <h3><%= product.productName %></h3>
-                <p class="text-muted">Category: <%= product.category.name %></p>
-                <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
-                    <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPriceAfterDiscount %></span> <del class="mr-3">₹<%= product.salesPrice %></del>  <span class="discount">%<%= product.productOffer[0].discountPercentage %>  off</span></p>
-                <% } else {%>
-                    <p><strong>Price: </strong><span class="product-price">₹<%= product.salesPrice %></span></p>
-                <% } %>     
-                <p><strong>Description:</strong> <%= product.description %></p>
-
-                <!-- Sizes Selection with Stock -->
-                <div class="sizes">
-                    <h5>Select Size:</h5>
-                    <div class="btn-group" role="group" aria-label="Size Selection">
-                        <% product.sizes.forEach(sizeVariant => { %>
-                                <% if(sizeVariant.stock === 0){ %>
-                                    <button type="button" class="btn btn-outline-primary size-option" data-size="<%= sizeVariant.size %>" data-stock="<%= sizeVariant.stock %>">
-                                        <%= sizeVariant.size %> 
-                                        <span class="badge bg-danger ms-1">Stock Out</span>
-                                    </button>
-                                <% } else { %>
-                                    <button type="button" class="btn btn-outline-primary size-option" data-size="<%= sizeVariant.size %>" data-stock="<%= sizeVariant.stock %>">
-                                        <%= sizeVariant.size %> 
-                                        <span class="badge bg-success ms-1"><%= sizeVariant.stock %></span>
-                                    </button>
-                                <% } %>
-                        <% }) %>
-                    </div>
-                </div>
-
-                <!-- Add to Cart Button -->
-                <div class="mt-4">
-                    <button class="btn btn-primary btn-lg" id="addToCartBtn" disabled>Add to Cart <i class="bi bi-cart-fill ms-2"></i></button>
-                </div>
+                <a class="carousel-control-prev" href="#productCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#productCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
             </div>
         </div>
+
+        <!-- Product Information -->
+        <div class="col-lg-6 col-md-6 col-sm-12 product-info">
+            <h3><%= product.productName %></h3>
+            <p class="text-muted">Category: <%= product.category.name %></p>
+            <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
+                <p>
+                    <span class="product-price">₹<%= product.salesPriceAfterDiscount %></span>
+                    <del>₹<%= product.salesPrice %></del>
+                    <span class="discount"><%= product.productOffer[0].discountPercentage %>% off</span>
+                </p>
+            <% } else { %>
+                <p><span class="product-price">₹<%= product.salesPrice %></span></p>
+            <% } %>     
+            <p><strong>Description:</strong> <%= product.description %></p>
+
+            <!-- Sizes Selection with Stock -->
+            <div class="sizes mt-4">
+                <h5>Select Size:</h5>
+                <div class="btn-group flex-wrap" role="group" aria-label="Size Selection">
+                    <% let allOutOfStock = true; %>
+                    <% product.sizes.forEach(sizeVariant => { %>
+                        <% if(sizeVariant.stock > 0) { allOutOfStock = false; } %>
+                        <button type="button" class="btn btn-outline-primary size-option m-1" 
+                                data-size="<%= sizeVariant.size %>" 
+                                data-stock="<%= sizeVariant.stock %>"
+                                <%= sizeVariant.stock === 0 ? 'disabled' : '' %>>
+                            <%= sizeVariant.size %> 
+                            <% if(sizeVariant.stock === 0) { %>
+                                <span class="badge bg-danger ms-1">Out of Stock</span>
+                            <% } else { %>
+                                <span class="badge bg-success ms-1"><%= sizeVariant.stock %></span>
+                            <% } %>
+                        </button>
+                    <% }) %>
+                </div>
+            </div>
+
+            <!-- Add to Cart Button -->
+            <button class="btn btn-primary btn-lg" id="addToCartBtn" disabled>
+                Add to Cart <i class="bi bi-cart-fill ms-2"></i>
+            </button>
+
+            <!-- Add to Wishlist Button -->
+            <button class="btn btn-success btn-lg" id="addToWishlistBtn" <%= allOutOfStock ? 'disabled' : '' %>>
+                Add to Wishlist <i class="bi bi-heart ms-2"></i>
+            </button>
+        </div>
     </div>
+</div>
 
-    <!-- Bootstrap 4 JS, Popper.js, and jQuery (Ensure Bootstrap 4 is consistent) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXd2R6Kq3GvJ0lEnxAGN7B77wzNs1cFeHyJ7QoA+u7xzZV3ZJnPA0K+7pjGcI5U" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"
-        integrity="sha384-VP5x0yQ3V5ZqYQQrLUoc6+RH7b0qm3sT6bFHC+1V+VfXwgiD8tADyYj9KvlEMC9K" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
-        integrity="sha384-XoU2KQeh3B8ZEmFZ3lQm3icbjItgblgHZb+I56Pwz4eEM5G9tCCP+2W0k1MBHs2U" crossorigin="anonymous"></script>
+<!-- Bootstrap 4 JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- script for validation add to cart -->
-    <script>
-        document.addEventListener("DOMContentLoaded",()=> {
-            const categoryId = '<%= product.category._id %>';
-            const productId = '<%= product._id %>';
-            
-            // selecting all button that has a class of size option
-            const sizeButtons = document.querySelectorAll(".size-option");
-            const addToCartBtn = document.getElementById("addToCartBtn");
-            console.log(addToCartBtn,sizeButtons[1]);
-            
-            let selectedSize = null;
-            let selectedStock = 0;
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const categoryId = '<%= product.category._id %>';
+        const productId = '<%= product._id %>';
+        
+        const sizeButtons = document.querySelectorAll(".size-option");
+        const addToCartBtn = document.getElementById("addToCartBtn");
+        const addToWishlistBtn = document.getElementById('addToWishlistBtn');
+        
+        let selectedSize = null;
+        let selectedStock = 0;
 
-            sizeButtons.forEach((button)=> {
-                button.addEventListener("click",(e)=> {
-                    const selectedButton = e.target.closest('.size-option');
-                    if(selectedButton){
-                    // first deselecting all buttons
-                    sizeButtons.forEach((btn)=> btn.classList.remove("selected"));
-
+        sizeButtons.forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const selectedButton = e.target.closest('.size-option');
+                if (selectedButton) {
+                    sizeButtons.forEach((btn) => btn.classList.remove("selected"));
                     selectedButton.classList.add("selected");
-                    console.log(selectedButton);
 
-                    // getting the size and stock from data-size and data-stock attributes
                     selectedSize = selectedButton.getAttribute('data-size');
                     selectedStock = parseInt(selectedButton.getAttribute('data-stock'));
 
-                    console.log(selectedSize,selectedStock);
-                    if(selectedStock > 0){
-                        addToCartBtn.disabled = false;
-                    }else{
-                        addToCartBtn.disabled = true;
-                        Toastify({
-                        text: "Selected size is out of stock.",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#dc3545",
-                    }).showToast();
-                    }
-                    }
-                })
-            });
-
-            addToCartBtn.addEventListener("click",()=> {
-                if(!selectedSize){
-                    Toastify({
-                        text: "please select a size.",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        backgroundColor: "#dc3545",
-                    }).showToast();
-                }else{
-                    $.ajax({
-                        url : "/user/cart",
-                        method : "POST",
-                        data : JSON.stringify({
-                            productId : productId,
-                            categoryId : categoryId,
-                            size : selectedSize,
-                            quantity : 1,
-                        }),
-                        contentType : "application/json",
-                        success : function (res){
-                            if(res.success){
-                                Toastify({
-                                    text: `${selectedSize},${1} Added to cart`,
-                                    duration: 3000,
-                                    gravity: "top",
-                                    position: "right",
-                                    backgroundColor: "green",
-                                }).showToast();
-
-
-                                sizeButtons.forEach((btn)=> btn.classList.remove("selected"));
-                                addToCartBtn.disabled = true;
-                                selectedSize = null;
-                                selectedStock = 0;
-                                setTimeout(()=>{
-                                    window.location.href = res.redirectUrl;
-                                },1000);
-                                }else{
-                                Toastify({
-                                    text: res.message,
-                                    duration: 3000,
-                                    gravity: "top",
-                                    position: "right",
-                                    backgroundColor: "red",
-                                }).showToast();
-                            }
-                        }
-                    })
+                    addToCartBtn.disabled = selectedStock <= 0;
                 }
-            })
-        })
-    </script>
+            });
+        });
+
+        function handleAction(action) {
+            console.log(`hi im ${action}`);
+            
+            if (!selectedSize) {
+                Toastify({
+                    text: "Please select a size.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#dc3545",
+                }).showToast();
+                return;
+            }
+
+            $.ajax({
+                url: `/user/${action}`,
+                method: "POST",
+                data: JSON.stringify({
+                    productId: productId,
+                    categoryId: categoryId,
+                    size: selectedSize,
+                    quantity: 1,
+                }),
+                contentType: "application/json",
+                success: function (res) {
+                    if (res.success) {
+                        Toastify({
+                            text: `${selectedSize} added to ${action}`,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "green",
+                        }).showToast();
+
+                        sizeButtons.forEach((btn) => btn.classList.remove("selected"));
+                        addToCartBtn.disabled = true;
+                        selectedSize = null;
+                        selectedStock = 0;
+                    } else {
+                        Toastify({
+                            text: res.message,
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "red",
+                        }).showToast();
+                    }
+                }
+            });
+        }
+
+        addToCartBtn.addEventListener("click", () => handleAction('cart'));
+        addToWishlistBtn.addEventListener("click", () => handleAction('wishlist'));
+
+        // Zoom functionality
+        const zoomContainers = document.querySelectorAll('.carousel-zoom');
+        zoomContainers.forEach(container => {
+            const img = container.querySelector('img');
+            container.addEventListener('mousemove', (e) => {
+                const { left, top, width, height } = container.getBoundingClientRect();
+                const x = (e.clientX - left) / width;
+                const y = (e.clientY - top) / height;
+                img.style.transformOrigin = `${x * 100}% ${y * 100}%`;
+            });
+        });
+    });
+</script>
 
 <%- include('../auth/partials/footer.ejs') %>

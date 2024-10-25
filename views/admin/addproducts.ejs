@@ -303,16 +303,16 @@
     let isValid = true;
 
     // Validate product name (alphabets and spaces only, no empty input)
-    if (!/^[A-Za-z\s]+$/.test(name)) {
-        displayErrorMessage('productName-error', 'Product name should only contain alphabets and spaces.');
+    if (!/^[A-Za-z0-9\s\W]+$/.test(name)) {
+        displayErrorMessage('productName-error', 'Product name should only contain alphabets, numbers, and special characters.');
         isValid = false;
     }
 
     // Validate description (alphabets, numbers, and spaces only, no empty input)
-    if (!/^[A-Za-z\s]+$/.test(description)) {
-    displayErrorMessage('description-error', 'Description should only contain alphabets and spaces.');
+    if (!/^[A-Za-z0-9\s\W]+$/.test(description)) {
+    displayErrorMessage('description-error', 'Description should only contain alphabets, numbers, and special characters.');
     isValid = false;
-    }
+}
 
    // Validate sale price (must be a whole number, at least 500, and not empty)
    if (!/^\d+$/.test(saleprice) || parseInt(saleprice) < 500) {

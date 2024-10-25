@@ -78,7 +78,7 @@
             <h4>Items Ordered:</h4>
             <% order.products.forEach(function(item) { %>
                 <p><strong><%= item.productId.productName %></strong> (Size: <%= item.size %>)</p>
-                <p>Quantity: <%= item.quantity %>, Price: ₹<%= item.productId.salesPrice * item.quantity%>%></p>
+                <p>Quantity: <%= item.quantity %>, Price: ₹<%= item.productId.salesPriceAfterDiscount ? item.productId.salesPriceAfterDiscount  * item.quantity : item.productId.salesPrice  * item.quantity%>%></p>
             <% }); %>
         </div>
 

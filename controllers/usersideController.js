@@ -1,11 +1,10 @@
 const bcrypt = require("bcrypt");
 const productModel = require("../models/product");
 const userModel = require("../models/user");
-const addressModel = require("../models/address");
-const categoryModel = require("../models/address");
 const cartModel = require("../models/cart");
 const orderModel = require("../models/order");
-const product = require("../models/product");
+const wishlistModel = require("../models/wishlist");
+const categoryModel = require("../models/category");
 const Razorpay = require('razorpay'); 
 const { ObjectId } = require("mongoose").Types;
 
@@ -28,22 +27,89 @@ const productView = async(req,res)=> {
             res.render("productView",{product : productData , user : userData});
         }
     } catch (error) {
-        console.log('error while loadin the product',error.message);
+        console.log('error in the product View',error.message);
     }
 }
 // loading shop list
-const shopList = async(req,res)=> {
+const shopList = async (req, res) => {
     try {
-        if(!req.session.user){
-            return res.redirect("/user/login");
-        }else{
-            const user = req.session.user;
-            const userData = await userModel.findOne({ email: user });
-            const productData = await productModel.find({isListed : true}).populate("category","name");
-            res.render("shopPage",{user : userData , products : productData});
+      if (!req.session.user) {
+        return res.redirect("/user/login");
+      } else {
+        const user = req.session.user;
+        const userData = await userModel.findOne({ email: user });
+        
+        
+        const { category, sort, search, page = 1 } = req.query;
+
+        console.log(req.query)
+        const limit = 8; 
+        const skip = (page - 1) * limit;
+        
+        
+        let query = { isListed: true };
+        
+       
+        if (category && category !== 'All Categories') {
+          query['category'] = category;
         }
+        
+        
+        if (search) {
+          query.productName = { $regex: search, $options: 'i' };
+        }
+        console.log(query);
+        
+        const totalProducts = await productModel.countDocuments(query);
+        
+        
+        let productData = await productModel.find(query)
+          .populate("category")
+          .skip(skip)
+          .limit(limit);
+        
+        if (sort) {
+          switch (sort) {
+            case 'price-low-high':
+              productData.sort((a, b) => a.salesPrice - b.salesPrice);
+              break;
+            case 'price-high-low':
+              productData.sort((a, b) => b.salesPrice - a.salesPrice);
+              break;
+            case 'name-az':
+              productData.sort((a, b) => a.productName.localeCompare(b.productName));
+              break;
+            case 'name-za':
+              productData.sort((a, b) => b.productName.localeCompare(a.productName));
+              break;
+          }
+        }
+        
+        
+        const categories = await categoryModel.find({}, {name : 1});
+        
+        
+        const totalPages = Math.ceil(totalProducts / limit);
+        const currentPage = parseInt(page);
+        
+        res.render("shopPage", { 
+          user: userData, 
+          products: productData, 
+          categories,
+          currentCategory: query.category || 'All Categories',
+          currentSort: sort || 'default',
+          searchQuery: search || '',
+          pagination: {
+            totalProducts,
+            currentPage,
+            totalPages,
+            limit
+          }
+        });
+      }
     } catch (error) {
-        console.log("error while loading shop page",error.message);
+      console.log("error while loading shop page", error.message);
+      res.status(500).send("An error occurred while loading the shop page");
     }
 }
 
@@ -339,7 +405,6 @@ const addCart = async(req, res) => {
         res.json({ success: true });
       } else {
   
-        // Create a new cart entry
         const items = [
           {
             size: size,
@@ -360,7 +425,7 @@ const addCart = async(req, res) => {
         console.log(result);
   
         if (newCart) {
-          res.json({ success: true, redirectUrl: `/user/cart` });
+          res.json({ success: true});
         }
       }
     } catch (error) {
@@ -429,6 +494,100 @@ const deleteCart = async(req,res)=> {
         console.log("error while deleting cart")
     }
 }
+
+
+// wishList
+const wishListPage = async (req, res) => {
+    try {
+      // Find the user based on the session
+      const userData = await userModel.findOne({ email: req.session.user });
+      const userId = userData._id;
+  
+      // Find the wishlist for the user and populate the productId
+      const wishListData = await wishlistModel
+        .findOne({ userId: userId })
+        .populate({
+          path: 'products.productId',
+          model: 'Products',
+        });
+      // Check if wishlist exists
+      if (!wishListData) {
+        return res.status(404).send("Wishlist not found");
+      }
+  
+      // Render the wishlist page with the user and populated wishlist data
+      res.render("wishlist", { user: userData, wishlist: wishListData });
+    } catch (error) {
+      console.log("Error in wishListPage:", error.message);
+      res.status(500).send("Server error");
+    }
+};
+  
+const addToWishlist = async (req, res) => {
+    try {
+        const userData = await userModel.findOne({ email: req.session.user });
+        if (!userData) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const { productId } = req.body;
+
+        const wishlist = await wishlistModel.findOne({ userId: userData._id });
+
+        if (wishlist) {
+            // Check if the product already exists in the wishlist
+            const productExists = wishlist.products.some(product => 
+                product.productId.toString() === productId
+            );
+
+            if (productExists) {
+                return res.status(200).json({ success: false, message: "Product already exists in wishlist" });
+            }
+
+            // Add the new product to the existing wishlist
+            wishlist.products.push({ productId });
+            await wishlist.save();
+        } else {
+            const newWishlist = new wishlistModel({
+                userId: userData._id,
+                products: [{ productId }],
+            });
+            await newWishlist.save();
+        }
+
+        res.status(200).json({ success: true, message: "Product added to wishlist successfully" });
+    } catch (error) {
+        console.error("Error in addToWishlist:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+const removeWishlist = async (req, res) => {
+    try {
+      const { id } = req.params; 
+      const userData = await userModel.findOne({ email: req.session.user });
+  
+      if (!userData) {
+        return res.status(404).send("User not found");
+      }
+  
+      const result = await wishlistModel.updateOne(
+        { userId: userData._id },
+        { $pull: { products: { productId: id } } } 
+      );
+  
+      if (result.nModified === 0) {
+        return res.status(400).send("Product not found in wishlist");
+      }
+  
+      res.redirect("/user/wishlist");
+    } catch (error) {
+      console.log("Error from removeWishlist:", error.message);
+      res.status(500).send("Internal Server Error");
+    }
+  };
+  
+
 
 
 // checkout
@@ -873,5 +1032,8 @@ module.exports = {
     returnOrder,
     returnItem,
     onlineOrder,
-    verifyOrder
+    verifyOrder,
+    wishListPage,
+    addToWishlist,
+    removeWishlist
 }

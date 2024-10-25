@@ -104,6 +104,18 @@
     </table>
   </div>
 
+  <div class="pagination-area mt-30 mb-50">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-start">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i == currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+            <% } %>
+        </ul>
+    </nav>
+  </div>
+
   <!-- Bootstrap JS and dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
   <!-- toastify -->
@@ -143,4 +155,3 @@
       return true;
     }
   </script>
-<%- include('./partials/footer.ejs') %>

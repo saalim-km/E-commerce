@@ -306,8 +306,16 @@ const removeImage = async(req,res)=> {
 // Product offer 
 const addOfferPage = async(req,res)=> {
   try {
-    const products = await productModel.find();
-    res.render('addOffer',{products : products});
+    const perpage = 3;
+      const page = req.query.page || 1;
+
+      const productData = await productModel.find().skip((perpage * page) - perpage).limit(perpage);
+      const productCount = await productModel.countDocuments({$or : [{isListed : true} , {isListed : false}]});
+      res.render("addOffer",{
+        products : productData,
+        currentPage : page,
+        totalPages : Math.ceil(productCount / perpage),
+      });
   } catch (error) {
     console.log(error.message);
   }
@@ -399,7 +407,7 @@ const deactivate_offer = async(req,res)=> {
         }
       }
     )
-    console.log(result);
+    // console.log(result);
     req.flash("success","Offer De-Activated");
     return res.redirect("/admin/add_offer");
   } catch (error) {
@@ -425,7 +433,7 @@ const activate_offer = async(req,res)=> {
         }
       }
     )
-    console.log(result);
+    // console.log(result);
     req.flash("success","Offer Activated");
     return res.redirect("/admin/add_offer");
   } catch (error) {

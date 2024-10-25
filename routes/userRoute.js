@@ -32,6 +32,10 @@ router.post("/cart",userSideController.addCart);
 router.post("/cart/delete/:id",userSideController.deleteCart);
 router.post("/cart/updateQuantity",userSideController.updateCartQuantity);
 
+// whislist
+router.get("/wishlist",userMiddleware.isLogin,userSideController.wishListPage);
+router.post("/wishlist",userSideController.addToWishlist);
+router.get("/wishlist/remove/:id",userSideController.removeWishlist)
 
 // checkout
 router.get("/checkout",userMiddleware.isLogin,userSideController.checkoutPage);

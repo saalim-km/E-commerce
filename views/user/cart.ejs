@@ -163,6 +163,10 @@
             console.error(err);
         });
     }
+
+    window.addEventListener('load', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 </script>
 
 <%- include('../auth/partials/footer.ejs') %>

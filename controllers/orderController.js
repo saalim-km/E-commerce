@@ -4,8 +4,15 @@ const { findByIdAndUpdate } = require("../models/user");
 
 const loadOrders = async(req,res)=> {
     try {
-        const orders = await orderModel.find().populate('userId').sort({createdAt : -1});
-        res.render("ordersAdmin" , {orders});
+        const page = req.query.page || 1;
+        const perpage = 3;
+        const orders = await orderModel.find().populate('userId').skip((perpage * page)-perpage).limit(perpage).sort({createdAt : -1});
+        const ordersCount = await orderModel.countDocuments();
+        res.render("ordersAdmin" , {
+            orders,
+            currentPage : page,
+            totalPages : (ordersCount / perpage),
+        });
     } catch (error) {
         console.log("error while loading orders page")
     }

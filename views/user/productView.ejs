@@ -1,5 +1,18 @@
 <%- include('../auth/partials/header.ejs') %>
 <style>
+    .offer-countdown {
+            border: 1px solid #dee2e6;
+            max-width: 400px;
+        }
+        .offer-countdown .h5 {
+            font-weight: bold;
+            color: #dc3545;
+            min-width: 40px;
+        }
+        .offer-countdown small {
+            color: #6c757d;
+            font-size: 0.75rem;
+        }
     /* Enhanced Carousel Styling */
     .carousel-item img {
         height: 600px;
@@ -152,15 +165,40 @@
         <div class="col-lg-6 col-md-6 col-sm-12 product-info">
             <h3><%= product.productName %></h3>
             <p class="text-muted">Category: <%= product.category.name %></p>
-            <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
-                <p>
-                    <span class="product-price">₹<%= product.salesPriceAfterDiscount %></span>
-                    <del>₹<%= product.salesPrice %></del>
-                    <span class="discount"><%= product.productOffer[0].discountPercentage %>% off</span>
-                </p>
+            <% if (product.salesPriceAfterDiscount && product.productOffer && product.productOffer.length > 0 && product.productOffer[0].offerStatus) { %>
+                <div class="offer-section mb-3">
+                    <p class="price-display">
+                        <span class="product-price">₹<%= product.salesPriceAfterDiscount %></span>
+                        <del>₹<%= product.salesPrice %></del>
+                        <span class="discount"><%= product.productOffer[0].discountPercentage %>% off</span>
+                    </p>
+                    <div class="offer-countdown bg-light p-3 rounded">
+                        <h6 class="text-danger mb-2">
+                            <i class="bi bi-clock"></i> Offer Ends In:
+                        </h6>
+                        <div class="d-flex justify-content-start gap-3" id="countdown">
+                            <div class="text-center">
+                                <span class="h5 d-block" id="days">00</span>
+                                <small>Days</small>
+                            </div>
+                            <div class="text-center">
+                                <span class="h5 d-block" id="hours">00</span>
+                                <small>Hours</small>
+                            </div>
+                            <div class="text-center">
+                                <span class="h5 d-block" id="minutes">00</span>
+                                <small>Minutes</small>
+                            </div>
+                            <div class="text-center">
+                                <span class="h5 d-block" id="seconds">00</span>
+                                <small>Seconds</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <% } else { %>
-                <p><span class="product-price">₹<%= product.salesPrice %></span></p>
-            <% } %>     
+                <p class="price-display"><span class="product-price">₹<%= product.salesPrice %></span></p>
+            <% } %>
             <p><strong>Description:</strong> <%= product.description %></p>
 
             <!-- Sizes Selection with Stock -->
@@ -298,6 +336,101 @@
                 img.style.transformOrigin = `${x * 100}% ${y * 100}%`;
             });
         });
+    });
+</script>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+        // Check if product has an active offer
+        <% if (product.productOffer && product.productOffer.length > 0 && product.productOffer[0].offerStatus) { %>
+            try {
+                // Get the expiry date from the offer
+                const expiryDate = new Date('<%= product.productOffer[0].offerExpiryDate %>').getTime();
+                const countdownElement = document.getElementById('countdown');
+                const originalPrice = <%= product.salesPrice %>;
+                const priceDisplayElement = document.querySelector('.price-display');
+                
+                if (!countdownElement || !priceDisplayElement) {
+                    console.error('Required elements not found');
+                    return;
+                }
+
+                // Update countdown every second
+                const countdownTimer = setInterval(function() {
+                    // Get current date and time
+                    const now = new Date().getTime();
+                    
+                    // Find the distance between now and the expiry date
+                    const distance = expiryDate - now;
+                    
+                    // Check if the countdown elements exist
+                    const daysElement = document.getElementById('days');
+                    const hoursElement = document.getElementById('hours');
+                    const minutesElement = document.getElementById('minutes');
+                    const secondsElement = document.getElementById('seconds');
+
+                    if (!daysElement || !hoursElement || !minutesElement || !secondsElement) {
+                        console.error('One or more countdown elements not found');
+                        clearInterval(countdownTimer);
+                        return;
+                    }
+                    
+                    if (distance < 0) {
+                        // Offer has expired
+                        clearInterval(countdownTimer);
+                        
+                        // Update the price display to show only the original price
+                        priceDisplayElement.innerHTML = `<span class="product-price">₹${originalPrice}</span>`;
+                        
+                        // Remove the countdown section
+                        const offerCountdown = document.querySelector('.offer-countdown');
+                        if (offerCountdown) {
+                            offerCountdown.remove();
+                        }
+
+                        // Show a toast notification
+                        Toastify({
+                            text: "Offer has expired",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#dc3545",
+                        }).showToast();
+
+                        // Send AJAX request to update offer status in backend
+                        $.ajax({
+                            url: '/user/update-offer-status',
+                            method: 'POST',
+                            data: JSON.stringify({
+                                productId: '<%= product._id %>',
+                                offerId: '<%= product.productOffer[0]._id %>'
+                            }),
+                            contentType: 'application/json',
+                            success: function(response) {
+                                console.log('Offer status updated in database');
+                            },
+                            error: function(error) {
+                                console.error('Error updating offer status:', error);
+                            }
+                        });
+                    } else {
+                        // Calculate time units
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                        
+                        // Update the display
+                        daysElement.textContent = days.toString().padStart(2, '0');
+                        hoursElement.textContent = hours.toString().padStart(2, '0');
+                        minutesElement.textContent = minutes.toString().padStart(2, '0');
+                        secondsElement.textContent = seconds.toString().padStart(2, '0');
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('Error in countdown timer:', error);
+            }
+        <% } %>
     });
 </script>
 

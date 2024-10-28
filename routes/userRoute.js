@@ -55,4 +55,10 @@ router.put('/return_order',userSideController.returnOrder);
 // cancel and order individual items
 router.put('/order_cancel' , userSideController.cancelItem);
 router.put('/order_return' , userSideController.returnItem);
+
+// when the offer expires
+router.post('/update-offer-status',userSideController.updateOffer)
+
+// validate coupon
+router.post("/validate-coupon",userSideController.validateCoupon)
 module.exports = router;

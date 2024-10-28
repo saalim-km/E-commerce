@@ -1,0 +1,170 @@
+<%- include('./partials/header.ejs') %>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <div class="container mt-5">
+        <!-- Coupon Creation Form -->
+        <h2 class="mb-4">Create New Coupon</h2>
+        <% if(message.success){ %>
+            <div class="alert alert-success">
+                <%= message.success %>
+            </div>
+        <% } %>
+        <% if(  message.error){ %>
+            <div class="alert alert-danger">
+                <%= message.error %>
+            </div>
+        <% } %>
+        <form action="/admin/coupons/create" method="POST" onsubmit="return validateForm()">
+            <div class="mb-3">
+                <label for="name" class="form-label">Coupon Name</label>
+                <input type="text" class="form-control" id="name" name="name">
+            </div>
+            <div class="mb-3">
+                <label for="descountPercentage" class="form-label">Discount percentage</label>
+                <input type="number" class="form-control" id="discountPercentage" name="discountPercentage">
+            </div>
+            <div class="mb-3">
+                <label for="minPrice" class="form-label">Minimum Price</label>
+                <input type="number" class="form-control" id="minPrice" name="minPrice">
+            <div class="mb-3">
+                <label for="expiryDate" class="form-label">Expiry Date</label>
+                <input type="datetime-local" class="form-control" id="expiryDate" name="expiryDate">
+            </div>
+            <button type="submit" class="btn btn-primary">Create Coupon</button>
+        </form>
+
+
+
+        <div class="mt-5">
+            <h3 class="mb-4">Available Coupons</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Coupon Name</th>
+                            <th>Min Price</th>
+                            <th>Discount %</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(typeof coupons !== 'undefined' && coupons.length > 0) { %>
+                            <% coupons.forEach(coupon => { %>
+                                <tr>
+                                    <td><%= coupon.name %></td>
+                                    <td>₹<%= coupon.minPrice %></td>
+                                    <td><%= coupon.discountPercentage %> %</td>
+                                    <td><%= new Date(coupon.expiryDate).toLocaleDateString() %></td>
+                                    <td>
+                                        <% if(new Date(coupon.expiryDate) > new Date()) { %>
+                                            <span class="badge bg-success">Active</span>
+                                        <% } else { %>
+                                            <span class="badge bg-danger">Expired</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteCoupon('<%= coupon._id %>')">Delete</button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center">No coupons available</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<script>
+    function validateForm() {
+        const nameInput = document.getElementById('name');
+        nameInput.value = nameInput.value.toUpperCase(); 
+        const namePattern = /^[A-Z0-9]{1,8}$/; 
+        if (!namePattern.test(nameInput.value)) {
+            Toastify({
+                text: "Name should only contain uppercase letters and numbers, with a max of 8 characters",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+                close: true,
+            }).showToast();
+            return false;
+        }
+
+        // Discount Percentage validation
+        const discountPercentage = document.getElementById('discountPercentage');
+        const discountValue = parseInt(discountPercentage.value, 10);
+        if (isNaN(discountValue) || discountValue < 5 || discountValue > 99) {
+            Toastify({
+                text: "Discount percentage must be an integer between 5 and 99.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+                close: true,
+            }).showToast();
+            return false;
+        }
+
+        // Minimum price validation
+        const minPriceInput = document.getElementById('minPrice');
+        const minPricePattern = /^[1-9][0-9]{0,3}$/; 
+        if (!minPricePattern.test(minPriceInput.value)) {
+            Toastify({
+                text: "Minimum price should be a positive integer with up to 4 digits.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+                close: true,
+            }).showToast();
+            return false;
+        }
+
+        // Expiry date validation
+        const expiryDateInput = document.getElementById('expiryDate');
+        if (!expiryDateInput.value) {
+            Toastify({
+                text: "Expiry date cannot be empty.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+                close: true,
+            }).showToast();
+            return false;
+        }
+
+        const expiryDate = new Date(expiryDateInput.value);
+        const currentDate = new Date();
+        if (expiryDate <= currentDate) {
+            Toastify({
+                text: "Expiry date must be in the future.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#f44336",
+                close: true,
+            }).showToast();
+            return false;
+        }
+
+        return true;
+    }
+
+    // Uppercase conversion as the user types in the name field
+    document.getElementById('name').addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+    });
+</script>

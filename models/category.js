@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const offer = require("../models/offerModel");
+
 
 const categorySchema = new mongoose.Schema({
     name: {
@@ -14,6 +16,7 @@ const categorySchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    categoryOffer : [offer.schema],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Category', categorySchema);

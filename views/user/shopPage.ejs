@@ -145,6 +145,14 @@
     border-color: #ccc;
     cursor: not-allowed;
   }
+  .search-btn {
+    cursor: pointer;
+    margin-top: 5px;
+    margin-left: 5px;
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+  }
 </style>
 
 <div class="container mt-5">
@@ -178,7 +186,8 @@
       </div>
       <div class="col-md-4 mb-3">
         <label for="search" class="form-label">Search:</label>
-        <input type="text" id="search" class="form-control" value="<%= searchQuery %>" placeholder="Search products..." oninput="applyFilters()">
+        <input type="text" id="search" class="form-control" value="<%= searchQuery %>" placeholder="Search products..." >
+        <button class="search-btn" onclick="applyFilters()">Search</button>
       </div>
     </div>
   </div>

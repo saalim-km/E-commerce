@@ -5,64 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmation</title>
     <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         /* Styles for the order confirmation page */
         .confirmation-container {
             text-align: center;
-            padding: 50px;
+            padding: 50px 20px;
             font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
         }
         .confirmation-container h1 {
             font-size: 36px;
             margin-bottom: 20px;
-            color: green;
+            color: #4CAF50;
         }
         .order-details {
             margin: 20px auto;
-            max-width: 600px;
-            border: 1px solid #ddd;
-            padding: 20px;
-            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .order-details:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
         }
         .order-details h2 {
             font-size: 24px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            color: #333;
         }
         .order-details p {
             font-size: 16px;
             margin-bottom: 10px;
+            color: #666;
         }
         .order-summary {
             text-align: left;
             margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .order-summary h3, .order-summary h4 {
+            color: #333;
+            margin-bottom: 15px;
         }
         .order-summary p {
             font-size: 16px;
-            margin: 5px 0;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
         }
-        .order-summary p span {
+        .order-summary p span:first-child {
             font-weight: bold;
+            color: #555;
         }
         .thank-you {
             margin-top: 30px;
             font-size: 18px;
+            color: #666;
+        }
+        .btn-home {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn-home:hover {
+            background-color: #45a049;
+        }
+        .item-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .item-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+        .coupon-info {
+            background-color: #e8f5e9;
+            border: 1px dashed #4CAF50;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 40px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* Animated Checkmark Styles */
+        .checkmark-circle {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
             margin-bottom: 20px;
         }
-        .order-success-icon {
-            font-size: 60px;
-            color: green;
-            margin-bottom: 20px;
+        .checkmark-circle .background {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #4CAF50;
+            position: absolute;
+        }
+        .checkmark-circle .checkmark {
+            border-radius: 5px;
+        }
+        .checkmark-circle .checkmark.draw:after {
+            animation-delay: 100ms;
+            animation-duration: 1s;
+            animation-timing-function: ease;
+            animation-name: checkmark;
+            transform: scaleX(-1) rotate(135deg);
+            animation-fill-mode: forwards;
+        }
+        .checkmark-circle .checkmark:after {
+            opacity: 0;
+            height: 50px;
+            width: 25px;
+            transform-origin: left top;
+            border-right: 7px solid #fff;
+            border-top: 7px solid #fff;
+            content: '';
+            left: 25px;
+            top: 50px;
+            position: absolute;
+        }
+
+        @keyframes checkmark {
+            0% {
+                height: 0;
+                width: 0;
+                opacity: 1;
+            }
+            20% {
+                height: 0;
+                width: 25px;
+                opacity: 1;
+            }
+            40% {
+                height: 50px;
+                width: 25px;
+                opacity: 1;
+            }
+            100% {
+                height: 50px;
+                width: 25px;
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body class="page-template belle">
 
 <div class="confirmation-container">
-    <div class="order-success-icon">✔️</div>
-    <h1>Thank you for your order!</h1>
+    <div class="checkmark-circle">
+        <div class="background"></div>
+        <div class="checkmark draw"></div>
+    </div>
+    <h1 class="animate__animated animate__fadeInDown">Thank you for your order!</h1>
 
     <!-- Order details -->
-    <div class="order-details">
+    <div class="order-details fade-in-up">
         <h2>Order Confirmation</h2>
         <p><strong>Order Id:</strong> <%= order._id %></p>
         <p><strong>Order Date:</strong> 
@@ -72,26 +198,51 @@
         <!-- Display order summary -->
         <div class="order-summary">
             <h3>Order Summary</h3>
-            <p><span>Total Price:</span> ₹<%= order.totalAmount %></p>
-            <p><span>Shipping Address:</span> <%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.pincode %></p>
+            <p><span>Subtotal:</span> <span>₹<%= order.totalAmount %></span></p>
+            <% if (order.coupon) { %>
+                <p><span>Coupon Discount:</span> <span><%= order.coupon %></span></p>
+            <% } %>
+            <p><span>Shipping Address:</span> <span><%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.pincode %></span></p>
 
             <h4>Items Ordered:</h4>
+            <ul class="item-list">
             <% order.products.forEach(function(item) { %>
-                <p><strong><%= item.productId.productName %></strong> (Size: <%= item.size %>)</p>
-                <p>Quantity: <%= item.quantity %>, Price: ₹<%= item.productId.salesPriceAfterDiscount ? item.productId.salesPriceAfterDiscount  * item.quantity : item.productId.salesPrice  * item.quantity%>%></p>
+                <li>
+                    <strong><%= item.productId.productName %></strong> (Size: <%= item.size %>)<br>
+                    Quantity: <%= item.quantity %>, Price: ₹<%= item.productId.salesPriceAfterDiscount ? item.productId.salesPriceAfterDiscount * item.quantity : item.productId.salesPrice * item.quantity %>
+                </li>
             <% }); %>
+            </ul>
         </div>
 
         <!-- Payment method -->
         <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+
+        <% if (order.couponCode) { %>
+            <div class="coupon-info animate__animated animate__fadeIn">
+                <p><strong>Coupon Applied:</strong> <%= order.couponCode %></p>
+                <p><strong>Discount Amount:</strong> ₹<%= order.couponDiscount %></p>
+            </div>
+        <% } %>
     </div>
 
-    <div class="thank-you">
+    <div class="thank-you animate__animated animate__fadeIn">
         <p>Your order has been successfully placed and will be processed soon.</p>
         <p>You'll receive a confirmation email with further details.</p>
     </div>
 
-    <a href="/home" class="btn btn-dark">Back to Home</a>
+    <a href="/home" class="btn-home animate__animated animate__fadeIn">Back to Home</a>
 </div>
+
+<script>
+    // Add staggered animation to order summary items
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const items = document.querySelectorAll('.item-list li');
+        items.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.classList.add('animate__animated', 'animate__fadeInRight');
+        });
+    });
+</script>
 </body>
 </html>

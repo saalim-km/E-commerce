@@ -5,7 +5,10 @@ const cartModel = require("../models/cart");
 const orderModel = require("../models/order");
 const wishlistModel = require("../models/wishlist");
 const categoryModel = require("../models/category");
+const CouponModel = require("../models/couponModel");
 const Razorpay = require('razorpay'); 
+const couponModel = require("../models/couponModel");
+const { json } = require("express");
 const { ObjectId } = require("mongoose").Types;
 
 // Razor pay configuration
@@ -260,6 +263,7 @@ const deleteAdd = async(req,res)=> {
     }
 }
 
+// edit address
 const editAddPage = async(req,res)=> {
     try {
         const addressId = new ObjectId(req.params.id);
@@ -585,7 +589,7 @@ const removeWishlist = async (req, res) => {
       console.log("Error from removeWishlist:", error.message);
       res.status(500).send("Internal Server Error");
     }
-  };
+};
   
 
 
@@ -604,11 +608,9 @@ const checkoutPage = async(req,res)=> {
 
 const checkout = async(req,res)=> {
     try {
-        console.log(req.body);
         const email = req.session.user;
         const userData = await userModel.findOne({email});
         const {selectedAddress,cartItems,couponCode,paymentMethod} = req.body;
-        console.log(selectedAddress)
         const addressId = new ObjectId(selectedAddress);
 
         // selecting Address
@@ -622,7 +624,6 @@ const checkout = async(req,res)=> {
                 }
             }
         ]);
-        console.log(cartItems);
         let totalPrice = 0;
 
         // Total Amount
@@ -632,18 +633,25 @@ const checkout = async(req,res)=> {
             const itemTotal = product.salesPriceAfterDiscount ? product.salesPriceAfterDiscount * item.quantity : product.salesPrice * item.quantity;
             totalPrice += itemTotal;
         }
+
+        if(couponCode) {
+            console.log(couponCode);
+            const coupon = await couponModel.findOne({name : couponCode});
+            totalPrice = totalPrice - Math.trunc((totalPrice * coupon.discountPercentage) / 100);
+        }
+
         const order = new orderModel({
             userId : userData._id,
             products : cartItems,
             shippingAddress : address[0].addresses,
             paymentMethod : paymentMethod,
             totalAmount : totalPrice,
+            coupon : couponCode
         });
         const orderDetails = await order.save();
 
         // Decreasing the quantity from stock 
         for(let product of cartItems){
-            console.log(product);
             const productId = product.productId;
             const updateProduct = await productModel.updateOne({_id:productId ,'sizes.size' : product.size},{$inc : {'sizes.$.stock' : -product.quantity}});
         }
@@ -659,6 +667,7 @@ const checkout = async(req,res)=> {
 const orderSuccess = async(req,res)=> {
     try {
         const orderId = req.params.id;
+        console.log(orderId)
         const order = await orderModel.findById(orderId).populate("products.productId").populate("shippingAddress");
         res.render("orderPage",{order});
     } catch (error) {
@@ -733,6 +742,12 @@ const onlineOrder = async(req,res)=> {
             totalPrice += itemTotal;
         }
 
+        if(couponCode) {
+            const couponData = await couponModel.findOne({name : couponCode});
+            const discountPercentage = couponData.discountPercentage;
+            totalPrice -= Math.trunc((totalPrice / 100) * discountPercentage);
+        }
+        console.log(`total after cupon discount : ${totalPrice}`);
         const amount = totalPrice * 100;
 
         const options = {
@@ -761,13 +776,14 @@ const onlineOrder = async(req,res)=> {
         console.log("error while creating online order",error.message);
     }
 }
+
 // after payment successfull
 const verifyOrder = async(req,res)=> {
     try {
+        console.log('hi nigga ',req.body);
         const userData = await userModel.findOne({email : req.session.user});
-        console.log(userData)
         const {selectedAddress,cartItems,couponCode,paymentMethod} = req.body;
-        const addressId = new ObjectId(selectedAddress);
+        const addressId = new ObjectId(req.body.selectedAddress);
         const address = await userModel.aggregate([
             {
                 "$unwind" : "$addresses"
@@ -788,6 +804,13 @@ const verifyOrder = async(req,res)=> {
             totalPrice += itemTotal;
         }
 
+        if(couponCode) {
+            const couponData = await couponModel.findOne({name : couponCode});
+            const discountPercentage = couponData.discountPercentage;
+            totalPrice -= Math.trunc((totalPrice / 100) * discountPercentage);
+        }
+        console.log(`total after cupon discount : ${totalPrice}`);
+
         // creating order and saving database
         const order = new orderModel({
             userId : userData._id,
@@ -799,7 +822,6 @@ const verifyOrder = async(req,res)=> {
         const orderDetails = await order.save();
 
         for(let product of cartItems){
-            console.log(product);
             const productId = product.productId;
             const updateProduct = await productModel.updateOne({_id:productId ,'sizes.size' : product.size},{$inc : {'sizes.$.stock' : -product.quantity}});
         }
@@ -807,7 +829,7 @@ const verifyOrder = async(req,res)=> {
         const cartDelete = await cartModel.deleteMany({userId : userData._id});
         console.log(cartDelete);
         if(orderDetails && cartDelete){
-            res.json({success : true})
+            res.json({success : true , orderId : orderDetails._id})
         }else {
             res.json({success : false});
         }
@@ -1006,6 +1028,60 @@ const returnItem = async(req,res)=> {
         res.status(500).json({success : false});
     }
 }
+
+// updatin offer when the offer expires via ajax
+const updateOffer = async(req,res)=> {
+    try {
+        const {productId , offerId} = req.body;
+
+        const result = await productModel.findOneAndUpdate(
+            {
+                '_id' : productId,
+                'productOffer._id' : offerId
+            },
+            {
+                '$set' : {
+                    'productOffer.$.offerStatus' : false,
+                    'salesPriceAfterDiscount' : null
+                }
+            }
+        );
+        console.log(result);
+        res.json({success : true});
+    } catch (error) {
+        console.log("error in update offer",error.message);
+        res.status(500).json({success : false , error : error.message});
+    }
+}
+
+// validate coupon
+const validateCoupon = async(req,res)=> {
+    try {
+        console.log(req.body)
+        const { couponCode , totalAmount } = req.body;
+        const coupon = await CouponModel.findOne({ name: couponCode });
+
+        if (!coupon) {
+            return res.json({ valid: false, message: "Invalid coupon code." });
+        }
+
+        if (new Date() > coupon.expiryDate) {
+            return res.json({ valid: false, message: "This coupon has expired." });
+        }
+
+        if (totalAmount < coupon.minPrice) {
+            return res.json({ valid: false, message: `This coupon is only valid for orders above ₹${coupon.minPrice}.`});
+        }
+
+        res.json({
+            valid: true,
+            discountPercentage: coupon.discountPercentage
+        });
+    } catch (error) {
+        console.error('Error validating coupon:', error.message);
+        res.status(500).json({ valid: false, message: "An error occurred while validating the coupon." });
+    }
+}
 module.exports = {
     productView,
     shopList,
@@ -1035,5 +1111,7 @@ module.exports = {
     verifyOrder,
     wishListPage,
     addToWishlist,
-    removeWishlist
+    removeWishlist,
+    updateOffer,
+    validateCoupon
 }

@@ -1,14 +1,22 @@
 const express = require('express');
 const router = express.Router();
+
+// controllers
 const adminController = require('../controllers/adminController');
 const userController = require('../controllers/userController');
 const productController = require("../controllers/productsController");
 const orderController = require("../controllers/orderController");
+const categoriesController = require("../controllers/categoriesController");
+const couponController = require("../controllers/couponController");
+
+// middleware
+const adminMiddleware = require("../middlewares/isAdmin");
+
+// configurations
 const multer = require('multer');
 const storage = require("../config/multer");
 const uploads = multer({storage : storage});
-const categoriesController = require("../controllers/categoriesController");
-const adminMiddleware = require("../middlewares/isAdmin");
+
 
 // login routes
 router.get('/login',adminController.loadLogin);
@@ -67,13 +75,28 @@ router.get("/orders/:id",adminMiddleware.isAdmin,orderController.loadOtderDetail
 router.post("/orders/update/:id",orderController.updateOrder);
 
 
-// offer 
+// product offer 
 router.get("/add_offer",adminMiddleware.isAdmin,productController.addOfferPage);
 router.post("/add_offer/:id",productController.addOffer)
 
 // avtivate && de_activate offer
 router.post("/deactivate_offer/:id",productController.deactivate_offer);
-router.post("/activate_offer/:id",productController.activate_offer)
+router.post("/activate_offer/:id",productController.activate_offer);
+
+
+
+// category offer
+router.get("/categoryOffer",adminMiddleware.isAdmin,categoriesController.categoryOffer);
+router.post("/add_category_offer/:id",categoriesController.addOffer);
+
+// activate / de-activate category offer
+router.post('/deactivate_category_offer/:id',categoriesController.deactivateOffer);
+router.post('/activate_category_offer/:id' ,categoriesController.activateOffer);
+
+// coupon
+router.get("/coupon",adminMiddleware.isAdmin,couponController.couponPage);
+router.post("/coupons/create",couponController.addCoupon)
+
 module.exports = router;
 
 

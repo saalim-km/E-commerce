@@ -1,22 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Offers for Products</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- toastify css -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <%- include('./partials/header.ejs') %>
   <style>
-    .product_img {
-        height: 80px;
-        width: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-    }
-    .product_name {
+    .category_name {
       width: 200px;
       white-space: nowrap;
       overflow: hidden;
@@ -37,16 +23,16 @@
   </style>
 </head>
 <body>
-  <h1 class="text-center mb-4 mt-5">Manage Offers for Products</h1>
+  <h1 class="text-center mb-4 mt-5">Manage Offers for Categories</h1>
 
   <div class="container mt-5">
     
-    <% if (message.success) { %>
+    <% if (message && message.success) { %>
      <div class="alert alert-success">
       <%= message.success %>
      </div>
     <% } %>
-    <% if (message.error) { %>
+    <% if (message && message.error) { %>
      <div class="alert alert-danger">
         <%= message.error %>
      </div>
@@ -54,10 +40,8 @@
 
     <table class="table table-hover align-middle">
       <thead class="table-dark">
-        <tr >
-          <th>Product</th>
-          <th>Product Name</th>
-          <th>Sales Price</th>
+        <tr>
+          <th>Category Name</th>
           <th>Current Offer (%)</th>
           <th>Offer Expiry Date</th>
           <th>Actions</th>
@@ -65,17 +49,13 @@
         </tr>
       </thead>
       <tbody>
-        <% products.forEach(product => { %>
+        <% categories.forEach(category => { %>
             <tr class="shadow-sm bg-white rounded">
+              <td class="category_name"><%= category.name %></td>
+              <td><%= category.categoryOffer.length >= 1 ? category.categoryOffer[0].discountPercentage : '0' %> %</td>
+              <td><%= category.categoryOffer.length >= 1 ? category.categoryOffer[0].offerExpiryDate.toISOString().split('T')[0] : 'Not Set' %></td>
               <td>
-                <img src="/uploads/product-images/<%= product.images[0] %>" class="product_img" alt="<%= product.productName %>">
-              </td>
-              <td class="product_name"><%= product.productName %></td>
-              <td>₹<%= product.productOffer.length >= 1 ? Math.ceil(product.salesPriceAfterDiscount) : product.salesPrice %></td>
-              <td><%= product.productOffer.length >= 1 ? product.productOffer[0].discountPercentage : '0' %> %</td>
-              <td><%= product.productOffer.length >= 1 ? product.productOffer[0].offerExpiryDate.toISOString().split('T')[0] : 'Not Set' %></td>
-              <td>
-                <form action="/admin/add_offer/<%= product._id %>" method="POST" class="d-inline" onsubmit="return validateForm(this)">
+                <form action="/admin/add_category_offer/<%= category._id %>" method="POST" class="d-inline" onsubmit="return validateForm(this)">
                   <div class="input-group">
                     <input id="offerPercentage" type="number" class="form-control" name="offerPercentage" placeholder="Offer %"  min="0" max="99" step="1" aria-label="Offer Percentage">
                     <input type="date" class="form-control" name="expiryDate"  aria-label="Offer Expiry Date">
@@ -84,13 +64,13 @@
                 </form>
               </td>
               <td class="action-buttons">
-                <% if (product.productOffer.length >= 1) { %>
-                  <% if (product.productOffer[0].offerStatus) { %>
-                    <form action="/admin/deactivate_offer/<%=product._id%>" method="POST" class="d-inline">
+                <% if (category.categoryOffer.length >= 1) { %>
+                  <% if (category.categoryOffer[0].offerStatus) { %>
+                    <form action="/admin/deactivate_category_offer/<%=category._id%>" method="POST" class="d-inline">
                       <button type="submit" class="btn btn-danger">Deactivate</button>
                     </form>
                   <% } else { %>
-                    <form action="/admin/activate_offer/<%= product._id %>" method="POST" class="d-inline">
+                    <form action="/admin/activate_category_offer/<%= category._id %>" method="POST" class="d-inline">
                       <button type="submit" class="btn btn-success">Activate</button>
                     </form>
                   <% } %>
@@ -123,7 +103,7 @@
 
   <!-- Form validation script -->
   <script>
-      function validateForm(form) {
+    function validateForm(form) {
       const offerPercentageInput = form.querySelector('input[name="offerPercentage"]');
       const expiryDateInput = form.querySelector('input[name="expiryDate"]');
       
@@ -157,3 +137,5 @@
       }).showToast();
     }
   </script>
+</body>
+</html>

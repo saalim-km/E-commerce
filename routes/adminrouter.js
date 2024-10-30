@@ -95,7 +95,8 @@ router.post('/activate_category_offer/:id' ,categoriesController.activateOffer);
 
 // coupon
 router.get("/coupon",adminMiddleware.isAdmin,couponController.couponPage);
-router.post("/coupons/create",couponController.addCoupon)
+router.post("/coupons/create",couponController.addCoupon);
+router.delete('/coupon/delete',couponController.deleteCoupon)
 
 module.exports = router;
 

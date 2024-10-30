@@ -130,8 +130,14 @@
 
             <div class="d-flex justify-content-end">
                 <div>
-                    <p>Total Amount : </p>
-                    <h5>&#x20B9; <%=order.totalAmount%></h5>
+                    <% if (order.totalAmount == 0) { %>
+                        <p class="text-danger">Order <%= order.status %></p>
+                        <p>Total Amount</p>
+                        <h5>&#x20B9; <%=order.backupTotalAmount%></h5>
+                    <% } else {%>
+                        <p>Total Amount</p>
+                        <h5>&#x20B9; <%=order.totalAmount%></h5>
+                    <% } %>
                 </div>
             </div>
         </div>

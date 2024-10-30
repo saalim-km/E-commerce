@@ -5,7 +5,7 @@ const { findByIdAndUpdate } = require("../models/user");
 const loadOrders = async(req,res)=> {
     try {
         const page = req.query.page || 1;
-        const perpage = 3;
+        const perpage = 4;
         const orders = await orderModel.find().populate('userId').skip((perpage * page)-perpage).limit(perpage).sort({createdAt : -1});
         const ordersCount = await orderModel.countDocuments();
         res.render("ordersAdmin" , {
@@ -25,48 +25,90 @@ const loadOtderDetails = async(req,res)=> {
         const products = order.products;
         const address = order.shippingAddress;
         const user = order.userId;
-        console.log(products);
         res.render("orderDetail",{order , products , address , user});
     } catch (error) {
         console.log("error while loading the order details page : ",error.message);
     }
 }
 
-const updateOrder = async(req,res)=> {
+const updateOrder = async (req, res) => {
     try {
-        const {status} = req.body;
-        const {id} = req.params;
-        if(status == 'Cancelled') {
-            const order = await orderModel.findById(id);
-            const orderUpdate = await orderModel.findByIdAndUpdate(id,{$set : {status : 'Cancelled'}});
-            if(orderUpdate) {
-                for(const product of order.products) {
-                    const productId = product.productId;
-                    const size = product.size;
-                    const quantity = product.quantity
+        const { status } = req.body;
+        const { id } = req.params;
 
-                    await productModel.updateOne(
-                        {
-                            _id : productId,
-                            'sizes.size' : size,
-                        },
-                        {
-                            $inc : {'sizes.$.stock' : quantity}
+        if (status === 'Cancelled') {
+            const order = await orderModel.findById(id);
+            if (order) {
+
+                const orderUpdate = await orderModel.findByIdAndUpdate(
+                    id,
+                    {
+                        $set: {
+                            status: 'Cancelled',
+                            'products.$[].status': 'Cancelled'  
                         }
-                    );
+                    },
+                    { new: true }
+                );
+
+                if (orderUpdate) {
+                    
+                    for (const product of order.products) {
+                        const productId = product.productId;
+                        const size = product.size;
+                        const quantity = product.quantity;
+
+                        await productModel.updateOne(
+                            {
+                                _id: productId,
+                                'sizes.size': size
+                            },
+                            {
+                                $inc: { 'sizes.$.stock': quantity }
+                            }
+                        );
+                    }
+                    req.flash("success", "Order and products cancelled successfully.");
+                    res.redirect("/admin/orders");
                 }
-                res.redirect("/admin/orders");
             }
-        }else {
-            const order = await orderModel.findByIdAndUpdate(id,{$set : {status : status}});
-            req.flash(`success","order status update to ${status}`);
+        } 
+        else if(status === 'Delivered') {
+            const order = await orderModel.findById(id);
+            if (order) {
+
+                const orderUpdate = await orderModel.findByIdAndUpdate(
+                    id,
+                    {
+                        $set: {
+                            status: 'Delivered',
+                            'products.$[].status': 'Delivered'  
+                        }
+                    },
+                    { new: true }
+                );
+
+                if (orderUpdate) {
+                    req.flash("success", "Order and products Delivered successfully.");
+                    res.redirect("/admin/orders");
+                }
+            }
+        }
+        else {
+            await orderModel.findByIdAndUpdate(
+                id,
+                { $set: { status } }
+            );
+            req.flash("success", `Order status updated to ${status}`);
             res.redirect("/admin/orders");
         }
     } catch (error) {
-        req.flash("error",`error while updating the cart ${error.message}`);
-        console.log("error while updating order",error.message);
+        req.flash("error", `Error while updating the order: ${error.message}`);
+        console.log("Error while updating order:", error.message);
+        res.redirect("/admin/orders");
     }
-}
+};
+
 
 
 module.exports = {

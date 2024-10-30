@@ -2,6 +2,7 @@ const dotenv = require('dotenv').config();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userModel = require('../models/user');
+const walletModel = require("../models/wallet");
 
 
 passport.use(new GoogleStrategy({ 
@@ -25,7 +26,13 @@ async function (request , accessToken, regreshToken, profile , done) {
 				email : email,
 				username : name,
 			});
-			await existingUser.save();
+			const userData = await existingUser.save();
+			const wallet = new walletModel({
+				userId : userData._id,
+				balance : 0,
+			})
+			await wallet.save();
+			console.log(`wallet created for ${userData.username}`);
 			console.log('data stored in the database');
 			return done(null,existingUser);
 		}

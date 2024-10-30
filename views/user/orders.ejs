@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Orders</title>
 
     <!-- DataTables CSS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -74,6 +74,11 @@
                                     <i class="bi bi-box-seam-fill"> </i> Orders
                                 </a>
                             </li>
+                            <li class="dropdown-item ">
+                                <a class="nav-link" href="/user/wallet">
+                                    <i class="bi bi-wallet2"> </i> SAVAGE-Wallet
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -138,7 +143,13 @@
                             <%= order.status %>
                         </td>
                         <td><%= order.paymentMethod %></td>
-                        <td>&#x20B9;<%= order.totalAmount %></td>
+                        <% if (order.status == 'Returned' || order.status == 'Cancelled') { %>
+                            <td>
+                                <p style="color: green;">Cash Refunded</p>
+                            </td>
+                        <% } else {%>
+                            <td>&#x20B9;<%= order.totalAmount %></td>
+                        <% } %>    
                         <td>
                             <a href="/user/ordersDetails/<%= order._id %>">
                                 <button class="btn btn-info">View Order</button>

@@ -60,5 +60,8 @@ router.put('/order_return' , userSideController.returnItem);
 router.post('/update-offer-status',userSideController.updateOffer)
 
 // validate coupon
-router.post("/validate-coupon",userSideController.validateCoupon)
+router.post("/validate-coupon",userSideController.validateCoupon);
+
+// wallet
+router.get("/wallet",userMiddleware.isLogin,userSideController.walletPage)
 module.exports = router;

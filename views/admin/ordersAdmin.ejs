@@ -52,7 +52,9 @@
                                     <td>#<%= order._id %></td>
                                     <td><%= order.userId.username %></td>
                                     <td><%= order.userId.email %></td>
-                                    <td>₹<%= order.totalAmount %></td>
+                                    <td>
+                                        ₹ <%= order.totalAmount == 0 ? order.backupTotalAmount : order.totalAmount%>
+                                    </td>
                                     <td>
                                         <span class="badge rounded-pill 
                                             <%= order.status === 'Pending' ? 'alert-warning' : 

@@ -164,6 +164,19 @@
                 <input type="text" class="form-control" name="couponCode" id="couponCode" placeholder="Enter coupon code" />
                 <button type="button" id="applyCouponBtn" class="btn btn-secondary mb-3">Apply</button>
             </div>
+            <div class="available-coupons mt-4 card rounded">
+                <div class="coupon-list p-3 checkout-section rounded">
+                    <h5>Available Coupons</h5>  
+                    <% coupons.forEach(function(coupon) { %>
+                        <div class="coupon-item d-flex justify-content-between align-items-center mb-2 ">
+                            <h3 style="font-weight: 700;" class="coupon-code"><%= coupon.name %></h3>
+                            <p>This coupon is only valid for orders above ₹<%= coupon.minPrice %></p>
+                            <button type="button" class="btn btn-sm btn-outline-secondary copy-coupon" data-coupon="<%= coupon.name %>">Copy</button>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
 
             <!-- Payment Methods Section -->
             <div class="payment-methods">
@@ -177,7 +190,6 @@
                     <label class="form-check-label" for="Razorpay">Razorpay</label>
                 </div>
             </div>
-
             <!-- Submit Button -->
             <button id="placeOrderBtn" type="submit" class="btn btn-primary">Place Order</button>
         </div>
@@ -233,7 +245,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.valid) {
-                    const discountAmount = Math.trunc((originalTotal * data.discountPercentage) / 100);
+                    const discountAmount = Math.round((originalTotal * data.discountPercentage) / 100);
                     const newTotal = originalTotal - discountAmount;
 
                     totalElement.textContent = newTotal.toFixed(2);
@@ -334,6 +346,28 @@
                     }
                 });
             }
+        });
+
+        const copyButtons = document.querySelectorAll('.copy-coupon');
+        
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const couponCode = this.getAttribute('data-coupon');
+                navigator.clipboard.writeText(couponCode).then(() => {
+                    // Change button text temporarily
+                    const originalText = this.textContent;
+                    this.textContent = 'Copied!';
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                    }, 2000);
+
+                    // Show toast notification
+                    showToast("Coupon code copied to clipboard!", "success");
+                }, (err) => {
+                    console.error('Could not copy text: ', err);
+                    showToast("Failed to copy coupon code.", "error");
+                });
+            });
         });
     });
 </script>

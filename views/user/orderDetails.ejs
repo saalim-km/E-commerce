@@ -107,25 +107,39 @@
                     <% products.forEach(item => { %>
                         <tr>
                             <td><img class="product-img" src="/uploads/product-images/<%= item.productId.images[0] %>" alt=""></td>
-                            <td><%= item.productId.productName %>  (<%= item.size %>)</td>
+                            <td><%= item.productId.productName %> (<%= item.size %>)</td>
                             <td>&#x20B9; <%= item.price %></td>
                             <td><%= item.quantity %></td>
                             <td>&#x20B9; <%= item.quantity * item.price %></td>
                             <td>
-                                <% if (products.length > 1 && order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned') { %> 
-                                        <button class="btn cancel-btn" onclick="cancelItemOne('<%= order._id %>','<%= item._id %>','<%= item.productId.productName%>')">Cancel</button>
-                                <% } %>
-        
-                                <% if (products.length > 1 && order.status === 'Delivered') { %> 
-                                        <button class="btn return-btn btn-success" onclick="returnItemOne('<%= order._id %>','<%= item._id %>','<%= item.productId.productName%>')">Return</button>
-                                <% } %>
+                                <% if (item.status === 'Returned') { %>
+                                    <p style="color: green;">Returned</p>
+                                <% } else if (item.status === 'Cancelled') { %>
+                                    <p style="color: rgb(255, 52, 52);">Cancelled</p>
+                                <% } else { %>
+                                    <% if (products.length > 1 && order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== 'Returned') { %> 
+                                        <button class="btn cancel-btn" onclick="cancelItemOne('<%= order._id %>', '<%= item._id %>', '<%= item.productId.productName %>')">Cancel</button>
+                                    <% } %>
+                                    <% if (item.status === 'Delivered') { %>
+                                        <p style="color: green;">Delivered</p>
+                                    <% } %>
+                                    <% if (order.status === 'Delivered') { %> 
+                                        <button class="btn return-btn btn-success" onclick="returnItemOne('<%= order._id %>', '<%= item._id %>', '<%= item.productId.productName %>')">Return</button>
+                                    <% } %>
+                                <% } %>     
                             </td>
                         </tr>
                     <% }) %>
+                    
                 </tbody>
             </table>
             <div class="text-end">
-                <h5>Total: &#x20B9; <%= order.totalAmount %></h5>
+                <% if (order.totalAmount == 0) { %>
+                    <p class="text-danger">Order <%=order.status%></p>
+                    <h5>Total: &#x20B9; <%= order.backupTotalAmount %></h5>
+                <% } else {%>
+                    <h5>Total: &#x20B9; <%= order.totalAmount %></h5>
+                <% } %>    
             </div>
     </div>
 
@@ -283,7 +297,7 @@
             }).then((result)=> {
                 if(result.isConfirmed){
                     $.ajax({
-                        url : "/user/order_cancel",
+                        url : "/user/order_return",
                         type : 'PUT',
                         data : JSON.stringify({
                             id : orderId,

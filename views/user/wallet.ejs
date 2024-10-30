@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAVAGE - Wallet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        .koulen {
+            font-family: 'Koulen', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light border-bottom bg-white">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center ms-5" href="#">
+                <h1 class="m-2 text-dark koulen">SAVAGE</h1>
+            </a>
+    
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/home">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" aria-expanded="false">
+                            <i class="bi bi-person-fill"></i> Account
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/user/profile"><i class="bi bi-person-fill"></i> User Profile</a></li>
+                            <li><a class="dropdown-item" href="/user/password"><i class="bi bi-key-fill"></i> Change Password</a></li>
+                            <li><a class="dropdown-item" href="/user/address"><i class="bi bi-person-vcard-fill"></i> Address</a></li>
+                            <li><a class="dropdown-item" href="/user/orders"><i class="bi bi-box-seam-fill"></i> Orders</a></li>
+                            <li><a class="dropdown-item active" href="/user/wallet/"><i class="bi bi-wallet2"></i> SAVAGE-Wallet</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger fw-bold" href="/user/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Wallet Content -->
+    <div class="container my-5">
+        <h2 class="display-5 mb-4">SAVAGE Wallet</h2>
+        
+        <!-- Wallet Overview -->
+        <div class="card p-4 mb-4">
+            <h3 class="h5">Wallet Balance</h3>
+            <p class="display-4 text-success">₹<%= wallet.balance %></p>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="card p-4">
+            <h3 class="h5 mb-3">Transaction History</h3>
+            
+            <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">PaymentMethod</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% wallet.transactions.forEach(transaction => { %>
+                                <tr>
+                                    <td><%= new Date(transaction.createdAt).toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                                    <td>#<%= transaction.orderId ? transaction.orderId._id : "N/A" %></td>
+                                    <td class="<%= transaction.transactionType === 'credit' ? 'text-success' : 'text-danger' %>">
+                                        ₹<%= transaction.amount.toFixed(2) %>
+                                    </td>
+                                    <td><%= transaction.transactionType.charAt(0).toUpperCase() + transaction.transactionType.slice(1) %></td>
+                                    <% if (transaction.description == 'Cancelled') { %>
+                                        <td style="color: red;"><%= transaction.description %></td>
+                                    <% } else { %>
+                                        <td style="color: green;"><%= transaction.description %></td>
+                                    <% } %>    
+                                    <td><%= transaction.paymentMethod %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-3 text-muted mb-3"></i>
+                    <p class="text-muted">No transaction history available.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var dropdownToggle = document.getElementById('navbarDropdown');
+            var dropdownMenu = document.querySelector('.dropdown-menu');
+
+            dropdownToggle.addEventListener('click', function (event) {
+                event.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

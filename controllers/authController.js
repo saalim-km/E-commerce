@@ -5,6 +5,7 @@ const userModel = require("../models/user");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const productModel = require("../models/product");
+const walletModel = require("../models/wallet");
 
 // Configuring NodeMailer
 const transporter = nodemailer.createTransport({
@@ -143,8 +144,18 @@ const verifyOtp = async (req, res) => {
         isAdmin: 0,
         isBlocked: 0,
       });
-      await newUser.save();
+      const userData = await newUser.save();
       console.log(newUser);
+
+      
+      // creating new wallet for user
+      const wallet = new walletModel({
+        userId : userData._id,
+        balance : 0,
+      })
+      await wallet.save();
+      console.log(`created wallet for ${userData.username}`);
+
 
       // re-setting the otp
       req.session.otp = null;

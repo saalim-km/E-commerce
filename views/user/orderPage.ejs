@@ -201,6 +201,7 @@
             <p><span>Subtotal:</span> <span>₹<%= order.totalAmount %></span></p>
             <% if (order.coupon) { %>
                 <p><span>Coupon Discount:</span> <span><%= order.coupon %></span></p>
+                <p><span>Discount price</span> <span>₹ <%= order.discount %></span></p>
             <% } %>
             <p><span>Shipping Address:</span> <span><%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.pincode %></span></p>
 

@@ -105,7 +105,7 @@
                   <div class="image-section" id="imageSection">
                     <% product.images.forEach((image, index) => { %>
                       <div class="image-container mb-2" id="image-container-<%= index %>">
-                        <img src="/uploads/product-images/<%= image %>" alt="Product Image" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                        <img src="<%= image %>" alt="Product Image" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
                         <button type="button" class="btn btn-danger mt-2" onclick="removeImage('<%- image %>', <%= index %>)">Remove</button>
                         <input type="hidden" name="existingImages[]" value="<%= image %>">
                       </div>

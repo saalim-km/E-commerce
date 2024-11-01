@@ -8,11 +8,6 @@ const getAllCategories = async (req, res) => {
       return res.redirect("/admin/login");
     }else{
     const categories = await Category.find().sort({createdAt : -1});
-
-    if (categories.length === 0) {
-      req.flash("info", "No categories found. Please add some categories.");
-      return res.redirect('/admin/users');
-    }
     res.render("categories", { categories });
     }
   } catch (error) {

@@ -50,34 +50,38 @@
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <% categories.forEach(category => { %>
-                                    <tr>
-                                        <td><b><%= category.name %></b></td>
-                                        <td><%= category.description %></td>
-                                        <td>
-                                            <span class="badge <%= category.isListed ? 'bg-success' : 'bg-danger' %>">
-                                                <%= category.isListed ? "Listed" : 'UnListed' %>
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            <div class="dropdown">
-                                                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm">
-                                                    <i class="material-icons md-more_horiz"></i>
-                                                </a>
-                                                <div class="dropdown-menu">
-                                                    <form action="/admin/categories/edit/<%= category._id %>" method="GET">
-                                                        <button type="submit" class="dropdown-item">Edit</button>
-                                                    </form>
-                                                    <form action="/admin/categories/islist/<%= category._id %>" method="POST">
-                                                        <button type="submit" class="dropdown-item"><%= category.isListed ? 'Unlist' : 'List' %></button>
-                                                    </form>
+                            <% if (categories) { %>
+                                <tbody>
+                                    <% categories.forEach(category => { %>
+                                        <tr>
+                                            <td><b><%= category.name %></b></td>
+                                            <td><%= category.description %></td>
+                                            <td>
+                                                <span class="badge <%= category.isListed ? 'bg-success' : 'bg-danger' %>">
+                                                    <%= category.isListed ? "Listed" : 'UnListed' %>
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="dropdown">
+                                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm">
+                                                        <i class="material-icons md-more_horiz"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu">
+                                                        <form action="/admin/categories/edit/<%= category._id %>" method="GET">
+                                                            <button type="submit" class="dropdown-item">Edit</button>
+                                                        </form>
+                                                        <form action="/admin/categories/islist/<%= category._id %>" method="POST">
+                                                            <button type="submit" class="dropdown-item"><%= category.isListed ? 'Unlist' : 'List' %></button>
+                                                        </form>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            <% } else {%>
+                                <h1>no categories found add some categories</h1>
+                            <% } %>
                         </table>
                     </div>
                 </div>

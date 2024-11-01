@@ -63,5 +63,9 @@ router.post('/update-offer-status',userSideController.updateOffer)
 router.post("/validate-coupon",userSideController.validateCoupon);
 
 // wallet
-router.get("/wallet",userMiddleware.isLogin,userSideController.walletPage)
+router.get("/wallet",userMiddleware.isLogin,userSideController.walletPage);
+
+
+// Invoice
+router.get("/download_invoice/:id",userSideController.downloadInvoice)
 module.exports = router;

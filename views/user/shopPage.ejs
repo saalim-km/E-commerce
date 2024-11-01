@@ -194,24 +194,32 @@
 
   <div class="product-grid">
     <% products.forEach((product, index) => { %>
-        <div class="cardd">
-            <a href="/user/products/<%= product._id %>">
-                <div class="product-item" style="animation-delay: <%= index * 0.1 %>s;">
-                    <img src="/uploads/product-images/<%= product.images[0] %>" alt="<%= product.productName %>" class="img-fluid">
-                    <div class="product-info">
-                      <h5 class="product-name"><%= product.productName %></h5>
-                      <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
-                        <p class="price">₹<%= product.salesPriceAfterDiscount %> <del class="text-muted">₹<%= product.salesPrice %></del> <span class="text-success font-weight-bold">%<%= product.productOffer[0].discountPercentage %> OFF</span></p>
-                      <% } else { %>
-                        <p class="price">₹<%= product.salesPrice %></p>
-                      <% } %>
-                      <p class="category mb-3" style="color: rgb(54, 54, 54); font-size: 1em; font-weight: 600;"><%= product.category.name %></p>
-                      <a href="/user/products/<%= product._id %>" class="btn animated-button w-100">View Product</a>
-                    </div>
-                </div>
-            </a>
-        </div>
+      <div class="cardd">
+        <a href="/user/products/<%= product._id %>">
+          <div class="product-item" style="animation-delay: <%= index * 0.1 %>s;">
+            <!-- Use Cloudinary image URL stored in product.images[0] -->
+            <img src="<%= product.images[0] %>" alt="<%= product.productName %>" class="img-fluid">
+            <div class="product-info">
+              <h5 class="product-name"><%= product.productName %></h5>
+              <% if (product.salesPriceAfterDiscount && product.productOffer[0].offerStatus) { %>
+                <p class="price">
+                  ₹<%= product.salesPriceAfterDiscount %> 
+                  <del class="text-muted">₹<%= product.salesPrice %></del> 
+                  <span class="text-success font-weight-bold">%<%= product.productOffer[0].discountPercentage %> OFF</span>
+                </p>
+              <% } else { %>
+                <p class="price">₹<%= product.salesPrice %></p>
+              <% } %>
+              <p class="category mb-3" style="color: rgb(54, 54, 54); font-size: 1em; font-weight: 600;">
+                <%= product.category.name %>
+              </p>
+              <a href="/user/products/<%= product._id %>" class="btn animated-button w-100">View Product</a>
+            </div>
+          </div>
+        </a>
+      </div>
     <% }) %>
+    
   </div>
 
   <% if (pagination.totalPages > 1) { %>

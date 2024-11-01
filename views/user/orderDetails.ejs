@@ -74,7 +74,12 @@
 
         <div class="row mt-4 text-end">
             <div class="col-md-12">
-                <button class="btn invoice-btn btn-dark">Download Invoice</button>
+                <% if (order.status === 'Delivered') { %>
+                    <button class="btn invoice-btn btn-dark" onclick="window.location.href='/user/download_invoice/<%= order._id %>'">Download Invoice</button>
+                <% } else {%>
+                    <p></p>
+                <% } %>    
+                
         
                 <% if (order.status !== 'Cancelled' && order.status !== 'Delivered' && order.status !== "Returned") { %>
                     <!-- Show general cancel button if only one item and order not cancelled/delivered -->

@@ -11,8 +11,10 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cloudinary": "^2.5.1",
     "connect-flash": "^0.1.1",
     "dotenv": "^16.4.5",
+    "easyinvoice": "^3.0.47",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "express-session": "^1.18.0",
@@ -24,6 +26,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "path": "^0.12.7",
+    "pdfkit": "^0.15.1",
     "razorpay": "^2.9.4",
     "sharp": "^0.33.5",
     "sweetalert2": "^11.14.0"

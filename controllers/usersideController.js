@@ -8,6 +8,8 @@ const categoryModel = require("../models/category");
 const CouponModel = require("../models/couponModel");
 const couponModel = require("../models/couponModel");
 const walletModel = require("../models/wallet");
+const easyinvoice = require("easyinvoice");
+const fs = require('fs');
 const Razorpay = require("razorpay");
 const { json } = require("express");
 const { ObjectId } = require("mongoose").Types;
@@ -994,35 +996,35 @@ const cancelOrder = async (req, res) => {
 const returnOrder = async (req, res) => {
   try {
     const { id } = req.body;
-    console.log("Returning order with ID:", id);
+    console.log("Returning entire order with ID:", id);
 
     const order = await orderModel.findById(id).populate('userId');
     if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
     let refundAmount = 0;
+
     for (const product of order.products) {
       if (product.status !== "Returned") {
-        
         let productRefundAmount = product.price * product.quantity;
 
-       
+        // Apply coupon discount if applicable
         if (order.coupon) {
           const coupon = await couponModel.findOne({ name: order.coupon });
           if (coupon) {
             const discountMultiplier = 1 - (coupon.discountPercentage / 100);
-            productRefundAmount *= discountMultiplier; // Avoid rounding here
+            productRefundAmount *= discountMultiplier;
           }
         }
 
         refundAmount += productRefundAmount;
 
-        
+        // Restock the returned product
         await productModel.updateOne(
           { _id: product.productId, "sizes.size": product.size },
           { $inc: { "sizes.$.stock": product.quantity } }
         );
 
-        
+        // Update the product's status to "Returned"
         await orderModel.updateOne(
           { _id: id, "products._id": product._id },
           { $set: { "products.$.status": "Returned" } }
@@ -1030,26 +1032,16 @@ const returnOrder = async (req, res) => {
       }
     }
 
-    
     refundAmount = Math.round(refundAmount);
 
-    // checking all the products returned or not if the all products returned the totalAmount is set to '0'
-    const allProductsReturned = order.products.every(product => product.status === "Returned");
-    if (allProductsReturned) {
-      await orderModel.updateOne(
-        { _id: id },
-        { $set: { totalAmount: 0, status: "Returned" } }
-      );
-    } else {
-      
-      await orderModel.updateOne(
-        { _id: id },
-        { $inc: { totalAmount: -refundAmount } }
-      );
-    }
+    // Update the order's totalAmount to zero and status to "Returned"
+    await orderModel.updateOne(
+      { _id: id },
+      { $set: { totalAmount: 0, status: "Returned" } }
+    );
 
-    // wallet update only for Razorpay payements only
-    if (order.paymentMethod !== "COD" && refundAmount > 0) {
+    // Update the wallet balance and add transaction for both COD and Razorpay
+    if (refundAmount > 0) {
       const walletData = await walletModel.findOne({ userId: order.userId._id });
       if (walletData) {
         walletData.balance += refundAmount;
@@ -1067,12 +1059,14 @@ const returnOrder = async (req, res) => {
       }
     }
 
-    res.json({ success: true});
+    res.json({ success: true });
   } catch (error) {
-    console.log("Error while returning order:", error.message);
+    console.log("Error while returning entire order:", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
+
 
 
 
@@ -1362,6 +1356,62 @@ const walletPage = async (req, res) => {
   }
 };
   
+
+const downloadInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Fetch order details from your database
+    const order = await orderModel.findById(id).populate('userId').populate('products.productId');
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    // Configure the invoice data
+    const invoiceData = {
+      "sender": {
+        "company": "Savage",
+        "address": "Jew Street Kochi",
+        "zip": "682025",
+        "city": "Kochi",
+        "country": "India",
+      },
+      "client": {
+        "company": order.userId.username,
+        "address": order.shippingAddress.street,
+        "zip": order.shippingAddress.pincode,
+        "city": order.shippingAddress.city,
+        "custom1": `Order ID: #${order._id}`,
+      },
+      "information": {
+        "number": order._id,
+        "date": new Date(order.createdAt).toLocaleDateString(),
+      },
+      "products": order.products.map(item => ({
+        "quantity": item.quantity,
+        "description": item.productId.productName,
+        "tax-rate": 0,
+        "price": item.price,
+      })),
+      "bottom-notice": "Thank you for shopping with us!",
+      "settings": { "currency": "INR" }
+    };
+
+    // Generate the PDF invoice
+    const invoicePdf = await easyinvoice.createInvoice(invoiceData);
+    // Convert base64 to binary for PDF download
+    const pdfBuffer = Buffer.from(invoicePdf.pdf, 'base64');
+
+    // Send the invoice file as a response
+    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${id}.pdf`);
+    res.type('application/pdf');
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error("Error in downloadInvoice:", error.message);
+    res.status(500).json({ message: "An error occurred while generating the invoice" });
+  }
+};
+
 module.exports = {
   productView,
   shopList,
@@ -1395,4 +1445,5 @@ module.exports = {
   updateOffer,
   validateCoupon,
   walletPage,
+  downloadInvoice,
 };

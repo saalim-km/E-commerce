@@ -145,7 +145,7 @@
                     <% product.images.forEach((image, index) => { %>
                         <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
                             <div class="carousel-zoom d-flex justify-content-center align-items-center" style="height: 600px;">
-                                <img src="/uploads/product-images/<%= image %>" alt="Product Image <%= index + 1 %>" class="d-block">
+                                <img src="<%= image %>" alt="Product Image <%= index + 1 %>" class="d-block">
                             </div>
                         </div>
                     <% }) %>

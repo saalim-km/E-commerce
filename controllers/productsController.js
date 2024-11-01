@@ -1,3 +1,6 @@
+const dotenv = require("dotenv");
+dotenv.config();
+const cloudinary = require("../config/cloudinary");
 const productModel = require("../models/product");
 const categoryModel = require("../models/category");
 const cartModel = require('../models/cart');
@@ -21,76 +24,64 @@ const loadAddProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    console.log(req.body);
-    console.log(req.files);
-    const {
+    const { productName, product_offer, salesPrice, description, category, sizes } = req.body;
+
+    const productSizes = [
+      { size: "S", stock: sizes.s },
+      { size: "M", stock: sizes.m },
+      { size: "L", stock: sizes.l },
+      { size: "XL", stock: sizes.xl },
+    ];
+
+    const productExists = await productModel.findOne({ productName });
+    if (productExists) {
+      req.flash("error", "already existing product");
+      return res.redirect("/admin/addproducts");
+    }
+
+    const images = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        // Upload directly from buffer using Cloudinary's upload_stream
+        const result = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "product-images",
+              width: 440,
+              height: 440,
+              crop: "fill",
+            },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
+          uploadStream.end(file.buffer);
+        });
+
+        images.push(result.secure_url);
+      }
+    }
+
+    const categoryObj = await categoryModel.findOne({ name: category });
+    const categoryId = categoryObj._id;
+
+    const newProduct = new productModel({
       productName,
       product_offer,
       salesPrice,
       description,
-      category,
-      sizes,
-    } = req.body;
-    const productSizes = [
-      {size : 'S' , stock : sizes.s},
-      {size : 'M' , stock : sizes.m},
-      {size : 'L' , stock : sizes.l},
-      {size : 'XL', stock : sizes.xl},
-    ];
-    const productExists = await productModel.findOne({
-      productName: productName,
+      images,
+      category: categoryId,
+      sizes: productSizes,
     });
 
-    // checking if the product already exists.
-    if (!productExists) {
-      const images = [];
-      if (req.files && req.files.length > 0) {
-        for (let i = 0; i < req.files.length; i++) {
-          const originalImagePath = req.files[i].path;
-
-          const reziedImagePath = path.join(
-            "public",
-            "uploads",
-            "product-images",
-            req.files[i].filename
-          );
-          const sharpingImg = await sharp(originalImagePath)
-            .resize({ width: 440, height: 440 })
-            .toFile(reziedImagePath);
-          if (!sharpingImg) {
-            req.flash(
-              "error",
-              "error while rezising the image please try again"
-            );
-            return res.redirect("/admin/addproducts");
-          }
-          images.push(req.files[i].filename);
-        }
-      }
-
-      //   fetching category ._id
-      const categoryObj = await categoryModel.findOne({ name: category });
-      const categoryId = categoryObj._id;
-
-      const newProduct = new productModel({
-        productName,
-        product_offer,
-        salesPrice,
-        description,
-        images: images,
-        category: categoryId,
-        sizes : productSizes,
-      });
-      const result = await newProduct.save();
-      console.log("product added to database", result);
-      req.flash("success", "product added");
-      res.redirect("/admin/addproducts");
-    } else {
-      req.flash("error", "already existing product");
-      res.redirect("/admin/addproducts");
-    }
+    const result = await newProduct.save();
+    console.log("Product added to database", result);
+    req.flash("success", "Product added");
+    res.redirect("/admin/addproducts");
   } catch (error) {
-    console.log("error while adding products", error.message);
+    console.log("Error while adding products", error.message);
   }
 };
 
@@ -162,18 +153,17 @@ const loadEditPage = async(req,res)=> {
 }
 
 const updateCartsWithReducedStock = async (productId, updatedSizes) => {
-  // Find all carts with the affected product
+
   const carts = await cartModel.find({ productId });
 
   for (const cart of carts) {
     let cartUpdated = false;
 
-    // Loop through the sizes in the cart
+
     for (const cartItem of cart.sizes) {
       const updatedSize = updatedSizes.find(size => size.size === cartItem.size);
 
       if (updatedSize && updatedSize.stock < cartItem.quantity) {
-        // If the stock is less than what's in the cart, reduce the quantity
         cartItem.quantity = updatedSize.stock;
         cartUpdated = true;
       }
@@ -189,16 +179,10 @@ const updateCartsWithReducedStock = async (productId, updatedSizes) => {
 
 const editProduct = async (req, res) => {
   try {
-    console.log("request body : ", req.body);
+    console.log("request body:", req.body);
     console.log(req.files);
 
-    const {
-      productName,
-      product_offer,
-      salesPrice,
-      description,
-      category,
-    } = req.body;
+    const { productName, product_offer, salesPrice, description, category } = req.body;
 
     // Collect the new sizes and stocks
     const updatedSizes = [
@@ -217,30 +201,31 @@ const editProduct = async (req, res) => {
 
       if (req.files && req.files.length > 0) {
         const newImages = [];
-        for (let i = 0; i < req.files.length; i++) {
-          const originalImagePath = req.files[i].path;
-          const resizedImagePath = path.join(
-            "public",
-            "uploads",
-            "product-images",
-            req.files[i].filename
-          );
+        for (const file of req.files) {
+          // Upload directly from buffer using Cloudinary's upload_stream
+          const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "product-images",
+                width: 440,
+                height: 440,
+                crop: "fill",
+              },
+              (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+              }
+            );
+            uploadStream.end(file.buffer);
+          });
 
-          const sharpingImg = await sharp(originalImagePath)
-            .resize({ width: 440, height: 440 })
-            .toFile(resizedImagePath);
-
-          if (!sharpingImg) {
-            req.flash("error", "Error while resizing the image. Please try again.");
-            return res.redirect("/admin/product/edit/" + productId);
-          }
-          newImages.push(req.files[i].filename);
+          newImages.push(result.secure_url);
         }
         images = [...images, ...newImages];
       }
 
       const categoryObj = await categoryModel.findOne({ name: category });
-      const categoryId = categoryObj._id;
+      const categoryId = categoryObj ? categoryObj._id : null;
 
       // Detect if any stock size is reduced
       let stockReduced = false;
@@ -263,7 +248,6 @@ const editProduct = async (req, res) => {
       productExists.sizes = sizesToUpdate;
 
       const result = await productExists.save();
-
       console.log("Product updated in database", result);
 
       // If stock is reduced, update the relevant carts
@@ -284,6 +268,7 @@ const editProduct = async (req, res) => {
     res.redirect("/admin/products");
   }
 };
+
 
 const removeImage = async(req,res)=> {
   try {

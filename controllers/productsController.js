@@ -5,7 +5,6 @@ const productModel = require("../models/product");
 const categoryModel = require("../models/category");
 const cartModel = require('../models/cart');
 const path = require("path");
-const sharp = require("sharp");
 
 
 const loadAddProduct = async (req, res) => {
@@ -196,13 +195,13 @@ const editProduct = async (req, res) => {
     const productExists = await productModel.findById(productId);
 
     if (productExists) {
-      // Handle new image uploads
+
       let images = productExists.images;
 
       if (req.files && req.files.length > 0) {
         const newImages = [];
         for (const file of req.files) {
-          // Upload directly from buffer using Cloudinary's upload_stream
+       
           const result = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
               {
@@ -227,18 +226,18 @@ const editProduct = async (req, res) => {
       const categoryObj = await categoryModel.findOne({ name: category });
       const categoryId = categoryObj ? categoryObj._id : null;
 
-      // Detect if any stock size is reduced
+      
       let stockReduced = false;
       const oldSizes = productExists.sizes;
       const sizesToUpdate = updatedSizes.map((newSize) => {
         const oldSize = oldSizes.find(size => size.size === newSize.size);
         if (oldSize && oldSize.stock > newSize.stock) {
-          stockReduced = true; // Mark if stock has reduced
+          stockReduced = true; 
         }
         return newSize;
       });
 
-      // Update the product with new values
+     
       productExists.productName = productName;
       productExists.product_offer = product_offer;
       productExists.salesPrice = salesPrice;
@@ -250,7 +249,7 @@ const editProduct = async (req, res) => {
       const result = await productExists.save();
       console.log("Product updated in database", result);
 
-      // If stock is reduced, update the relevant carts
+      
       if (stockReduced) {
         console.log('Stock reduced, updating cart quantities...');
         await updateCartsWithReducedStock(productId, sizesToUpdate);

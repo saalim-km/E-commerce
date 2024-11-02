@@ -55,7 +55,7 @@
                 <% cart.forEach(function(item) { %>
                     <div class="cart-item" style="border: 1px solid rgba(128, 128, 128, 0.431); padding: 10px;">
                         <div class="product-info">
-                            <img src="/uploads/product-images/<%= item.productId.images[0] %>" alt="Product Image">
+                            <img src="<%= item.productId.images[0] %>" alt="Product Image">
                             <p><strong><%= item.productId.productName %></strong></p>
                             <p>Size: <%= item.sizes[0].size %></p>
                             <p>Category: <span class="badge bg-dark text-white"><%= item.categoryId.name %></span></p>

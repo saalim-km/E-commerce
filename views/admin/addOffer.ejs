@@ -68,7 +68,7 @@
         <% products.forEach(product => { %>
             <tr class="shadow-sm bg-white rounded">
               <td>
-                <img src="/uploads/product-images/<%= product.images[0] %>" class="product_img" alt="<%= product.productName %>">
+                <img src="<%= product.images[0] %>" class="product_img" alt="<%= product.productName %>">
               </td>
               <td class="product_name"><%= product.productName %></td>
               <td>₹<%= product.productOffer.length >= 1 ? Math.ceil(product.salesPriceAfterDiscount) : product.salesPrice %></td>

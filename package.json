@@ -14,6 +14,7 @@
     "cloudinary": "^2.5.1",
     "connect-flash": "^0.1.1",
     "dotenv": "^16.4.5",
+    "easyinvoice": "^3.0.47",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "express-session": "^1.18.0",

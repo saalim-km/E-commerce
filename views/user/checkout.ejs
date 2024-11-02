@@ -128,7 +128,7 @@
             <div class="order-items">
                 <% cart.forEach(function(item) { %>
                     <div class="order-item">
-                        <img src="/uploads/product-images/<%= item.productId.images[0] %>" alt="<%= item.productId.productName %>">
+                        <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.productName %>">
                         <div>
                             <p><strong><%= item.productId.productName %></strong></p>
                             <p>Size: <%= item.sizes[0].size %></p>

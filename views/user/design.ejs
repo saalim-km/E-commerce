@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom T-shirt Designer</title>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2962ff',
+                        secondary: '#1e88e5',
+                        background: '#f5f7fa',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+</head>
+<body class="bg-background font-sans">
+    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <a href="/" class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold ">Savage</span>
+                    </a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="/" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/designs" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">My Designs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Custom T-shirt Designer</h1>
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-4" role="alert">
+            <p class="font-bold">Note for Image Upload</p>
+            <p>Currently, images may not fully blend with the T-shirt background. For the best result, try using images with transparent backgrounds.</p>
+            <p>Please note that customization options are currently available only for the front of the T-shirt, not the back.</p>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="lg:w-2/3">
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <canvas id="tshirtCanvas" class="w-full"></canvas>
+                </div>
+            </div>
+            
+            <div class="lg:w-1/3">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">T-shirt Color</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="changeTshirtColor('white')" class="w-8 h-8 rounded-full bg-white border border-gray-300"></button>
+                            <button onclick="changeTshirtColor('black')" class="w-8 h-8 rounded-full bg-black"></button>
+                            <button onclick="changeTshirtColor('#2962ff')" class="w-8 h-8 rounded-full bg-primary"></button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">Add Image</h3>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                        <button onclick="document.getElementById('imageInput').click()" class="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                            Upload Image
+                        </button>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">Add Text</h3>
+                        <input type="text" id="textInput" placeholder="Enter text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        <div class="flex items-center mt-2">
+                            <label for="fontSize" class="mr-2">Size:</label>
+                            <input type="number" id="fontSize" value="30" min="1" max="200" class="w-16 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <label for="textColor" class="mr-2">Color:</label>
+                            <input type="color" id="textColor" value="#000000" class="w-8 h-8 border border-gray-300 rounded">
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <label for="fontWeight" class="mr-2">Font Weight:</label>
+                            <input type="number" id="fontWeight" value="300" class="w-16 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" min="100" max="900">
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <label for="fontStyle" class="mr-2">Font Style:</label>
+                            <select id="fontStyle" class="border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="normal">Normal</option>
+                                <option value="italic">Italic</option>
+                                <option value="oblique">Oblique</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <label for="fontFamily" class="mr-2">Font Family:</label>
+                            <select id="fontFamily" class="border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="Arial">Arial</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Roboto">Roboto</option> <!-- Add more fonts as needed -->
+                                <option value="Lobster">Lobster</option> <!-- Google Font -->
+                                <option value="Pacifico">Pacifico</option> <!-- Google Font -->
+                            </select>
+                        </div>
+                        <button onclick="addText()" class="mt-2 bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                            Add Text
+                        </button>
+                    </div>
+                    
+
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">Actions</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="deleteSelected()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                                Delete Selected
+                            </button>
+                            <button onclick="moveLayer('up')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                                Move Up
+                            </button>
+                            <button onclick="moveLayer('down')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                                Move Down
+                            </button>
+                        </div>
+                    </div>
+
+                    <button onclick="saveDesign()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                        Save Design
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        let canvas;
+        let tshirtImage;
+
+        // Initialize canvas
+        window.onload = function() {
+            canvas = new fabric.Canvas('tshirtCanvas', {
+                width: 600,
+                height: 600,
+            });
+
+            // laoding the image that coming from the backend 
+            fabric.Image.fromURL('<%= tshirtImageUrl %>', function(img) {
+                tshirtImage = img;
+                img.scaleToWidth(600);
+                canvas.add(img);
+                img.set({
+                    selectable: false,
+                    evented: false
+                });
+                canvas.renderAll();
+            },{crossOrigin: "Anonymous"});
+
+            // handling the file uplaod by the user
+            document.getElementById('imageInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    fabric.Image.fromURL(event.target.result, function(img) {
+                        img.scaleToWidth(200);
+                        img.opacity = 0.8; 
+                        canvas.add(img);
+                        canvas.setActiveObject(img);
+                        canvas.renderAll();
+                    },{crossOrigin: "Anonymous"});
+                }
+                reader.readAsDataURL(file);
+            });
+
+
+            canvas.on('selection:created', updateTextControls);
+            canvas.on('selection:updated', updateTextControls);
+            canvas.on('selection:cleared', clearTextControls);
+        };
+
+
+        function changeTshirtColor(color) {
+            Toastify({
+                text: "This feature is working currently, comin soon..",
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                close : true,
+                backgroundColor: "#dc3545",
+            }).showToast();
+        }
+
+
+        function addText() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) {
+                Toastify({
+                    text: "Please enter some text.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    close : true,
+                    backgroundColor: "#dc3545",
+                }).showToast();
+                return;
+            }
+
+            const color = document.getElementById('textColor').value;
+            const fontSize = parseInt(document.getElementById('fontSize').value);
+            const fontWeight = document.getElementById("fontWeight").value;
+            const fontStyle = document.getElementById('fontStyle').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            if (isNaN(fontSize) || fontSize < 1 || fontSize > 200) {
+                Toastify({
+                    text: "Please enter a valid font size between 1 and 200.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    close : true,
+                    backgroundColor: "#dc3545",
+                }).showToast();
+                return;
+            }
+
+            const fabricText = new fabric.Text(text, {
+                left: 200,
+                top: 200,
+                fontSize: fontSize,
+                fill: color,
+                fontWeight : fontWeight,
+                fontStyle : fontStyle,
+                fontFamily: fontFamily,
+            });
+
+            canvas.add(fabricText);
+            canvas.setActiveObject(fabricText);
+            canvas.renderAll();
+            document.getElementById('textInput').value = '';
+        }
+
+        // Update text color
+        function updateTextColor() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'text') {
+                activeObject.set('fill', document.getElementById('textColor').value);
+                canvas.renderAll();
+            }
+        }
+
+        // Update text size
+        function updateTextSize() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.type === 'text') {
+                const fontSize = parseInt(document.getElementById('fontSize').value);
+                if (!isNaN(fontSize) && fontSize >= 1 && fontSize <= 200) {
+                    activeObject.set('fontSize', fontSize);
+                    canvas.renderAll();
+                }
+            }
+        }
+
+        // Update text controls when object is selected
+        function updateTextControls(e) {
+            const selectedObject = e.selected[0];
+            if (selectedObject && selectedObject.type === 'text') {
+                document.getElementById('textColor').value = selectedObject.fill;
+                document.getElementById('fontSize').value = selectedObject.fontSize;
+            }
+        }
+
+        // Clear text controls
+        function clearTextControls() {
+            document.getElementById('textColor').value = '#000000';
+            document.getElementById('fontSize').value = '30';
+        }
+
+        // Delete selected object
+        function deleteSelected() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) {
+                canvas.remove(activeObject);
+                canvas.renderAll();
+            } else {
+                alert('Please select an object to delete.');
+            }
+        }
+
+        function moveLayer(direction) {
+            Toastify({
+                text: "This feature is working currently, comin soon..",
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                close : true,
+                backgroundColor: "#dc3545",
+            }).showToast();
+        }
+
+        // Save design
+        function saveDesign() {
+            console.log('Downlaoding scan')
+            let a = document.createElement('a')
+            let dt = canvas.toDataURL({
+                format: 'png',
+                quality: 1,
+            })
+            dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream')
+            dt = dt.replace(
+                /^data:application\/octet-stream/,
+                'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png',
+            )
+
+            a.href = dt
+            a.download = 'canvas.png'
+            a.click()
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,7 @@
 const PDFDocument = require("pdfkit");
+const {Stream} = require("stream");
 const orderModel = require("../models/order");
+
 
 const reportPage = async (req, res) => {
     try {
@@ -85,57 +87,94 @@ const filterSalesReport = async (req, res) => {
 
 
 
-const downloadSalesReportPdf = async(req,res)=> {
+const downloadSalesReportPdf = async (req, res) => {
     try {
-
-        const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
-        const startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
-
-
-        const salesData = await orderModel.find({
-            createdAt: { $gte: startDate, $lte: endDate },
-        });
-
-      
-        const totalSales = salesData.reduce((sum, order) => sum + order.totalAmount, 0);
-
-        
-        const doc = new PDFDocument();
-        res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
-        res.setHeader('Content-Type', 'application/pdf');
-
-        doc.pipe(res);
-
-        doc.fontSize(20).text('Sales Report', { align: 'center' });
-        doc.fontSize(12).text(`From: ${startDate.toDateString()} To: ${endDate.toDateString()}`, { align: 'center' });
-        doc.moveDown();
-
-        doc.fontSize(16).text(`Total Sales: ₹${totalSales.toLocaleString()}`, { align: 'left' });
-        doc.moveDown();
-
-        doc.fontSize(12).text('Order ID', { width: 90, continued: true })
-            .text('Date', { width: 90, continued: true })
-            .text('Total Amount', { width: 90, continued: true })
-            .text('Payment Method', { width: 100, continued: true })
-            .text('Status', { width: 100 });
-        doc.moveDown();
-
-        salesData.forEach(order => {
-            doc.fontSize(10)
-                .text(order._id, { width: 90, continued: true })
-                .text(new Date(order.createdAt).toLocaleDateString(), { width: 90, continued: true })
-                .text(`₹${order.totalAmount.toLocaleString()}`, { width: 90, continued: true })
-                .text(order.paymentMethod, { width: 100, continued: true })
-                .text(order.status, { width: 100 });
-            doc.moveDown();
-        });
-
-        doc.end();
-
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+      const startDate = req.query.startDate
+        ? new Date(req.query.startDate)
+        : new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
+  
+      const salesData = await orderModel.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+  
+      const totalSales = salesData.reduce((sum, order) => sum + order.totalAmount, 0);
+  
+      const doc = new PDFDocument({
+        size: 'A4',
+        margins: { top: 50, bottom: 50, left: 50, right: 50 },
+      });
+  
+      res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
+      res.setHeader('Content-Type', 'application/pdf');
+  
+      doc.pipe(res);
+  
+      // Header
+      doc.fontSize(24).font('Helvetica-Bold').text('Sales Report', { align: 'center' });
+      doc.moveDown(0.5);
+      doc.fontSize(12).font('Helvetica').text(`From: ${startDate.toDateString()} To: ${endDate.toDateString()}`, { align: 'center' });
+      doc.moveDown(1);
+  
+      // Summary
+      doc.rect(50, doc.y, 495, 80).fill('#f0f0f0');
+      doc.fill('#333');
+      doc.fontSize(14).font('Helvetica-Bold').text('Summary', 70, doc.y + 20);
+      doc.fontSize(12).font('Helvetica').text(`Total Sales: ₹${totalSales.toLocaleString()}`, 70, doc.y + 20);
+      doc.text(`Total Orders: ${salesData.length}`, 70, doc.y + 20);
+      doc.moveDown(2);
+  
+      // Table header
+      const tableTop = doc.y + 20;
+      doc.font('Helvetica-Bold');
+      drawTableRow(doc, tableTop, ['Order ID', 'Date', 'Total Amount', 'Payment Method', 'Status']);
+      doc.moveDown(0.5);
+  
+      // Table rows
+      let yPosition = doc.y;
+      salesData.forEach((order) => {
+        if (yPosition + 40 > doc.page.height - 50) {
+          doc.addPage();
+          yPosition = 50;
+          drawTableRow(doc, yPosition, ['Order ID', 'Date', 'Total Amount', 'Payment Method', 'Status']);
+          doc.moveDown(0.5);
+          yPosition = doc.y;
+        }
+  
+        doc.font('Helvetica');
+        drawTableRow(doc, yPosition, [
+          order._id.toString().slice(-6),
+          new Date(order.createdAt).toLocaleDateString(),
+          `₹${order.totalAmount.toLocaleString()}`,
+          order.paymentMethod,
+          order.status,
+        ]);
+        doc.moveDown(0.5);
+        yPosition = doc.y;
+      });
+  
+      // Footer
+      const pageCount = doc.bufferedPageRange().count;
+      for (let i = 0; i < pageCount; i++) {
+        doc.switchToPage(i);
+        doc.fontSize(10).text(`Page ${i + 1} of ${pageCount}`, 50, doc.page.height - 50, { align: 'center' });
+      }
+  
+      doc.end();
     } catch (error) {
-        console.error("Error generating PDF:", error.message);
-        res.status(500).json({ success: false, message: "Failed to generate PDF" });
+      console.error("Error generating PDF:", error.message);
+      res.status(500).json({ success: false, message: "Failed to generate PDF" });
     }
+};
+  
+function drawTableRow(doc, y, texts) {
+    const widths = [80, 100, 100, 120, 95];
+    let x = 50;
+  
+    texts.forEach((text, i) => {
+      doc.text(text, x, y, { width: widths[i], align: 'left' });
+      x += widths[i];
+    });
 }
 
 module.exports = {

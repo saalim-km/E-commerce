@@ -838,9 +838,12 @@ const verifyOrder = async (req, res) => {
     for (const item of cartItems) {
       const itemProductId = item.productId;
       const product = await productModel.findById(itemProductId);
-      const itemTotal = product.salesPrice * item.quantity;
+      const itemTotal = product.salesPriceAfterDiscount
+        ? product.salesPriceAfterDiscount * item.quantity
+        : product.salesPrice * item.quantity;
       totalPrice += itemTotal;
     }
+
     let discount = 0;
     if (couponCode) {
       const couponData = await couponModel.findOne({ name: couponCode });

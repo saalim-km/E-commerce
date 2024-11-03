@@ -1,0 +1,106 @@
+<!-- views/tshirt-selection.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom T-shirt Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2962ff',
+                        secondary: '#1e88e5',
+                        background: '#f5f7fa',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-sans">
+    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <a href="/" class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold ">Savage</span>
+                    </a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8" style="margin-top: 1%;">
+                    <a href="/" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/designs" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">My Designs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+        <section class="text-center py-12 px-4 sm:px-6 lg:px-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">Create Your Custom T-shirt</h1>
+            <p class="mt-5 max-w-xl mx-auto text-xl text-gray-500">Choose a t-shirt style below and start designing your perfect custom apparel. Express yourself with our easy-to-use design tool.</p>
+        </section>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- White T-shirt -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl" onclick="startDesigning('white')">
+                <div class="h-64 bg-gray-100 flex items-center justify-center p-4">
+                    <img src="https://res.cloudinary.com/deh2nuqeb/image/upload/v1730554192/https___d1e00ek4ebabms.cloudfront.net_production_bb4d4c4d-3305-40a8-9e93-fdd595ec583e_ttr2zh.avif" alt="White T-shirt" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Classic White</h3>
+                    <button class="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                        Start Designing
+                    </button>
+                </div>
+            </div>
+
+            <!-- Black T-shirt -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl" onclick="startDesigning('black')">
+                <div class="h-64 bg-gray-100 flex items-center justify-center p-4">
+                    <img src="https://res.cloudinary.com/deh2nuqeb/image/upload/v1730554174/black_q0cwba.png" alt="Black T-shirt" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Classic Black</h3>
+                    <button class="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                        Start Designing
+                    </button>
+                </div>
+            </div>
+
+            <!-- Blue T-shirt -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl" onclick="startDesigning('blue')">
+                <div class="h-64 bg-gray-100 flex items-center justify-center p-4">
+                    <img src="https://res.cloudinary.com/deh2nuqeb/image/upload/v1730561154/blue_vep21i.png" alt="Blue T-shirt" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Classic Blue</h3>
+                    <button class="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                        Start Designing
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gray T-shirt -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl" onclick="startDesigning('green')">
+                <div class="h-64 bg-gray-100 flex items-center justify-center p-4">
+                    <img src="https://res.cloudinary.com/deh2nuqeb/image/upload/v1730561154/green_bx8ypb.png" alt="Green T-shirt" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="p-6 text-center">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Classic Green</h3>
+                    <button class="bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                        Start Designing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function startDesigning(color) {
+            window.location.href = `/user/custom-tshirt/design?color=${color}`;
+        }
+    </script>
+</body>
+</html>

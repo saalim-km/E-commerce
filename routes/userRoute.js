@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userSideController = require("../controllers/usersideController");
+const customController = require("../controllers/customTshirt");
 const userMiddleware = require("../middlewares/isUser");
 
 
@@ -67,5 +68,11 @@ router.get("/wallet",userMiddleware.isLogin,userSideController.walletPage);
 
 
 // Invoice
-router.get("/download_invoice/:id",userSideController.downloadInvoice)
+router.get("/download_invoice/:id",userSideController.downloadInvoice);
+
+
+// custom t-shirt
+router.get("/custom_tshirt",customController.loadCustomPage);
+
+router.get("/custom-tshirt/design",customController.designPage)
 module.exports = router;

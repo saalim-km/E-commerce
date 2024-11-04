@@ -10,7 +10,7 @@ const walletTransaction = mongoose.Schema({
     },
     description : {
         type : String,
-        enum : ['Returned' , 'Cancelled']
+        enum : ['Returned' , 'Cancelled' , 'CustomOrder']
     },
     transactionType : {
         type : String,
@@ -18,7 +18,7 @@ const walletTransaction = mongoose.Schema({
     },
     paymentMethod : {
         type : String,
-        enum : ['Razorpay' , 'COD']
+        enum : ['Razorpay' , 'COD' , 'Wallet']
     }
 },{timestamps : true});
 

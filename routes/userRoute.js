@@ -72,7 +72,20 @@ router.get("/download_invoice/:id",userSideController.downloadInvoice);
 
 
 // custom t-shirt
-router.get("/custom_tshirt",customController.loadCustomPage);
+router.get("/custom_tshirt",userMiddleware.isLogin,customController.loadCustomPage);
 
-router.get("/custom-tshirt/design",customController.designPage)
+router.get("/custom-tshirt/design",userMiddleware.isLogin,customController.designPage);
+
+// saving design
+router.post("/design/save",customController.saveDesign);
+
+router.get("/designs",userMiddleware.isLogin,customController.getDesign);
+
+router.get('/custom_checkout',userMiddleware.isLogin,customController.getCheckout);
+
+router.post('/delete_design',customController.deleteDesign);
+
+router.post("/custom_checkout",customController.checkout);
+
+router.get('/custom_order/:id',userMiddleware.isLogin,customController.orderSuccess)
 module.exports = router;

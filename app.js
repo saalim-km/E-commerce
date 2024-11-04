@@ -46,8 +46,8 @@ app.set('views',[
 app.use(express.static('public'));
 
 // parsing form data to req.body object
-app.use(express.urlencoded({extended:true}));
-app.use(express.json());
+app.use(express.urlencoded({limit : '10mb' , extended:true}));
+app.use(express.json({ limit: '10mb' }));
 
 // setting nocache (not for storing files in the browser).
 app.use(nocache());

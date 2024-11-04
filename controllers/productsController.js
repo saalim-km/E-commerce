@@ -319,13 +319,15 @@ const addOffer = async(req,res)=> {
     // getting product sales price
     const salesPrice = productData.salesPrice;
     // calculating salesPriceAferDiscount
-    const salesPriceAfterDiscount = Math.trunc(salesPrice - (salesPrice / 100 * offerDisconutPercentage));
-
+    const salesPriceAfterDiscount = Math.round(salesPrice - (salesPrice / 100 * offerDisconutPercentage));
+    // discount Amount
+    const discountAmount = Math.round((salesPrice / 100 * offerDisconutPercentage))
 
     const newOffer = {
       discountPercentage : offerDisconutPercentage,
       offerStartDate : new Date().toISOString(),
       offerExpiryDate : expiryDate,
+      discountAmount : discountAmount,
     }
 
     if(productData.productOffer.length >= 1){

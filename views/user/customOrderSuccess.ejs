@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        /* Styles for the order confirmation page */
+        .confirmation-container {
+            text-align: center;
+            padding: 50px 20px;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .confirmation-container h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        .order-details {
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .order-details:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        }
+        .order-details h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .order-details p {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        .order-summary {
+            text-align: left;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .order-summary h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .order-summary p {
+            font-size: 16px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .order-summary p span:first-child {
+            font-weight: bold;
+            color: #555;
+        }
+        .thank-you {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #666;
+        }
+        .btn-home {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .btn-home:hover {
+            background-color: #45a049;
+        }
+        .design-image {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="page-template belle">
+
+<div class="confirmation-container">
+    <h1 class="animate__animated animate__fadeInDown">Thank you for your order!</h1>
+
+    <!-- Order details -->
+    <div class="order-details fade-in-up">
+        <h2>Order Confirmation</h2>
+        <p><strong>Order Id:</strong> <%= order._id %></p>
+        <p><strong>Order Date:</strong> 
+            <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
+        </p>
+
+        <!-- Display the design image -->
+        <img src="<%= order.design %>" alt="Custom T-Shirt Design" class="design-image animate__animated animate__fadeIn">
+
+        <!-- Display order summary -->
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <p><span>Total Amount:</span> <span>₹<%= order.totalAmount %></span></p>
+            <p><span>Shipping Address:</span> <span><%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.pincode %></span></p>
+        </div>
+
+        <!-- Payment method -->
+        <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+    </div>
+
+    <div class="thank-you animate__animated animate__fadeIn">
+        <p>Your order has been successfully placed and will be processed soon.</p>
+        <p>You'll receive a confirmation email with further details.</p>
+    </div>
+
+    <a href="/home" class="btn-home animate__animated animate__fadeIn">Back to Home</a>
+</div>
+
+</body>
+</html>

@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,7 +24,9 @@
             }
         }
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    
 </head>
 <body class="bg-background font-sans">
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
@@ -35,9 +37,9 @@
                         <span class="text-2xl font-bold ">Savage</span>
                     </a>
                 </div>
-                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <a href="/" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                    <a href="/designs" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">My Designs</a>
+                <div style="margin-top: 1%;" class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="/user/custom_tshirt" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/user/designs" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">My Designs</a>
                 </div>
             </div>
         </div>
@@ -109,9 +111,9 @@
                                 <option value="Georgia">Georgia</option>
                                 <option value="Impact">Impact</option>
                                 <option value="Comic Sans MS">Comic Sans MS</option>
-                                <option value="Roboto">Roboto</option> <!-- Add more fonts as needed -->
-                                <option value="Lobster">Lobster</option> <!-- Google Font -->
-                                <option value="Pacifico">Pacifico</option> <!-- Google Font -->
+                                <option value="Roboto">Roboto</option> 
+                                <option value="Lobster">Lobster</option> 
+                                <option value="Pacifico">Pacifico</option> 
                             </select>
                         </div>
                         <button onclick="addText()" class="mt-2 bg-primary hover:bg-secondary text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
@@ -142,8 +144,12 @@
             </div>
         </div>
     </main>
-
+    <!-- j query -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- toastify -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- sweet alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let canvas;
         let tshirtImage;
@@ -295,7 +301,14 @@
                 canvas.remove(activeObject);
                 canvas.renderAll();
             } else {
-                alert('Please select an object to delete.');
+                Toastify({
+                    text: "Please select an object to delete.",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "center",
+                    close : true,
+                    backgroundColor: "#dc3545",
+                }).showToast();
             }
         }
 
@@ -312,21 +325,52 @@
 
         // Save design
         function saveDesign() {
-            console.log('Downlaoding scan')
-            let a = document.createElement('a')
-            let dt = canvas.toDataURL({
-                format: 'png',
-                quality: 1,
-            })
-            dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream')
-            dt = dt.replace(
-                /^data:application\/octet-stream/,
-                'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png',
-            )
+            Swal.fire({
+            title: 'Preparing your design...',
+            text: 'Please wait a moment while we process your design.',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-            a.href = dt
-            a.download = 'canvas.png'
-            a.click()
+            const dataURL = canvas.toDataURL({
+                format: 'png',
+                quality: 1.0,
+            });
+
+            $.ajax({
+                url : "/user/design/save",
+                method : 'POST',
+                data : { image : dataURL},
+                success : (res)=> {
+                    if(res.success){
+                        Swal.fire({
+                        title: 'Design Saved!',
+                        text: 'Your design has been successfully saved.',
+                        icon: 'success',
+                        allowOutsideClick: false,
+                        showCancelButton: true,
+                        confirmButtonText: 'Go to My Designs',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/user/designs'; 
+                        }
+                    })
+                    }else {
+                        Toastify({
+                        text: "Error while saving design please try again later",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "center",
+                        close : true,
+                        backgroundColor: "#dc3545",
+                    }).showToast();
+                    }
+                }
+            })
         }
     </script>
 </body>

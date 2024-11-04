@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Savage</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Custom Styles toastify-->
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <a href="/" class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold">Savage</span>
+                    </a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8" style="margin-top: 1%;">
+                    <a href="/user/custom_tshirt" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/user/designs" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">My Designs</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <form id="checkoutForm" action="/user/custom_checkout" method="POST" class="mt-20 pb-16">
+        <div class="ml-20 mr-20 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 space-y-1">
+            <p>Note: The order will take 2 working days to process your custom T-shirt.</p>
+            <p>Note: Cash on Delivery (COD) is not available for this custom T-shirt order.</p>
+        </div>
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-wrap -mx-4">
+                <!-- Shipping Address Section -->
+                <div class="w-full lg:w-1/2 px-4 mb-8">
+                    <div class="bg-white rounded shadow-md p-6">
+                        <h4 class="text-xl font-semibold mb-4">Select Shipping Address</h4>
+                        <% if (address.length > 0) { %>
+                            <% address.forEach(function(add, index) { %> 
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="selectedAddress" 
+                                           id="address_<%= add._id %>" 
+                                           value="<%= add._id %>" 
+                                           <% if (index === 0) { %> checked <% } %> 
+                                           required>
+                                    <label class="form-check-label" for="address_<%= add._id %>">
+                                        <%= add.fullName%>, <%= add.house %>, <%= add.state %>, <%= add.pincode %>
+                                    </label>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <h2 class="text-red-500">No Saved Address</h2>
+                            <a href="/user/address" class="btn btn-small bg-blue-500 text-white px-4 py-2 rounded inline-block mt-2">Add an address</a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Order Summary Section -->
+                <div class="w-full lg:w-1/2 px-4">
+                    <div class="bg-white rounded shadow-md p-6">
+                        <h4 class="text-xl font-semibold mb-4">Order Summary</h4>
+                        <div class="order-items mb-5">
+                            <div class="order-item flex items-center mb-3">
+                                <img src="<%= item.image %>" alt="<%= item.image %>" class="w-20 h-20 object-cover mr-4">
+                                <div>
+                                    <p><strong>Custom T-Shirt</strong></p>
+                                    <p>Quantity: 1</p>
+                                    <p>Price: ₹<%= item.price %></p>
+                                    <p>SubTotal: ₹<%= item.price %></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" value="<%= item.image %>" name="image">
+                        <input type="hidden" value="<%= item._id %>" name="designId">
+                        <div class="payment-methods mb-5">
+                            <h5 class="text-lg font-semibold mb-2">Payment Methods</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="Razorpay" value="Razorpay">
+                                <label class="form-check-label" for="Razorpay">Razorpay</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <% if (wallet < 1499) { %>
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="wallet" value="wallet" disabled>
+                                    <label class="form-check-label" for="wallet">Wallet (₹<%= wallet %>) <strong style="color: rgb(221, 31, 31);">Insufficient balance </strong></label>
+                                <% } else {%>
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="wallet" value="wallet">
+                                    <label class="form-check-label" for="wallet">Wallet (₹<%= wallet %>)</label>
+                                <% } %>    
+                                
+                            </div>
+                        </div>
+                        <button id="placeOrderBtn" type="submit" class="btn btn-primary bg-black text-white px-4 py-2 rounded w-full">Place Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <footer class="bg-black text-white py-6 mt-20">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-lg font-semibold text-white">© 2024 | Savage</p>
+            <p class="text-sm mt-2 text-white">All rights reserved</p>
+            <div class="flex justify-center mt-4 space-x-4">
+                <a href="https://twitter.com" target="_blank" class="text-gray-400 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.46 6.003c-.793.352-1.647.588-2.545.695a4.513 4.513 0 001.984-2.49 9.033 9.033 0 01-2.861 1.095 4.515 4.515 0 00-7.692 4.115A12.804 12.804 0 013.16 4.908a4.515 4.515 0 001.396 6.02 4.465 4.465 0 01-2.047-.565v.056a4.515 4.515 0 003.618 4.426 4.51 4.51 0 01-2.043.078 4.516 4.516 0 004.215 3.132A9.054 9.054 0 012 19.54a12.764 12.764 0 006.914 2.027c8.304 0 12.847-6.877 12.847-12.847 0-.196-.005-.392-.014-.586a9.204 9.204 0 002.262-2.351z"/>
+                    </svg>
+                </a>
+                <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.867 8.167 6.839 9.49.5.091.682-.216.682-.482 0-.237-.008-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.455-1.157-1.11-1.465-1.11-1.465-.908-.62.07-.608.07-.608 1.003.07 1.532 1.03 1.532 1.03.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.221-.253-4.555-1.113-4.555-4.947 0-1.093.39-1.988 1.029-2.687-.103-.253-.446-1.272.099-2.65 0 0 .84-.269 2.75 1.026A9.579 9.579 0 0112 6.845a9.53 9.53 0 012.503.336c1.909-1.295 2.748-1.026 2.748-1.026.546 1.378.203 2.397.1 2.65.64.699 1.028 1.594 1.028 2.687 0 3.843-2.337 4.692-4.565 4.94.359.31.678.921.678 1.856 0 1.338-.012 2.418-.012 2.748 0 .268.181.576.688.478C19.135 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://unpkg.com/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const checkoutForm = document.getElementById("checkoutForm");
+
+            checkoutForm.addEventListener("submit", (event) => {
+                const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+                const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+
+                if (!selectedAddress) {
+                    event.preventDefault();
+                    showToast("Please select a shipping address.", "error");
+                    return;
+                }
+
+                if (!selectedPaymentMethod) {
+                    event.preventDefault();
+                    showToast("Please select a payment method.", "error");
+                    return;
+                }
+
+                // Add your Razorpay integration logic here (similar to what you had)
+                // ...
+
+            });
+        });
+
+        function showToast(message, type) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "center",
+                backgroundColor: type === "success" ? "#4CAF50" : "#f44336",
+                close: true,
+            }).showToast();
+        }
+    </script>
+</body>
+</html>

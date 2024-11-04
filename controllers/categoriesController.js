@@ -183,7 +183,7 @@ const addOffer = async (req, res) => {
 
     for (const product of productsInCategory) {
       const salesPrice = product.salesPrice;
-      const salesPriceAfterDiscount = Math.trunc(salesPrice - (salesPrice / 100 * offerDiscountPercentage));
+      const salesPriceAfterDiscount = Math.round(salesPrice - (salesPrice / 100 * offerDiscountPercentage));
 
       if (product.productOffer.length >= 1) {
         await productModel.updateOne(

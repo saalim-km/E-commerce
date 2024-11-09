@@ -1,12 +1,9 @@
 const mongoose = require('mongoose');
 
-const offerSchema = new mongoose.Schema({
+const catOffer = new mongoose.Schema({
     discountPercentage : {
         type : Number,
         required : true,
-    },
-    discountAmount : {
-        type : Number,
     },
     offerStartDate : {
         type : Date,
@@ -22,4 +19,4 @@ const offerSchema = new mongoose.Schema({
     },
 })
 
-module.exports = new mongoose.model('Offer',offerSchema);
+module.exports = new mongoose.model('catOffer',catOffer);

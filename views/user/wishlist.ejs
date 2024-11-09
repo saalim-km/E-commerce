@@ -85,7 +85,7 @@
                   <a href="/user/products/<%= product.productId._id %>">
                     <div class="d-flex align-items-center">
                       <!-- Access the image and name from the populated productId field -->
-                      <img src="/uploads/product-images/<%= product.productId.images[0] %>" class="product-image mr-3" alt="<%= product.productId.productName %>">
+                      <img src="<%= product.productId.images[0] %>" class="product-image mr-3" alt="<%= product.productId.productName %>">
                       <span class="product-name"><%= product.productId.productName %></span>
                     </div>
                   </a>

@@ -28,8 +28,8 @@ const orderSchema = new mongoose.Schema({
             },
             status : {
                 type : String,
-                enum : ['Returned' , 'Cancelled','Delivered'],
-            }
+                enum : ['Returned' , 'Cancelled','Delivered']
+            },
         }
     ],
     shippingAddress : {
@@ -38,20 +38,23 @@ const orderSchema = new mongoose.Schema({
     },
     paymentMethod : {
         type : String,
-        enum : ['COD','Razorpay'],
+        enum : ['COD','Razorpay','Wallet'],
         required : true,
     },
     status : {
         type : String,
-        enum : ['Pending','Processing','Shipped','Delivered','Cancelled','Returned'],
+        enum : ['Pending','Processing','Shipped','Delivered','Cancelled','Returned','Failed'],
         default : 'Pending',
     },
     totalAmount : {
         type : Number,
         required : true,
     },
-    discount : {
+    couponDiscount : {
         type : Number
+    },
+    discount : {
+        type : Number,
     },
     coupon : {
         type : String,

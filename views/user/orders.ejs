@@ -139,7 +139,7 @@
                 <% orders.forEach((order, index) => { %>
                     <tr class="orders" data-payment = "<%= order.paymentMethod %>" data-status="<%= order.status %>">
                         <td># <%= order._id %></td>
-                        <td class="<%= order.status === 'Processing' || order.status === 'Shipped' ? 'text-warning' : order.status === 'Cancelled' ? 'text-danger' : order.status === 'Delivered' ? 'text-success' : '' %>">
+                        <td class="<%= order.status === 'Processing' || order.status === 'Shipped' ? 'text-warning' : order.status === 'Cancelled' ? 'text-danger' : order.status === 'Delivered' ? 'text-success' : order.status === 'Failed' ? 'text-danger' :  '' %>">
                             <%= order.status %>
                         </td>
                         <td><%= order.paymentMethod %></td>

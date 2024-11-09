@@ -51,7 +51,7 @@ router.get("/orders",userMiddleware.isLogin,userSideController.ordersPage);
 router.get("/ordersDetails/:id",userMiddleware.isLogin,userSideController.viewOrder);
 router.put("/cancel_order",userSideController.cancelOrder);
 router.put('/return_order',userSideController.returnOrder);
-
+router.post('/payment_failed',userSideController.paymentFailed)
 
 // cancel and order individual items
 router.put('/order_cancel' , userSideController.cancelItem);

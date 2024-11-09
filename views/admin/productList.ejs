@@ -15,12 +15,7 @@
         <header class="card-header">
             <div class="row align-items-center">
                 <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                    <select class="form-select">
-                        <option selected>All categories</option>
-                        <% category.forEach(cat => { %>
-                            <option value="<%= cat._id %>"><%= cat.name %></option>
-                        <% }) %>
-                    </select>
+
                 </div>
             </div>
         </header> <!-- card-header end// -->
@@ -40,10 +35,10 @@
                                 </a>
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-price"> 
-                                <span> ProductOffer  :  <%= product.product_offer %> %</span>
+                                <span> ProductOffer  :  <%= product.productOffer[0] ? product.productOffer[0].discountPercentage : '' %> %</span>
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-price"> 
-                                <span>Sales price : ₹<%= product.salesPrice %></span>
+                                <span>Sales price : ₹<%= product.salesPriceAfterDiscount ? product.salesPriceAfterDiscount : product.salesPrice %></span>
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-price"> 
                                 <span>Category : <%= product.category.name %></span>

@@ -161,9 +161,11 @@
 
             <!-- Coupon Input -->
             <div class="apply-coupon">
-                <input type="text" class="form-control" name="couponCode" id="couponCode" placeholder="Enter coupon code" />
+                <input type="text" class="form-control" name="couponCode" id="couponCode" placeholder="Enter coupon code"/>
                 <button type="button" id="applyCouponBtn" class="btn btn-secondary mb-3">Apply</button>
+                <button type="button" id="removeCoupon" class="ml-2 rounded btn-secondary" style="cursor: pointer; background-color: gray; color: black; border: none;">remove coupon</button>
             </div>
+
             <div class="available-coupons mt-4 card rounded">
                 <div class="coupon-list p-3 checkout-section rounded">
                     <h5>Available Coupons</h5>  
@@ -183,11 +185,15 @@
                 <h5>Payment Methods</h5>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD">
-                    <label class="form-check-label" for="cod">Cash on Delivery</label>
+                    <label class="form-check-label" for="cod">Cash on Delivery</label><strong id="codErr" style="color: red; margin-left: 2%;"></strong>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="paymentMethod" id="Razorpay" value="Razorpay">
                     <label class="form-check-label" for="Razorpay">Razorpay</label>
+                </div>
+                <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="wallet" value="Wallet">
+                        <label class="form-check-label" for="wallet">Wallet (₹<%= wallet %>)</label><strong id="walletErr" style="color: red;margin-left: 2%;"></strong>
                 </div>
             </div>
             <!-- Submit Button -->
@@ -210,21 +216,40 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {  
+        const walletBalance = '<%= wallet %>'
+        const wallet = document.getElementById('wallet');
+        const walletErr = document.getElementById('walletErr');
+        const totalElement = document.getElementById("totalAfterDiscount");        
+        const cashOnDel = document.getElementById('cod');
+        const codErr = document.getElementById('codErr');
+        const checkoutForm = document.getElementById("checkoutForm");
+        const applyCouponBtn = document.getElementById("applyCouponBtn");
+        const subtotalElement = document.getElementById("subtotal");
+        const discountElement = document.getElementById("discountAmount");
+        const discountValueElement = document.getElementById("discountValue");
+
+        if(parseInt(walletBalance) < parseInt(totalElement.innerText)) {
+            wallet.disabled = true;
+            walletErr.innerText = 'Insuffienct balance in wallet'
+        }
+
+
+        if(totalElement.innerText > 1000) {
+            cashOnDel.disabled = true;
+            codErr.innerText = 'COD is not available for orders above 1000';
+        }
+
         const couponCodeInput = document.getElementById("couponCode");
         couponCodeInput.addEventListener('keyup',(e)=> {
             e.preventDefault()
             couponCodeInput.value = couponCodeInput.value.toUpperCase();
         });
-        const checkoutForm = document.getElementById("checkoutForm");
-        const applyCouponBtn = document.getElementById("applyCouponBtn");
-        const subtotalElement = document.getElementById("subtotal");
-        const totalElement = document.getElementById("totalAfterDiscount");
-        const discountElement = document.getElementById("discountAmount");
-        const discountValueElement = document.getElementById("discountValue");
 
+        // Total Amount
         let originalTotal = parseFloat(totalElement.textContent);
 
+        // validating coupon
         applyCouponBtn.addEventListener("click", () => {
             const couponCode = couponCodeInput.value.trim();
             if (!couponCode) {
@@ -254,6 +279,7 @@
 
                     showToast("Coupon applied successfully!", "success");
                 } else {
+                    couponCodeInput.value = '';
                     showToast(data.message || "Invalid coupon code.", "error");
                 }
             })
@@ -263,6 +289,23 @@
             });
         });
 
+
+        // remove coupoon functionality
+        document.getElementById('removeCoupon').addEventListener('click',()=> {
+            if(!couponCodeInput.value){
+                return showToast("no coupon to remove", "error");
+            }
+            totalElement.textContent = originalTotal.toFixed(2);
+
+            discountValueElement.textContent = '';
+            discountElement.style.display = 'none';
+
+            couponCodeInput.value = '';
+
+            showToast("Coupon removed successfully!", "error");
+        })
+
+        // helper function for firing toast.
         function showToast(message, type) {
             Toastify({
                 text: message,
@@ -328,16 +371,14 @@
                             };
                             var razorpayObject = new Razorpay(options);
                             razorpayObject.on('payment.failed', function (response) {
-                                Swal.fire({
-                                    title: "Payment Failed",
-                                    icon: "error",
-                                    confirmButtonColor: "#3085d6",
-                                    confirmButtonText: "Go to cart"
-                                }).then((result)=> {
-                                    if(result.isConfirmed){
-                                        window.location.href = "/user/cart"
-                                    }
-                                })
+                                $.ajax({
+                                        url : "/user/payment_failed",
+                                        type : 'POST',
+                                        data : JSON.stringify({
+                                            selectedAddress: $('#checkoutForm input[name="selectedAddress"]:checked').val(),
+                                            formData,
+                                        }),
+                                   })
                             });
                             razorpayObject.open();
                         } else {

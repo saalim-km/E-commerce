@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Confirmation</title>
+    <title>Payment Failed</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* Styles for the order confirmation page */
+        /* Styles for the payment failed page */
         .confirmation-container {
             text-align: center;
             padding: 50px 20px;
@@ -18,7 +18,7 @@
         .confirmation-container h1 {
             font-size: 36px;
             margin-bottom: 20px;
-            color: #4CAF50;
+            color: #f44336;
         }
         .order-details {
             margin: 20px auto;
@@ -71,7 +71,7 @@
         .btn-home {
             display: inline-block;
             padding: 12px 24px;
-            background-color: #4CAF50;
+            background-color: #f44336;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -80,7 +80,7 @@
             margin-top: 20px;
         }
         .btn-home:hover {
-            background-color: #45a049;
+            background-color: #e53935;
         }
         .item-list {
             list-style-type: none;
@@ -93,29 +93,15 @@
         .item-list li:last-child {
             border-bottom: none;
         }
-        .coupon-info {
-            background-color: #e8f5e9;
-            border: 1px dashed #4CAF50;
+        .error-info {
+            background-color: #ffebee;
+            border: 1px dashed #f44336;
             padding: 10px;
             margin-top: 20px;
             border-radius: 5px;
         }
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translate3d(0, 40px, 0);
-            }
-            to {
-                opacity: 1;
-                transform: translate3d(0, 0, 0);
-            }
-        }
-        .fade-in-up {
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        /* Animated Checkmark Styles */
-        .checkmark-circle {
+        /* Animated Cross Styles */
+        .cross-circle {
             width: 100px;
             height: 100px;
             position: relative;
@@ -123,73 +109,47 @@
             vertical-align: top;
             margin-bottom: 20px;
         }
-        .checkmark-circle .background {
+        .cross-circle .background {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: #4CAF50;
+            background: #f44336;
             position: absolute;
         }
-        .checkmark-circle .checkmark {
-            border-radius: 5px;
-        }
-        .checkmark-circle .checkmark.draw:after {
-            animation-delay: 100ms;
-            animation-duration: 1s;
-            animation-timing-function: ease;
-            animation-name: checkmark;
-            transform: scaleX(-1) rotate(135deg);
-            animation-fill-mode: forwards;
-        }
-        .checkmark-circle .checkmark:after {
-            opacity: 0;
-            height: 50px;
-            width: 25px;
-            transform-origin: left top;
-            border-right: 7px solid #fff;
-            border-top: 7px solid #fff;
-            content: '';
-            left: 25px;
-            top: 50px;
+        .cross-circle .cross {
             position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 70px;
+            height: 70px;
         }
-
-        @keyframes checkmark {
-            0% {
-                height: 0;
-                width: 0;
-                opacity: 1;
-            }
-            20% {
-                height: 0;
-                width: 25px;
-                opacity: 1;
-            }
-            40% {
-                height: 50px;
-                width: 25px;
-                opacity: 1;
-            }
-            100% {
-                height: 50px;
-                width: 25px;
-                opacity: 1;
-            }
+        .cross-circle .cross:before, .cross-circle .cross:after {
+            position: absolute;
+            content: ' ';
+            height: 70px;
+            width: 10px;
+            background-color: #fff;
+        }
+        .cross-circle .cross:before {
+            transform: rotate(45deg);
+        }
+        .cross-circle .cross:after {
+            transform: rotate(-45deg);
         }
     </style>
 </head>
 <body class="page-template belle">
 
 <div class="confirmation-container">
-    <div class="checkmark-circle">
+    <div class="cross-circle">
         <div class="background"></div>
-        <div class="checkmark draw"></div>
+        <div class="cross"></div>
     </div>
-    <h1 class="animate__animated animate__fadeInDown">Thank you for your order!</h1>
+    <h1 class="animate__animated animate__fadeInDown">Payment Failed</h1>
 
-    <!-- Order details -->
+    <!-- Payment failure details -->
     <div class="order-details fade-in-up">
-        <h2>Order Confirmation</h2>
+        <h2>We're Sorry, Your Payment Didn't Go Through</h2>
         <p><strong>Order Id:</strong> <%= order._id %></p>
         <p><strong>Order Date:</strong> 
             <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
@@ -201,7 +161,7 @@
             <p><span>Subtotal:</span> <span>₹<%= order.totalAmount %></span></p>
             <% if (order.coupon) { %>
                 <p><span>Coupon Discount:</span> <span><%= order.coupon %></span></p>
-                <p><span>Discount price</span> <span>₹ <%= order.couponDiscount %></span></p>
+                <p><span>Discount price:</span> <span>₹ <%= order.couponDiscount %></span></p>
             <% } %>
             <p><span>Shipping Address:</span> <span><%= order.shippingAddress.street %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.pincode %></span></p>
 
@@ -216,20 +176,15 @@
             </ul>
         </div>
 
-        <!-- Payment method -->
+        <!-- Payment method and error message -->
         <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-
-        <% if (order.coupon) { %>
-            <div class="coupon-info animate__animated animate__fadeIn">
-                <p><strong>Coupon Applied:</strong> <%= order.coupon %></p>
-                <p><strong>Discount Amount:</strong> ₹<%= order.couponDiscount %></p>
-            </div>
-        <% } %>
+        <div class="error-info animate__animated animate__fadeIn">
+            <p><strong>Reason:</strong> Your payment could not be processed. Please try again or use a different payment method.</p>
+        </div>
     </div>
 
     <div class="thank-you animate__animated animate__fadeIn">
-        <p>Your order has been successfully placed and will be processed soon.</p>
-        <p>You'll receive a confirmation email with further details.</p>
+        <p>If you continue to have issues, please contact our support team for assistance.</p>
     </div>
 
     <a href="/home" class="btn-home animate__animated animate__fadeIn">Back to Home</a>

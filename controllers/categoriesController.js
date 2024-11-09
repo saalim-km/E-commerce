@@ -150,10 +150,9 @@ const addOffer = async (req, res) => {
     const offerDiscountPercentage = parseInt(offerPercentage);
 
     const newOffer = {
-      discountPercentage: offerDiscountPercentage,
-      offerStartDate: new Date().toISOString(),
-      offerExpiryDate: expiryDate,
-      offerStatus: true
+      discountPercentage : offerDiscountPercentage,
+      offerStartDate : new Date().toISOString(),
+      offerExpiryDate : expiryDate,
     };
 
 
@@ -169,7 +168,6 @@ const addOffer = async (req, res) => {
             "categoryOffer.$.discountPercentage": offerDiscountPercentage,
             "categoryOffer.$.offerStartDate": new Date().toISOString(),
             "categoryOffer.$.offerExpiryDate": expiryDate,
-            "categoryOffer.$.offerStatus": true,
           }
         }
       );
@@ -184,7 +182,8 @@ const addOffer = async (req, res) => {
     for (const product of productsInCategory) {
       const salesPrice = product.salesPrice;
       const salesPriceAfterDiscount = Math.round(salesPrice - (salesPrice / 100 * offerDiscountPercentage));
-
+      const discountAmount = Math.round(salesPrice / 100 * offerDiscountPercentage);
+      // if there is offer alrady exists then updaate the existing offer.
       if (product.productOffer.length >= 1) {
         await productModel.updateOne(
           {
@@ -196,13 +195,20 @@ const addOffer = async (req, res) => {
               "productOffer.$.discountPercentage": offerDiscountPercentage,
               "productOffer.$.offerStartDate": new Date().toISOString(),
               "productOffer.$.offerExpiryDate": expiryDate,
-              "productOffer.$.offerStatus": true,
-              salesPriceAfterDiscount: salesPriceAfterDiscount
+              salesPriceAfterDiscount: salesPriceAfterDiscount,
+              discountAmount : discountAmount,
             }
           }
         );
       } else {
-        product.productOffer.push(newOffer);
+        // or add new offer to the products in the category.
+        const newPrOffer = {
+          discountPercentage : offerDiscountPercentage,
+          offerStartDate : new Date().toISOString(),
+          offerExpiryDate : expiryDate,
+          discountAmount : Math.round(salesPrice / 100 * offerDiscountPercentage)
+        }
+        product.productOffer.push(newPrOffer);
         product.salesPriceAfterDiscount = salesPriceAfterDiscount;
         await product.save();
       }

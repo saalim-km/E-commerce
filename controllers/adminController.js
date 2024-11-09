@@ -45,7 +45,7 @@ const dashboardLoad = async (req, res) => {
             { $count: "totalSalesCount" }                   
         ]);
         console.log('totalsales count here ',totalSalesResult);
-        // checking for totalAmount bfefore sending to front end
+        
         const totalSalesCount = totalSalesResult.length > 0 ? totalSalesResult[0].totalSalesCount : 0;
 
 
@@ -54,23 +54,70 @@ const dashboardLoad = async (req, res) => {
             { $group: { _id: null, totalAmount: { $sum: "$totalAmount" } } }
         ]);
         console.log('overall order amount',overallOrderAmount)
-        // checking for overallAmount
+       
         const orderAmount = overallOrderAmount.length > 0 ? overallOrderAmount[0].totalAmount : 0;
 
-
-        const overallDiscount = await Order.aggregate([
-            {$match : {status : "Delivered"}},
-            { $group: { _id: null, totalDiscount: { $sum: { $ifNull: ["$discount", 0] } } } }
-        ]);
-        console.log('overall discount',overallDiscount);
-        // checking overall discount 
-        const discount = overallDiscount.length > 0 ? overallDiscount[0].totalDiscount : 0;
-
+        let discount = await Order.aggregate([{"$match" : {status : 'Delivered'}} , {$group : {_id:null , totalDiscount : { $sum : '$discount'}}}])
+        console.log('total discoutn here ' , discount);
         
+        const couponDiscount = await Order.aggregate([{"$match" : {status : 'Delivered'}} , {$group : {_id : null , totalCouponDiscount : {$sum: '$couponDiscount'}}}])
+
+
+        // fetching top 10 product
+        const topProducts = await Order.aggregate([
+
+            {"$unwind" : "$products"},
+
+            {
+                $group : {_id : "$products.productId" , totalQuantitySold : {$sum : '$products.quantity'}}
+            },
+
+            {$sort : {totalQuantitySold : -1}},
+
+            {$limit : 10},
+
+            {
+                $lookup : {
+                    from : "products",
+                    localField : "_id",
+                    foreignField : '_id',
+                    as : 'productDetails',
+                }
+            },
+
+            {
+                $project : {
+                    _id :1,
+                    totalQuantitySold : 1,
+                    productDetails : {$arrayElemAt : ['$productDetails',0]}
+                }
+            },
+
+            {
+                $lookup : {
+                    from : 'categories',
+                    localField : "productDetails.category",
+                    foreignField : '_id',
+                    as : 'categoryDetails',
+                }
+            },
+
+            {
+                $project : {
+                    _id : 1,
+                    categoryDetails : {$arrayElemAt : ['$categoryDetails',0]}
+                }
+            }
+        ]);
+
+
+        console.log(topProducts)
         res.render("dashboard", {
             totalSalesCount,
             overallOrderAmount: orderAmount,
-            overallDiscount: discount
+            overallDiscount: discount[0].totalDiscount,
+            couponDiscount : couponDiscount[0].totalCouponDiscount,
+            topProducts
         });
     } catch (error) {
         console.log("Error while loading dashboard", error.message);

@@ -151,7 +151,7 @@ const verifyOtp = async (req, res) => {
       // creating new wallet for user
       const wallet = new walletModel({
         userId : userData._id,
-        balance : 0,
+        balance : 10000,
       })
       await wallet.save();
       console.log(`created wallet for ${userData.username}`);

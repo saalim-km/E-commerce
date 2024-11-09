@@ -10,7 +10,7 @@ const walletTransaction = mongoose.Schema({
     },
     description : {
         type : String,
-        enum : ['Returned' , 'Cancelled' , 'CustomOrder']
+        enum : ['Returned' , 'Cancelled' , 'CustomOrder','Wallet Order']
     },
     transactionType : {
         type : String,

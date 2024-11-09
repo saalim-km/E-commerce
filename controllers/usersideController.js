@@ -8,11 +8,9 @@ const categoryModel = require("../models/category");
 const CouponModel = require("../models/couponModel");
 const couponModel = require("../models/couponModel");
 const walletModel = require("../models/wallet");
-const easyinvoice = require("easyinvoice");
-const fs = require('fs');
 const Razorpay = require("razorpay");
-const { json } = require("express");
 const { ObjectId } = require("mongoose").Types;
+const PDFDocument = require("pdfkit");
 
 // Razor pay configuration
 const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = process.env;
@@ -152,7 +150,8 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// changing password of user
+
+// ---- changing password of user ----
 // loading change password page
 const passwordPage = async (req, res) => {
   try {
@@ -347,14 +346,16 @@ const addCart = async (req, res) => {
 
     const { categoryId, productId, size, quantity } = req.body;
 
-    // Find if the cart item already exists
+
+    const maxLimit = 5;
+
+    // checkint if the cart already exists
     const cartExists = await cartModel.findOne({
       userId: userData._id,
       productId: productId,
       "sizes.size": size,
     });
 
-    // Find the product to check stock availability
     const productData = await productModel.findById(productId);
     if (!productData) {
       return res
@@ -374,7 +375,7 @@ const addCart = async (req, res) => {
     console.log(`Available stock for size ${size}:`, stockAvailable);
 
     if (cartExists) {
-      // If the cart item exists, check the current quantity in the cart
+      // If the cart item exists
       const currentQuantityInCart = cartExists.sizes.find(
         (item) => item.size === size
       ).quantity;
@@ -385,16 +386,23 @@ const addCart = async (req, res) => {
 
       const totalQuantity = currentQuantityInCart + Number(quantity);
 
-      // Check if adding the new quantity exceeds the available stock
+      // Check if adding the new quantity exceeds the stock or user limit
       if (totalQuantity > stockAvailable) {
         return res.json({
           success: false,
-          message: `stock limit reached`,
+          message: `Stock limit reached`,
+        });
+      }
+      
+      if (totalQuantity > maxLimit) {
+        return res.json({
+          success: false,
+          message: `Cannot add more than ${maxLimit} items of this product.`,
         });
       }
 
       // Update the cart with the new quantity
-      const cartUpdate = await cartModel.updateOne(
+      await cartModel.updateOne(
         {
           userId: userData._id,
           productId: productId,
@@ -405,14 +413,20 @@ const addCart = async (req, res) => {
 
       res.json({ success: true });
     } else {
+      // Check if the quantity exceeds the max limit when adding a new cart item
+      if (quantity > maxLimit) {
+        return res.json({
+          success: false,
+          message: `Cannot add more than ${maxLimit} items of this product.`,
+        });
+      }
+
       const items = [
         {
           size: size,
           quantity: quantity,
         },
       ];
-
-      console.log(items);
 
       const newCart = new cartModel({
         userId: userData._id,
@@ -421,18 +435,15 @@ const addCart = async (req, res) => {
         sizes: items,
       });
 
-      const result = await newCart.save();
-      console.log(result);
-
-      if (newCart) {
-        res.json({ success: true });
-      }
+      await newCart.save();
+      res.json({ success: true });
     }
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
+
 
 const loadCart = async (req, res) => {
   try {
@@ -607,6 +618,7 @@ const checkoutPage = async (req, res) => {
     const email = req.session.user;
     const user = await userModel.findOne({ email });
     coupons = await couponModel.find({});
+    const wallet = await walletModel.findOne({userId : user._id}); 
     const cartDetails = await cartModel
       .find({ userId: user._id })
       .populate("productId")
@@ -616,6 +628,7 @@ const checkoutPage = async (req, res) => {
       address: user.addresses,
       user: user,
       coupons : coupons,
+      wallet : wallet.balance,
     });
   } catch (error) {
     console.log("error while loading checkout page", error.message);
@@ -630,7 +643,7 @@ const checkout = async (req, res) => {
     const { selectedAddress, cartItems, couponCode, paymentMethod } = req.body;
     const addressId = new ObjectId(selectedAddress);
 
-    // selecting Address
+    // Selecting Address
     const address = await userModel.aggregate([
       {
         $unwind: "$addresses",
@@ -641,26 +654,32 @@ const checkout = async (req, res) => {
         },
       },
     ]);
-    let totalPrice = 0;
 
-    // Total Amount
+    let totalPrice = 0;
+    let totalDiscount = 0;
+
+    // Calculate Total Amount and Total Discount
     for (const item of cartItems) {
       const itemProductId = item.productId;
       const product = await productModel.findById(itemProductId);
+
       const itemTotal = product.salesPriceAfterDiscount
         ? product.salesPriceAfterDiscount * item.quantity
         : product.salesPrice * item.quantity;
       totalPrice += itemTotal;
+
+      // Calculate the product discount based on quantity
+      if (product.productOffer.length > 0 && product.productOffer[0].discountAmount) {
+        totalDiscount += product.productOffer[0].discountAmount * item.quantity;
+      }
     }
 
-    // storing discount value
+    // Applying coupon discount
     let discount = 0;
     if (couponCode) {
-      console.log(couponCode);
       const coupon = await couponModel.findOne({ name: couponCode });
-      discount = Math.round((totalPrice * coupon.discountPercentage) / 100)
-      totalPrice =
-        totalPrice - discount;
+      discount = Math.round((totalPrice * coupon.discountPercentage) / 100);
+      totalPrice -= discount;
     }
 
     const order = new orderModel({
@@ -670,27 +689,46 @@ const checkout = async (req, res) => {
       paymentMethod: paymentMethod,
       totalAmount: totalPrice,
       coupon: couponCode,
-      discount : discount,
-      backupTotalAmount : totalPrice,
+      couponDiscount: discount,
+      backupTotalAmount: totalPrice + discount, // Original price before coupon
+      discount: totalDiscount,
     });
     const orderDetails = await order.save();
 
-    // Decreasing the quantity from stock
+    // Decreasing wallet amount
+    if (paymentMethod === 'Wallet') {
+      const wallet = await walletModel.findOne({ userId: userData._id });
+      wallet.balance -= totalPrice;
+
+      const newTransaction = {
+        orderId: orderDetails._id,
+        amount: totalPrice,
+        description: 'Wallet Order',
+        transactionType: 'debit',
+        paymentMethod: 'Wallet',
+      };
+
+      wallet.transactions.push(newTransaction);
+      await wallet.save();
+    }
+
+    // Decreasing stock quantity
     for (let product of cartItems) {
       const productId = product.productId;
-      const updateProduct = await productModel.updateOne(
+      await productModel.updateOne(
         { _id: productId, "sizes.size": product.size },
         { $inc: { "sizes.$.stock": -product.quantity } }
       );
     }
 
-    const cartDelete = await cartModel.deleteMany({ userId: userData._id });
-    console.log(cartDelete);
+    // Deleting cart items
+    await cartModel.deleteMany({ userId: userData._id });
     res.redirect(`/user/order/${orderDetails._id}`);
   } catch (error) {
-    console.log("error while checkout", error.message);
+    console.log("Error during checkout:", error.message);
   }
 };
+
 
 // order success page
 const orderSuccess = async (req, res) => {
@@ -701,7 +739,12 @@ const orderSuccess = async (req, res) => {
       .findById(orderId)
       .populate("products.productId")
       .populate("shippingAddress");
-    res.render("orderPage", { order });
+
+      if(order.status == 'Pending'){
+        res.render("orderPage", { order });
+      }else {
+        res.render("paymentFail",{order});
+      }
   } catch (error) {
     console.log("error while loading order confirmation page", error.message);
   }
@@ -727,6 +770,9 @@ const updateCartQuantity = async (req, res) => {
     const cartSize = cartItem.sizes.find((s) => s.size === size);
 
     if (action === "increase") {
+      if(cartSize.quantity >= 5 ){
+        return res.json({success: false , message : 'limit reached'});
+      }
       if (cartSize.quantity < productSize.stock) {
         cartSize.quantity += 1;
       } else {
@@ -818,7 +864,6 @@ const onlineOrder = async (req, res) => {
 // after payment successfull
 const verifyOrder = async (req, res) => {
   try {
-    console.log("hi nigga ", req.body);
     const userData = await userModel.findOne({ email: req.session.user });
     const { selectedAddress, cartItems, couponCode, paymentMethod } = req.body;
     const addressId = new ObjectId(req.body.selectedAddress);
@@ -835,6 +880,8 @@ const verifyOrder = async (req, res) => {
 
     let totalPrice = 0;
 
+    let totalDiscount = 0;
+
     for (const item of cartItems) {
       const itemProductId = item.productId;
       const product = await productModel.findById(itemProductId);
@@ -842,6 +889,10 @@ const verifyOrder = async (req, res) => {
         ? product.salesPriceAfterDiscount * item.quantity
         : product.salesPrice * item.quantity;
       totalPrice += itemTotal;
+
+      if(product.productOffer.length > 0 && product.productOffer[0].discountAmount) {
+        totalDiscount += product.productOffer[0].discountAmount;
+      }
     }
 
     let discount = 0;
@@ -861,8 +912,9 @@ const verifyOrder = async (req, res) => {
       paymentMethod: "Razorpay",
       totalAmount: totalPrice,
       coupon : couponCode,
-      discount: discount,
+      couponDiscount: discount,
       backupTotalAmount : totalPrice,
+      discount : totalDiscount,
     });
     const orderDetails = await order.save();
 
@@ -1280,7 +1332,7 @@ const returnItem = async (req, res) => {
 };
 
 
-// updatin offer when the offer expires via ajax
+// updating offer when the offer expires via ajax
 const updateOffer = async (req, res) => {
   try {
     const { productId, offerId } = req.body;
@@ -1359,61 +1411,148 @@ const walletPage = async (req, res) => {
   }
 };
   
-
+// invoice generator
 const downloadInvoice = async (req, res) => {
   try {
-    const { id } = req.params;
-    
-    // Fetch order details from your database
-    const order = await orderModel.findById(id).populate('userId').populate('products.productId');
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    
-    // Configure the invoice data
-    const invoiceData = {
-      "sender": {
-        "company": "Savage",
-        "address": "Jew Street Kochi",
-        "zip": "682025",
-        "city": "Kochi",
-        "country": "India",
-      },
-      "client": {
-        "company": order.userId.username,
-        "address": order.shippingAddress.street,
-        "zip": order.shippingAddress.pincode,
-        "city": order.shippingAddress.city,
-        "custom1": `Order ID: #${order._id}`,
-      },
-      "information": {
-        "number": order._id,
-        "date": new Date(order.createdAt).toLocaleDateString(),
-      },
-      "products": order.products.map(item => ({
-        "quantity": item.quantity,
-        "description": item.productId.productName,
-        "tax-rate": 0,
-        "price": item.price,
-      })),
-      "bottom-notice": "Thank you for shopping with us!",
-      "settings": { "currency": "INR" }
-    };
+    const {id} = req.params;
+    const order = await orderModel.findById(id);
 
-    // Generate the PDF invoice
-    const invoicePdf = await easyinvoice.createInvoice(invoiceData);
-    // Convert base64 to binary for PDF download
-    const pdfBuffer = Buffer.from(invoicePdf.pdf, 'base64');
-
-    // Send the invoice file as a response
-    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${id}.pdf`);
-    res.type('application/pdf');
-    res.send(pdfBuffer);
+    const doc = new PDFDocument();
+    const filename = `order_invoice_${Date.now()}.pdf`;
+    res.setHeader("Content-disposition", `attachment; filename=${filename}`);
+    res.setHeader("Content-type", "application/pdf");
+    
+    doc.pipe(res);
+    
+    // Invoice Header
+    doc.fontSize(20).text("Invoice", { align: "center" }).moveDown();
+    doc.fontSize(12).text(`Order ID: ${order._id}`, { align: "center" });
+    doc.fontSize(12).text(`Order Date: ${new Date(order.createdAt).toDateString()}`, { align: "center" });
+    doc.moveDown();
+    
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke().moveDown();
+    
+    // Customer Details
+    doc.fontSize(14).text("Customer Details", { underline: true }).moveDown(0.5);
+    doc.fontSize(12).text(`Customer Email: ${order.userId.email}`)
+       .text(`Order Status: ${order.status}`)
+       .moveDown();
+    
+    // Shipping Address
+    doc.fontSize(14).text("Shipping Address", { underline: true }).moveDown(0.5);
+    doc.fontSize(12)
+       .text(`Name: ${order.shippingAddress.fullName}`)
+       .text(`Mobile: ${order.shippingAddress.phone}`)
+       .text(`Pincode: ${order.shippingAddress.pincode}`)
+       .text(`City: ${order.shippingAddress.city}`)
+       .text(`State: ${order.shippingAddress.state}`)
+       .moveDown();
+    
+    // Order Items
+    doc.fontSize(14).text("Order Items", { underline: true }).moveDown(0.5);
+    order.products.forEach((item, index) => {
+      doc.fontSize(12)
+         .text(`Item ${index + 1}: ${item.productId.productName || "Product Name"}`)
+         .text(`Quantity: ${item.quantity}`)
+         .text(`Size: ${item.size}`)
+         .text(`Price per Unit: ${item.price.toFixed(2)}`)
+         .text(`Status: ${item.status || "N/A"}`)
+         .text(`Total: ${(item.price * item.quantity).toFixed(2)}`)
+         .moveDown();
+    });
+    
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke().moveDown();
+    
+    // Payment Details
+    doc.fontSize(14).text("Payment Details", { underline: true }).moveDown(0.5);
+    doc.fontSize(12)
+       .text(`Payment Method: ${order.paymentMethod}`)
+       .text(`Payment Status: ${order.paymentStatus || "N/A"}`)
+       .text(`Payment ID: ${order.paymentId || "N/A"}`)
+       .moveDown();
+    
+    // Pricing Summary
+    doc.fontSize(14).text("Pricing Summary", { underline: true }).moveDown(0.5);
+    doc.fontSize(12)
+       .text(`Subtotal: ${order.totalAmount.toFixed(2)}`)
+       .text(`Shipping Fee: ${order.shippingFee ? order.shippingFee.toFixed(2) : "0.00"}`)
+       .text(`Discount: ${order.couponDiscount ? order.couponDiscount.toFixed(2) : "0.00"}`)
+       .text(`Coupon Code: ${order.coupon || "N/A"}`)
+       .moveDown();
+    
+    // Footer Note
+    doc.fontSize(10).text("Thank you for your purchase!", { align: "center" }).moveDown();
+    
+    doc.end();    
   } catch (error) {
-    console.error("Error in downloadInvoice:", error.message);
+    console.error("Error in download Invoice:", error.message);
     res.status(500).json({ message: "An error occurred while generating the invoice" });
   }
 };
+
+
+
+// if the payment got failed
+const paymentFailed  = async(req,res)=> {
+  try {
+    console.log("hi nigga ", req.body);
+    const userData = await userModel.findOne({ email: req.session.user });
+    const { selectedAddress, cartItems, couponCode, paymentMethod } = req.body;
+    const addressId = new ObjectId(req.body.selectedAddress);
+    const address = await userModel.aggregate([
+      {
+        $unwind: "$addresses",
+      },
+      {
+        $match: {
+          "addresses._id": addressId,
+        },
+      },
+    ]);
+
+    let totalPrice = 0;
+
+    for (const item of cartItems) {
+      const itemProductId = item.productId;
+      const product = await productModel.findById(itemProductId);
+      const itemTotal = product.salesPriceAfterDiscount
+        ? product.salesPriceAfterDiscount * item.quantity
+        : product.salesPrice * item.quantity;
+      totalPrice += itemTotal;
+    }
+
+    let discount = 0;
+    if (couponCode) {
+      const couponData = await couponModel.findOne({ name: couponCode });
+      const discountPercentage = couponData.discountPercentage;
+      discount = Math.round((totalPrice / 100) * discountPercentage);
+      totalPrice -= discount;
+    }
+    console.log(`total after cupon discount : ${totalPrice}`);
+
+    // creating order for railed payment with  a status of 'Failed'
+    const order = new orderModel({
+      userId: userData._id,
+      products: cartItems,
+      shippingAddress: address[0].addresses,
+      paymentMethod: "Razorpay",
+      totalAmount: totalPrice,
+      coupon : couponCode,
+      couponDiscount: discount,
+      backupTotalAmount : totalPrice,
+      status : 'Failed'
+    });
+    const orderDetails = await order.save();
+
+    if (orderDetails ) {
+      res.json({ success: true, orderId: orderDetails._id });
+    } else {
+      res.json({ success: false });
+    }
+  }catch(error){
+    console.log("error in paymentFailed",error.message);
+  }
+}
 
 module.exports = {
   productView,
@@ -1449,4 +1588,5 @@ module.exports = {
   validateCoupon,
   walletPage,
   downloadInvoice,
+  paymentFailed
 };

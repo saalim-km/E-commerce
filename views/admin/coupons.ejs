@@ -17,18 +17,18 @@
         <% } %>
         <form action="/admin/coupons/create" method="POST" onsubmit="return validateForm()">
             <div class="mb-3">
-                <label for="name" class="form-label">Coupon Name</label>
+                <label for="name" class="form-label">Coupon Name</label><span id="nameErr" style="color: red; margin-left: 2%;"></span>
                 <input type="text" class="form-control" id="name" name="name">
             </div>
             <div class="mb-3">
-                <label for="descountPercentage" class="form-label">Discount percentage</label>
+                <label for="descountPercentage" class="form-label">Discount percentage</label><span id="discountPerErr" style="color: red; margin-left: 2%;"></span>
                 <input type="number" class="form-control" id="discountPercentage" name="discountPercentage">
             </div>
             <div class="mb-3">
-                <label for="minPrice" class="form-label">Minimum Price</label>
+                <label for="minPrice" class="form-label">Minimum Price</label><span id="minPriceErr" style="color: red; margin-left: 2%;"></span>
                 <input type="number" class="form-control" id="minPrice" name="minPrice">
             <div class="mb-3">
-                <label for="expiryDate" class="form-label">Expiry Date</label>
+                <label for="expiryDate" class="form-label">Expiry Date</label><span id="expiryDateErr" style="color: red; margin-left: 2%;"></span>
                 <input type="datetime-local" class="form-control" id="expiryDate" name="expiryDate">
             </div>
             <button type="submit" class="btn btn-primary">Create Coupon</button>
@@ -57,7 +57,7 @@
                                     <td><%= coupon.name %></td>
                                     <td>₹<%= coupon.minPrice %></td>
                                     <td><%= coupon.discountPercentage %> %</td>
-                                    <td><%= new Date(coupon.expiryDate).toLocaleDateString() %></td>
+                                    <td><%= new Date(coupon.expiryDate).toLocaleDateString('en-GB') %></td>
                                     <td>
                                         <% if(new Date(coupon.expiryDate) > new Date()) { %>
                                             <span class="badge bg-success">Active</span>
@@ -87,19 +87,26 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 <script>
+    const nameErr = document.getElementById('nameErr');
+    const discountPerErr = document.getElementById('discountPerErr');
+    const minPriceErr = document.getElementById('minPriceErr');
+    const expiryDateErr = document.getElementById('expiryDateErr');
+
     function validateForm() {
+        nameErr.innerText = '';
+        discountPerErr.innerText = '';
+        minPriceErr.innerText = '';
+        expiryDateErr.innerText = '';
+
         const nameInput = document.getElementById('name');
         nameInput.value = nameInput.value.toUpperCase(); 
         const namePattern = /^[A-Z0-9]{1,8}$/; 
+        if(nameInput.value == '') {
+            nameErr.innerText = 'Coupon name cannot be empty'
+            return false;
+        }
         if (!namePattern.test(nameInput.value)) {
-            Toastify({
-                text: "Name should only contain uppercase letters and numbers, with a max of 8 characters",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f44336",
-                close: true,
-            }).showToast();
+            nameErr.innerText = 'Name should only contain uppercase letters and numbers, with a max of 8 characters';
             return false;
         }
 
@@ -107,14 +114,7 @@
         const discountPercentage = document.getElementById('discountPercentage');
         const discountValue = parseInt(discountPercentage.value, 10);
         if (isNaN(discountValue) || discountValue < 5 || discountValue > 99) {
-            Toastify({
-                text: "Discount percentage must be an integer between 5 and 99.",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f44336",
-                close: true,
-            }).showToast();
+            discountPerErr.innerText = 'Discount percentage must be an integer between 5 and 99.';
             return false;
         }
 
@@ -122,42 +122,21 @@
         const minPriceInput = document.getElementById('minPrice');
         const minPricePattern = /^[1-9][0-9]{0,3}$/; 
         if (!minPricePattern.test(minPriceInput.value)) {
-            Toastify({
-                text: "Minimum price should be a positive integer with up to 4 digits.",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f44336",
-                close: true,
-            }).showToast();
+            minPriceErr.innerText = 'Minimum price should be a positive integer with up to 4 digits.';
             return false;
         }
 
         // Expiry date validation
         const expiryDateInput = document.getElementById('expiryDate');
         if (!expiryDateInput.value) {
-            Toastify({
-                text: "Expiry date cannot be empty.",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f44336",
-                close: true,
-            }).showToast();
+            expiryDateErr.innerText = 'Expiry date cannot be empty.'
             return false;
         }
 
         const expiryDate = new Date(expiryDateInput.value);
         const currentDate = new Date();
         if (expiryDate <= currentDate) {
-            Toastify({
-                text: "Expiry date must be in the future.",
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#f44336",
-                close: true,
-            }).showToast();
+            expiryDateErr.innerText = 'Expiry date must be in the future.';
             return false;
         }
 

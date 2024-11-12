@@ -16,90 +16,121 @@ const reportPage = async (req, res) => {
             end: defaultEndDate
         });
     } catch (error) {
-        console.log("Error in report loading page:", error.message);
         res.status(500).send("Internal Server Error");
     }
 };
 
 
 const filterSalesReport = async (req, res) => {
-    try {
-        const { startDate, endDate, filterOption } = req.body;
-        const today = new Date();
-        let start, end;
+  try {
+      const { startDate, endDate, filterOption } = req.body;
+      const today = new Date();
+      let start, end;
 
-        if (startDate && endDate) {
-            const newStDate = new Date(startDate);
-            const newEndDate = new Date(endDate);
+      if (startDate && endDate) {
+          const newStDate = new Date(startDate);
+          const newEndDate = new Date(endDate);
 
-            if (isNaN(newStDate.getTime()) || isNaN(newEndDate.getTime())) {
-                console.log("Invalid custom date range provided");
-                return res.redirect("/admin/salesReport");
-            }
+          if (isNaN(newStDate.getTime()) || isNaN(newEndDate.getTime())) {
+              return res.redirect("/admin/salesReport");
+          }
 
-            console.log(`Custom start date: ${newStDate}, custom end date: ${newEndDate}`);
-            const salesData = await orderModel.find({
-                createdAt: { $gte: newStDate, $lte: newEndDate }
-            }).sort({ createdAt: -1 });
+          newStDate.setUTCHours(0, 0, 0, 0);
+          newEndDate.setUTCHours(23, 59, 59, 999); 
 
-            const totalSales = salesData.reduce((sum, order) => sum + order.backupTotalAmount, 0);
 
-            return res.render("reportsList", {
-                salesData,
-                totalSales
-            });
-        }
+          const salesData = await orderModel.find({
+              createdAt: { $gte: newStDate, $lte: newEndDate }
+          }).sort({ createdAt: -1 });
 
-        // Filter options based on filterOption
-        if (filterOption === '1-day') {
-            start = new Date(today);
-            start.setDate(today.getDate() - 1);
-            end = today;
-        } else if (filterOption === '1-week') {
-            start = new Date(today);
-            start.setDate(today.getDate() - 7);
-            end = today;
-        } else if (filterOption === '1-month') {
-            start = new Date(today);
-            start.setMonth(today.getMonth() - 1);
-            end = today;
-        } else {
-            console.log("Invalid filter option provided");
-            return res.redirect("/admin/salesReport");
-        }
+          const totalSales = salesData.reduce((sum, order) => sum + order.backupTotalAmount, 0);
 
-        // Fetch and calculate sales for selected filter
-        const salesData = await orderModel.find({
-            createdAt: { $gte: start, $lte: end }
-        }).sort({ createdAt: -1 });
+          return res.render("reportsList", {
+              salesData,
+              totalSales
+          });
+      }
 
-        const totalSales = salesData.reduce((sum, order) => sum + order.backupTotalAmount, 0);
+      // Filter options based on filterOption
+      end = new Date(today); // Use current time as end time
+      end.setUTCHours(23, 59, 59, 999);
 
-        res.render("reportsList", {
-            salesData,
-            totalSales,
-        });
-    } catch (error) {
-        console.log("Error in filtering sales report:", error.message);
-        res.status(500).send("Internal Server Error");
-    }
+      if (filterOption === '1-day') {
+          start = new Date(today);
+          start.setDate(today.getDate() - 1);
+      } else if (filterOption === '1-week') {
+          start = new Date(today);
+          start.setDate(today.getDate() - 7);
+      } else if (filterOption === '1-month') {
+          start = new Date(today);
+          start.setMonth(today.getMonth() - 1);
+      } else {
+          return res.redirect("/admin/salesReport");
+      }
+
+      start.setUTCHours(0, 0, 0, 0);
+
+
+      const salesData = await orderModel.find({
+          createdAt: { $gte: start, $lte: end }, status: 'Delivered'
+      }).sort({ createdAt: -1 });
+
+      const total = await orderModel.aggregate([
+          { "$match": { createdAt: { $gte: start, $lte: end }, status: 'Delivered' } },
+          { $group: { _id: null, totalSales: { $sum: '$totalAmount' } } }
+      ]);
+      const totalSales = total[0] ? total[0].totalSales : 0;
+
+      res.render("reportsList", {
+          salesData,
+          totalSales,
+          start,
+          end,
+      });
+  } catch (error) {
+      res.status(500).send("Internal Server Error");
+  }
 };
+
 
 
 
 const downloadSalesReportPdf = async (req, res) => {
     try {
-      const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
-      const startDate = req.query.startDate
-        ? new Date(req.query.startDate)
-        : new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
-  
+
+      let endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+      let startDate = req.query.startDate
+          ? new Date(req.query.startDate)
+          : new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
+
+      
+      endDate.setUTCHours(23, 59, 59, 999);
+      startDate.setUTCHours(0, 0, 0, 0);
+
+
       const salesData = await orderModel.find({
-        createdAt: { $gte: startDate, $lte: endDate },
+          createdAt: { $gte: startDate, $lte: endDate },
+          status: 'Delivered'
       });
-  
-      const totalSales = salesData.reduce((sum, order) => sum + order.totalAmount, 0);
-  
+
+      const total = await orderModel.aggregate([
+          {
+              "$match": {
+                  createdAt: { $gte: startDate, $lte: endDate },
+                  status: 'Delivered'
+              }
+          },
+          {
+              $group: { _id: null, totalSales: { $sum: '$totalAmount' } }
+          }
+      ]);
+
+
+      const totalSales = total.length > 0 ? total[0].totalSales : 0;
+
+      const discount = await orderModel.aggregate([{"$match" : {createdAt : {$gte : startDate , $lte : endDate },status : 'Delivered'}} , {$group : {_id:null , totalDiscount : { $sum : '$discount'}}}])
+      const totalDiscount = discount.length > 0 ? discount[0].totalDiscount : 0;
+
       const doc = new PDFDocument({
         size: 'A4',
         margins: { top: 50, bottom: 50, left: 50, right: 50 },
@@ -122,6 +153,7 @@ const downloadSalesReportPdf = async (req, res) => {
       doc.fontSize(14).font('Helvetica-Bold').text('Summary', 70, doc.y + 20);
       doc.fontSize(12).font('Helvetica').text(`Total Sales: ₹${totalSales.toLocaleString()}`, 70, doc.y + 20);
       doc.text(`Total Orders: ${salesData.length}`, 70, doc.y + 20);
+      doc.text(`Total Discount: ${totalDiscount}`, 70, doc.y + 20);
       doc.moveDown(2);
   
       // Table header
@@ -162,7 +194,6 @@ const downloadSalesReportPdf = async (req, res) => {
   
       doc.end();
     } catch (error) {
-      console.error("Error generating PDF:", error.message);
       res.status(500).json({ success: false, message: "Failed to generate PDF" });
     }
 };

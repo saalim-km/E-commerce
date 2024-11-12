@@ -23,8 +23,6 @@ const userList = async(req,res)=> {
         const count = await userModel.find({isAdmin : 0}).countDocuments();
 
         const totalPages = Math.ceil(count / limit);
-        console.log('count of documents',count);
-        // console.log(userData," , count of documents in the user list : ",count);
         res.render('userList',{
             users : userData,
             currentPage : page,
@@ -32,7 +30,6 @@ const userList = async(req,res)=> {
         });
         }
     } catch (error) {
-        console.log('error while loading users list',error.message);
     }
 }
 
@@ -41,10 +38,8 @@ const userBlock = async(req,res)=> {
         const {userId} = req.body;
         const result = await userModel.findByIdAndUpdate(userId,{isBlocked : 1});
         req.session.user = null;
-        console.log('session set null after blocking user');
         res.json({success : true});
     } catch (error) {
-        console.log('error while blocking user',error.message);
         req.flash("error","something went wrong while blocking the user");
         res.redirect("/admin/users")
     }
@@ -54,11 +49,9 @@ const userBlock = async(req,res)=> {
 const userUnBlock = async(req,res)=> {
     try {
         const {userId} = req.body;
-        console.log(userId);
         const user = await userModel.findByIdAndUpdate(userId,{isBlocked : 0});
         res.json({success:true});
     } catch (error) {
-        console.log('error while Un-Blocking user',error.message);
         req.flash("error","something went wrong while unblocking user");
         res.redirect("/admin/users")
     }

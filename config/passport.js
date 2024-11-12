@@ -32,8 +32,6 @@ async function (request , accessToken, regreshToken, profile , done) {
 				balance : 0,
 			})
 			await wallet.save();
-			console.log(`wallet created for ${userData.username}`);
-			console.log('data stored in the database');
 			return done(null,existingUser);
 		}
 	} catch (err) {

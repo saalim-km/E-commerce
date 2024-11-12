@@ -34,7 +34,6 @@ const productView = async (req, res) => {
       res.render("productView", { product: productData, user: userData });
     }
   } catch (error) {
-    console.log("error in the product View", error.message);
   }
 };
 // loading shop list
@@ -48,7 +47,6 @@ const shopList = async (req, res) => {
 
       const { category, sort, search, page = 1 } = req.query;
 
-      console.log(req.query);
       const limit = 8;
       const skip = (page - 1) * limit;
 
@@ -61,7 +59,6 @@ const shopList = async (req, res) => {
       if (search) {
         query.productName = { $regex: search, $options: "i" };
       }
-      console.log(query);
 
       const totalProducts = await productModel.countDocuments(query);
 
@@ -113,7 +110,6 @@ const shopList = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("error while loading shop page", error.message);
     res.status(500).send("An error occurred while loading the shop page");
   }
 };
@@ -125,14 +121,12 @@ const userProfile = async (req, res) => {
     const userData = await userModel.findOne({ email: userId });
     res.render("userDetails", { userData: userData });
   } catch (error) {
-    console.log("error while loading page", error.message);
   }
 };
 // updating user profile
 const updateProfile = async (req, res) => {
   try {
     const { userId, name, phone } = req.body;
-    console.log(userId, name, phone);
     const userExist = await userModel.findOne({ name });
     if (userExist) {
       res.json({ success: false });
@@ -141,11 +135,9 @@ const updateProfile = async (req, res) => {
         username: name,
         phone: phone,
       });
-      console.log(result);
       res.json({ success: true });
     }
   } catch (error) {
-    console.log("error while updating the user profile", error.message);
     res.json({ error: true });
   }
 };
@@ -159,16 +151,13 @@ const passwordPage = async (req, res) => {
     const userData = await userModel.findOne({ email: userId });
     res.render("password", { userData: userData });
   } catch (error) {
-    console.log(error.message);
   }
 };
 // post request for changing pass
 const changePass = async (req, res) => {
   try {
     const { oldPass, newPass, userId } = req.body;
-    console.log(oldPass, newPass, userId);
     const userData = await userModel.findById(userId);
-    console.log(userData);
     const isMatch = await bcrypt.compare(oldPass, userData.password);
     if (!isMatch) {
       res.json({ success: false });
@@ -179,9 +168,7 @@ const changePass = async (req, res) => {
       });
       res.json({ success: true });
     }
-    console.log(isMatch);
   } catch (error) {
-    console.log("error while upating password", error.message);
     res.json({ success: false });
   }
 };
@@ -194,7 +181,6 @@ const addPage = async (req, res) => {
     const addressData = user.addresses;
     res.render("address", { userData: user, address: addressData });
   } catch (error) {
-    console.log("error while loading address page", error.message);
   }
 };
 
@@ -203,7 +189,6 @@ const addAddress = async (req, res) => {
   try {
     const userEmail = req.session.user;
     const user = await userModel.findOne({ email: userEmail });
-    console.log(req.body);
     const { name, house, street, city, state, pincode, phone, altPhone } =
       req.body;
 
@@ -233,7 +218,6 @@ const addAddress = async (req, res) => {
       res.status(200).json({ success: false });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "server error" });
   }
 };
@@ -253,7 +237,6 @@ const deleteAdd = async (req, res) => {
       res.status(200).json({ success: false, message: "Address not found" });
     }
   } catch (error) {
-    console.log("error while deleting address", error.message);
     res.status(500).json({ error: "an error occured while deleting address" });
   }
 };
@@ -275,7 +258,6 @@ const editAddPage = async (req, res) => {
     ]);
     res.render("editAdd", { address: address[0].addresses });
   } catch (error) {
-    console.log("error while editing Address", error.message);
   }
 };
 
@@ -341,8 +323,7 @@ const addCart = async (req, res) => {
   try {
     const email = req.session.user;
     const userData = await userModel.findOne({ email });
-    console.log(userData);
-    console.log(req.body);
+
 
     const { categoryId, productId, size, quantity } = req.body;
 
@@ -372,17 +353,13 @@ const addCart = async (req, res) => {
     }
 
     const stockAvailable = productSize.stock;
-    console.log(`Available stock for size ${size}:`, stockAvailable);
 
     if (cartExists) {
       // If the cart item exists
       const currentQuantityInCart = cartExists.sizes.find(
         (item) => item.size === size
       ).quantity;
-      console.log(
-        `Current quantity in cart for size ${size}:`,
-        currentQuantityInCart
-      );
+
 
       const totalQuantity = currentQuantityInCart + Number(quantity);
 
@@ -439,7 +416,6 @@ const addCart = async (req, res) => {
       res.json({ success: true });
     }
   } catch (error) {
-    console.error("Error adding to cart:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
@@ -493,7 +469,6 @@ const loadCart = async (req, res) => {
     res.render("cart", { cart: updatedCartDetails, user: userDetails });
   } catch (error) {
     // Log error for server debugging
-    console.error("Error loading cart:", error.message);
 
     // Respond with an internal server error
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -508,7 +483,6 @@ const deleteCart = async (req, res) => {
       res.redirect("/user/cart");
     }
   } catch (error) {
-    console.log("error while deleting cart");
   }
 };
 
@@ -530,7 +504,6 @@ const wishListPage = async (req, res) => {
     // Render the wishlist page with the user and populated wishlist data
     res.render("wishlist", { user: userData, wishlist: wishListData });
   } catch (error) {
-    console.log("Error in wishListPage:", error.message);
     res.status(500).send("Server error");
   }
 };
@@ -581,7 +554,6 @@ const addToWishlist = async (req, res) => {
         message: "Product added to wishlist successfully",
       });
   } catch (error) {
-    console.error("Error in addToWishlist:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -606,7 +578,6 @@ const removeWishlist = async (req, res) => {
 
     res.redirect("/user/wishlist");
   } catch (error) {
-    console.log("Error from removeWishlist:", error.message);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -631,7 +602,6 @@ const checkoutPage = async (req, res) => {
       wallet : wallet.balance,
     });
   } catch (error) {
-    console.log("error while loading checkout page", error.message);
   }
 };
 
@@ -725,16 +695,14 @@ const checkout = async (req, res) => {
     await cartModel.deleteMany({ userId: userData._id });
     res.redirect(`/user/order/${orderDetails._id}`);
   } catch (error) {
-    console.log("Error during checkout:", error.message);
   }
 };
-
-
+                     
+                                                             
 // order success page
 const orderSuccess = async (req, res) => {
   try {
     const orderId = req.params.id;
-    console.log(orderId);
     const order = await orderModel
       .findById(orderId)
       .populate("products.productId")
@@ -746,7 +714,6 @@ const orderSuccess = async (req, res) => {
         res.render("paymentFail",{order});
       }
   } catch (error) {
-    console.log("error while loading order confirmation page", error.message);
   }
 };
 
@@ -793,7 +760,6 @@ const updateCartQuantity = async (req, res) => {
     await cartItem.save();
     return res.json({ success: true, message: "Cart updated successfully." });
   } catch (error) {
-    console.error(error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error." });
@@ -803,21 +769,10 @@ const updateCartQuantity = async (req, res) => {
 // online order
 const onlineOrder = async (req, res) => {
   try {
-    console.log(req.body);
     const userData = await userModel.findOne({ email: req.session.user });
-    console.log(userData);
     const { selectedAddress, cartItems, couponCode, paymentMethod } = req.body;
     const addressId = new ObjectId(selectedAddress);
-    const address = await userModel.aggregate([
-      {
-        $unwind: "$addresses",
-      },
-      {
-        $match: {
-          "addresses._id": addressId,
-        },
-      },
-    ]);
+
 
     let totalPrice = 0;
 
@@ -835,7 +790,6 @@ const onlineOrder = async (req, res) => {
       const discountPercentage = couponData.discountPercentage;
       totalPrice -= Math.round((totalPrice / 100) * discountPercentage);
     }
-    console.log(`total after cupon discount : ${totalPrice}`);
     const amount = totalPrice * 100;
 
     const options = {
@@ -857,7 +811,6 @@ const onlineOrder = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log("error while creating online order", error.message);
   }
 };
 
@@ -902,7 +855,6 @@ const verifyOrder = async (req, res) => {
       discount = Math.round((totalPrice / 100) * discountPercentage);
       totalPrice -= discount;
     }
-    console.log(`total after cupon discount : ${totalPrice}`);
 
     // creating order and saving database
     const order = new orderModel({
@@ -927,14 +879,12 @@ const verifyOrder = async (req, res) => {
     }
 
     const cartDelete = await cartModel.deleteMany({ userId: userData._id });
-    console.log(cartDelete);
     if (orderDetails && cartDelete) {
       res.json({ success: true, orderId: orderDetails._id });
     } else {
       res.json({ success: false });
     }
   } catch (error) {
-    console.log("error while creating order", error.message);
   }
 };
 
@@ -948,7 +898,6 @@ const ordersPage = async (req, res) => {
       .sort({ createdAt: -1 });
     res.render("orders", { orders, userData: userData });
   } catch (error) {
-    console.log("error while loading orders page", error.message);
   }
 };
 // View order Details
@@ -970,14 +919,12 @@ const viewOrder = async (req, res) => {
       res.render("orderDetails", { order, user, address, products });
     }
   } catch (error) {
-    console.log("error while loading view order page", error.message);
   }
 };
 // Cancelling Order
 const cancelOrder = async (req, res) => {
   try {
     const { id } = req.body;
-    console.log("Cancelling order with ID:", id);
 
     const order = await orderModel.findById(id).populate('userId');
     if (!order) return res.status(404).json({ success: false, message: "Order not found" });
@@ -1016,7 +963,27 @@ const cancelOrder = async (req, res) => {
     refundAmount = Math.round(refundAmount);
 
     if (order.paymentMethod === "Razorpay" && refundAmount > 0) {
-      // Set totalAmount to 0 for Razorpay orders
+
+      await orderModel.updateOne({ _id: id }, { $set: { totalAmount: 0 } });
+
+      // Update wallet
+      const walletData = await walletModel.findOne({ userId: order.userId._id });
+      if (walletData) {
+        walletData.balance += refundAmount;
+
+
+        const transaction = {
+          orderId: id,
+          amount: refundAmount,
+          description: 'Cancelled',
+          transactionType: 'credit',
+          paymentMethod: order.paymentMethod,
+        };
+        walletData.transactions.push(transaction);
+        await walletData.save();
+      }
+    }else if(order.paymentMethod === 'Wallet' && refundAmount > 0){
+
       await orderModel.updateOne({ _id: id }, { $set: { totalAmount: 0 } });
 
       // Update wallet
@@ -1042,7 +1009,6 @@ const cancelOrder = async (req, res) => {
 
     res.json({ success: true, message: "Order cancelled successfully" });
   } catch (error) {
-    console.log("Error while cancelling order:", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -1051,7 +1017,6 @@ const cancelOrder = async (req, res) => {
 const returnOrder = async (req, res) => {
   try {
     const { id } = req.body;
-    console.log("Returning entire order with ID:", id);
 
     const order = await orderModel.findById(id).populate('userId');
     if (!order) return res.status(404).json({ success: false, message: "Order not found" });
@@ -1095,7 +1060,7 @@ const returnOrder = async (req, res) => {
       { $set: { totalAmount: 0, status: "Returned" } }
     );
 
-    // Update the wallet balance and add transaction for both COD and Razorpay
+    // Update the wallet balance and add transaction for both COD , Razorpay & Wallet
     if (refundAmount > 0) {
       const walletData = await walletModel.findOne({ userId: order.userId._id });
       if (walletData) {
@@ -1116,7 +1081,6 @@ const returnOrder = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.log("Error while returning entire order:", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -1130,14 +1094,13 @@ const returnOrder = async (req, res) => {
 // cancel and reutrn for individual items
 const cancelItem = async (req, res) => {
   try {
-    console.log("cancelItem here !!");
 
     const userData = await userModel.findOne({ email: req.session.user });
     const { itemId, id } = req.body;
     const item = new ObjectId(itemId);
     const orderData = await orderModel.findById(id);
 
-    // Find the canceled item
+   
     const cancelItem = await orderModel.aggregate([
       { $unwind: "$products" },
       { $match: { "products._id": item } },
@@ -1147,7 +1110,7 @@ const cancelItem = async (req, res) => {
       return res.status(404).json({ success: false, message: "Item not found" });
     }
 
-    // Restocking product quantity
+    
     await productModel.updateOne(
       {
         _id: cancelItem[0].products.productId,
@@ -1158,7 +1121,7 @@ const cancelItem = async (req, res) => {
       }
     );
 
-    // Changing status of the specific item
+
     await orderModel.updateOne(
       {
         _id: id,
@@ -1169,10 +1132,9 @@ const cancelItem = async (req, res) => {
       }
     );
 
-    // Calculate subtotal for the canceled item (quantity * price)
     let subTotal = cancelItem[0].products.price * cancelItem[0].products.quantity;
 
-    // Apply coupon discount if available
+
     if (orderData.coupon) {
       const couponData = await couponModel.findOne({ name: orderData.coupon });
       if (couponData) {
@@ -1205,9 +1167,34 @@ const cancelItem = async (req, res) => {
         walletData.transactions.push(newTransaction);
         await walletData.save();
       }
+    }else if(orderData.paymentMethod === 'Wallet') {
+
+      const newOrderTotal = Math.max(0, orderData.totalAmount - subTotal);
+      await orderModel.updateOne(
+        { _id: id },
+        { $set: { totalAmount: newOrderTotal } }
+      );
+
+      // Update wallet balance and add transaction
+      const walletData = await walletModel.findOne({ userId: userData._id });
+      if (walletData) {
+        walletData.balance += subTotal;
+
+        const newTransaction = {
+          orderId: id,
+          amount: subTotal,
+          description: 'Cancelled',
+          transactionType: 'credit',
+          paymentMethod: 'Wallet',
+        };
+
+        walletData.transactions.push(newTransaction);
+        await walletData.save();
+      }
+
     }
 
-    // Check if all products are cancelled and update order status
+    // if all the products in the orde is cancelled then the full order will be cancelled.
     const updatedOrder = await orderModel.findById(id);
     const allProductsCancelled = updatedOrder.products.every(
       (product) => product.status === "Cancelled"
@@ -1221,7 +1208,6 @@ const cancelItem = async (req, res) => {
 
     res.status(200).json({ success: true });
   } catch (error) {
-    console.log("Error while canceling item:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -1230,7 +1216,6 @@ const cancelItem = async (req, res) => {
 
 const returnItem = async (req, res) => {
   try {
-    console.log("Return item here !!");
 
     const userData = await userModel.findOne({ email: req.session.user });
     const { itemId, id } = req.body;
@@ -1305,7 +1290,7 @@ const returnItem = async (req, res) => {
         );
 
     // if it is razorpay or cod update the wallet because its return item !!
-    if (orderData.paymentMethod === "Razorpay" || orderData.paymentMethod === "COD") {
+    if (orderData.paymentMethod === "Razorpay" || orderData.paymentMethod === "COD" || orderData.paymentMethod === "Wallet") {
 
       const walletData = await walletModel.findOne({ userId: userData._id });
 
@@ -1326,7 +1311,6 @@ const returnItem = async (req, res) => {
 
     res.status(200).json({ success: true });
   } catch (error) {
-    console.log("Error while returning item:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -1349,10 +1333,8 @@ const updateOffer = async (req, res) => {
         },
       }
     );
-    console.log(result);
     res.json({ success: true });
   } catch (error) {
-    console.log("error in update offer", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -1360,7 +1342,6 @@ const updateOffer = async (req, res) => {
 // validate coupon
 const validateCoupon = async (req, res) => {
   try {
-    console.log(req.body);
     const { couponCode, totalAmount } = req.body;
     const coupon = await CouponModel.findOne({ name: couponCode });
 
@@ -1384,7 +1365,6 @@ const validateCoupon = async (req, res) => {
       discountPercentage: coupon.discountPercentage,
     });
   } catch (error) {
-    console.error("Error validating coupon:", error.message);
     res
       .status(500)
       .json({
@@ -1406,7 +1386,6 @@ const walletPage = async (req, res) => {
 
       res.render("wallet", { wallet: walletData });
   } catch (error) {
-      console.log("Error in walletPage:", error.message);
       res.status(500).send("Error loading wallet page");
   }
 };
@@ -1485,7 +1464,6 @@ const downloadInvoice = async (req, res) => {
     
     doc.end();    
   } catch (error) {
-    console.error("Error in download Invoice:", error.message);
     res.status(500).json({ message: "An error occurred while generating the invoice" });
   }
 };
@@ -1495,7 +1473,6 @@ const downloadInvoice = async (req, res) => {
 // if the payment got failed
 const paymentFailed  = async(req,res)=> {
   try {
-    console.log("hi nigga ", req.body);
     const userData = await userModel.findOne({ email: req.session.user });
     const { selectedAddress, cartItems, couponCode, paymentMethod } = req.body;
     const addressId = new ObjectId(req.body.selectedAddress);
@@ -1528,7 +1505,6 @@ const paymentFailed  = async(req,res)=> {
       discount = Math.round((totalPrice / 100) * discountPercentage);
       totalPrice -= discount;
     }
-    console.log(`total after cupon discount : ${totalPrice}`);
 
     // creating order for railed payment with  a status of 'Failed'
     const order = new orderModel({
@@ -1550,7 +1526,6 @@ const paymentFailed  = async(req,res)=> {
       res.json({ success: false });
     }
   }catch(error){
-    console.log("error in paymentFailed",error.message);
   }
 }
 

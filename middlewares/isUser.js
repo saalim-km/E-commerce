@@ -8,7 +8,6 @@ const isLogin = async(req,res,next)=> {
             next();
         }
     } catch (error) {
-        console.log('error in the isLogin user middleware',error.message);
     }
 }
 

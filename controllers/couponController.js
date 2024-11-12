@@ -5,7 +5,6 @@ const couponPage = async(req,res)=> {
         const coupons = await couponModel.find().sort({createdAt : -1})
         res.render("coupons" , {coupons})
     } catch (error) {
-        console.log("error in coupon loading ",error.message);
     }
 }
 
@@ -33,7 +32,6 @@ const addCoupon = async(req,res)=> {
             res.redirect('/admin/coupon');
         }
     } catch (error) {
-        console.log("error in addcoupon",error.message);
     }
 }
 
@@ -47,7 +45,6 @@ const deleteCoupon = async(req,res)=> {
             res.json({success : false});
         }
     } catch (error) {
-        console.log("error in deletecoupon",error.message);
         res.status(500).json({success : false});
     }
 }

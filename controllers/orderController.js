@@ -11,10 +11,9 @@ const loadOrders = async(req,res)=> {
         res.render("ordersAdmin" , {
             orders,
             currentPage : page,
-            totalPages : (ordersCount / perpage),
+            totalPages : Math.round((ordersCount / perpage)),
         });
     } catch (error) {
-        console.log("error while loading orders page")
     }
 }
 
@@ -27,7 +26,6 @@ const loadOtderDetails = async(req,res)=> {
         const user = order.userId;
         res.render("orderDetail",{order , products , address , user});
     } catch (error) {
-        console.log("error while loading the order details page : ",error.message);
     }
 }
 
@@ -104,7 +102,6 @@ const updateOrder = async (req, res) => {
         }
     } catch (error) {
         req.flash("error", `Error while updating the order: ${error.message}`);
-        console.log("Error while updating order:", error.message);
         res.redirect("/admin/orders");
     }
 };

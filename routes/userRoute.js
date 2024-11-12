@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const userSideController = require("../controllers/usersideController");
 const customController = require("../controllers/customTshirt");
+const onlinePayment = require('../controllers/onlinePayment');
 const userMiddleware = require("../middlewares/isUser");
 
 
@@ -53,12 +54,15 @@ router.put("/cancel_order",userSideController.cancelOrder);
 router.put('/return_order',userSideController.returnOrder);
 router.post('/payment_failed',userSideController.paymentFailed)
 
+
 // cancel and order individual items
 router.put('/order_cancel' , userSideController.cancelItem);
 router.put('/order_return' , userSideController.returnItem);
 
+
 // when the offer expires
 router.post('/update-offer-status',userSideController.updateOffer)
+
 
 // validate coupon
 router.post("/validate-coupon",userSideController.validateCoupon);
@@ -73,19 +77,19 @@ router.get("/download_invoice/:id",userSideController.downloadInvoice);
 
 // custom t-shirt
 router.get("/custom_tshirt",userMiddleware.isLogin,customController.loadCustomPage);
-
 router.get("/custom-tshirt/design",userMiddleware.isLogin,customController.designPage);
+
 
 // saving design
 router.post("/design/save",customController.saveDesign);
-
 router.get("/designs",userMiddleware.isLogin,customController.getDesign);
-
 router.get('/custom_checkout',userMiddleware.isLogin,customController.getCheckout);
-
 router.post('/delete_design',customController.deleteDesign);
-
 router.post("/custom_checkout",customController.checkout);
+router.get('/custom_order/:id',userMiddleware.isLogin,customController.orderSuccess);
 
-router.get('/custom_order/:id',userMiddleware.isLogin,customController.orderSuccess)
+
+// re-payment of failed order
+router.post('/re_onlineOrder',onlinePayment.order_repayment);
+router.post('/re_verifyOrder',onlinePayment.re_verifyOrder)
 module.exports = router;

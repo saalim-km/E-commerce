@@ -50,7 +50,7 @@
                 <p><strong>Order Date:</strong> 
                     <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) %>
                 </p>
-                <p><strong>Status:</strong>
+                <p><strong>Order Status : </strong>
                     <span class=" badge rounded-pill 
                         <%= order.status === 'Pending' ? 'alert-warning' : 
                             order.status === 'Shipped' ? 'alert-success' : 
@@ -61,7 +61,13 @@
                         <%= order.status%>
                     </span>
                 </p>
-                <p><strong>Payment Method</strong> <%= order.paymentMethod %></p>
+                <% if (order.status === 'Failed') { %>
+                    <strong>Payment Status : <span style="color: rgb(204, 29, 29);">Pending</span></strong>
+                <% } %>
+                <p style="margin-top: 2%;"><strong>Payment Method : </strong> <%= order.paymentMethod %></p>
+                <% if (order.status == 'Failed') { %>
+                    <button onclick="razorpay('<%= order._id %>')" class="btn btn-primary">Continue To Payment</button>
+                <% } %>
             </div>
             <div class="col-md-6">
                     <h5>Delivery Address</h5>
@@ -148,6 +154,9 @@
 
     <!-- toastify -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- razorpay -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         function cancelOrder(orderId) {
             Swal.fire({
@@ -341,6 +350,52 @@
                     })
                 }
             })
+        }
+
+
+        function razorpay(orderId) {
+            $.ajax({
+                    url: "/user/re_onlineOrder",
+                    type: "POST",
+                    data: { orderId : orderId },
+                    success: function(res) {
+                        if (res.success) {
+                            var options = {
+                                "key": ""+res.key_id+"",
+                                "amount": ""+res.amount+"",
+                                "currency": "INR",
+                                "handler": function (response) {
+                                   $.ajax({
+                                        url : "/user/re_verifyOrder",
+                                        type : 'POST',
+                                        data : {orderId : orderId},
+                                        success : function (res) {
+                                            if(res.success){
+                                                window.location.href = `/user/order/${orderId}`;
+                                            }else {
+                                                showToast("Something went wrong. Please try again later.", "error");
+                                            }
+                                        }
+                                   })
+                                }
+                            };
+                            var razorpayObject = new Razorpay(options);
+                            razorpayObject.on('payment.failed', function (response) {
+                                Toastify({
+                                    text: "Payment Failed please try again later.",
+                                    duration: 3000,
+                                    gravity: "top",
+                                    position: "center",
+                                    backgroundColor: "red",
+                                    close: true,
+                                }).showToast();
+                            });
+                            razorpayObject.open();
+                        } else {
+                            showToast(res.msg || "Error processing order", "error");
+                        }
+                    }
+                });
         }
     </script>
 

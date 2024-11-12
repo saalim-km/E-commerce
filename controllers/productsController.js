@@ -17,7 +17,6 @@ const loadAddProduct = async (req, res) => {
       category,
     });
   } catch (error) {
-    console.log("error while loading product adding page", error.message);
   }
 };
 
@@ -76,11 +75,9 @@ const addProduct = async (req, res) => {
     });
 
     const result = await newProduct.save();
-    console.log("Product added to database", result);
     req.flash("success", "Product added");
     res.redirect("/admin/addproducts");
   } catch (error) {
-    console.log("Error while adding products", error.message);
   }
 };
 
@@ -106,7 +103,6 @@ const productList = async(req,res)=> {
       });
     }
   } catch (error) {
-    console.log("error while loading the product list page",error.message);
   }
 }
 
@@ -118,7 +114,6 @@ const unListProduct = async(req,res)=> {
     req.flash("success","product unListed");
     res.redirect("/admin/products");
   } catch (error) {
-    console.log("error while unLising the product",error.message);
   }
 }
 
@@ -130,7 +125,6 @@ const listProduct = async(req,res)=> {
     req.flash("success","product Listed");
     res.redirect("/admin/products");
   } catch (error) {
-    console.log("error while listing product",error.message); 
   }
 }
 
@@ -144,10 +138,8 @@ const loadEditPage = async(req,res)=> {
     const productCat = productData.category;
     const category = await categoryModel.find({isListed : true});
     
-    console.log(`the product's data${productData}`,`the product category${productCat}`);
     res.render("editProduct",{product : productData , category , productCat : productCat})
   } catch (error) {
-    console.log("error while loading product edit page",error.message);
   }
 }
 
@@ -171,15 +163,12 @@ const updateCartsWithReducedStock = async (productId, updatedSizes) => {
     // Save the cart if it was updated
     if (cartUpdated) {
       await cart.save();
-      console.log(`Cart for user ${cart.userId} updated due to stock change.`);
     }
   }
 };
 
 const editProduct = async (req, res) => {
   try {
-    console.log("request body:", req.body);
-    console.log(req.files);
 
     const { productName, product_offer, salesPrice, description, category } = req.body;
 
@@ -247,11 +236,9 @@ const editProduct = async (req, res) => {
       productExists.sizes = sizesToUpdate;
 
       const result = await productExists.save();
-      console.log("Product updated in database", result);
 
       
       if (stockReduced) {
-        console.log('Stock reduced, updating cart quantities...');
         await updateCartsWithReducedStock(productId, sizesToUpdate);
       }
 
@@ -262,7 +249,6 @@ const editProduct = async (req, res) => {
       res.redirect("/admin/products");
     }
   } catch (error) {
-    console.log("Error while updating product", error.message);
     req.flash("error", "Error while updating product");
     res.redirect("/admin/products");
   }
@@ -271,7 +257,6 @@ const editProduct = async (req, res) => {
 
 const removeImage = async(req,res)=> {
   try {
-    console.log(req.body);
     const {productId , imageName} = req.body; 
 
     let product = await productModel.findById(productId);
@@ -301,13 +286,11 @@ const addOfferPage = async(req,res)=> {
         totalPages : Math.ceil(productCount / perpage),
       });
   } catch (error) {
-    console.log(error.message);
   }
 }
 
 const addOffer = async(req,res)=> {
   try {
-    console.log(req.body)
     const {id} = req.params;
 
     const  {offerPercentage , expiryDate} =  req.body;
@@ -359,7 +342,6 @@ const addOffer = async(req,res)=> {
     productData.productOffer.push(newOffer);
     const result = await productData.save();
 
-    console.log(result);
 
     if(result){
       req.flash("success","Offer added successfully")
@@ -370,7 +352,6 @@ const addOffer = async(req,res)=> {
 
   } catch (error) {
     req.flash("error","error while adding offer");
-    console.log(error.message)
     return res.redirect("/admin/add_offer");
   }
 }
@@ -393,13 +374,11 @@ const deactivate_offer = async(req,res)=> {
         }
       }
     )
-    // console.log(result);
     req.flash("success","Offer De-Activated");
     return res.redirect("/admin/add_offer");
   } catch (error) {
     req.flash("error" , "an error occured please try again later");
     res.redirect("/admin/add_offer");
-    console.log(error.message);
   }
 }
 
@@ -419,13 +398,11 @@ const activate_offer = async(req,res)=> {
         }
       }
     )
-    // console.log(result);
     req.flash("success","Offer Activated");
     return res.redirect("/admin/add_offer");
   } catch (error) {
     req.flash("error" , "an error occured please try again later");
     res.redirect("/admin/add_offer");
-    console.log(error.message);
   }
 }
 module.exports = {

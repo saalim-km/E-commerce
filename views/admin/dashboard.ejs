@@ -1,110 +1,184 @@
 <%- include('./partials/header.ejs') %>
-        <section class="content-main">
-            <div class="content-header">
-                <div>
-                    <h2 class="content-title card-title">Dashboard </h2>
-                    <p>Whole data about your business here</p>
-                </div>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Dashboard </h2>
+            <p>Whole data about your business here</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Overall sales count</h6>
+                        <span><%= totalSalesCount %></span>
+                    </div>
+                </article>
             </div>
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="card card-body mb-4">
-                        <article class="icontext">
-                            <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
-                            <div class="text">
-                                <h6 class="mb-1 card-title">Overall sales count</h6>
-                                <span><%= totalSalesCount %></span>
-                            </div>
-                        </article>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Overall order amount</h6>
+                        <span><%= overallOrderAmount %></span>
                     </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="card card-body mb-4">
-                        <article class="icontext">
-                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
-                            <div class="text">
-                                <h6 class="mb-1 card-title">Overall order amount</h6>
-                                <span><%= overallOrderAmount %></span>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="card card-body mb-4">
-                        <article class="icontext">
-                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
-                            <div class="text">
-                                <h6 class="mb-1 card-title">Overall discount</h6>
-                                <span><%= overallDiscount %></span>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="card card-body mb-4">
-                        <article class="icontext">
-                            <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
-                            <div class="text">
-                                <h6 class="mb-1 card-title">Overall Coupon Deduction</h6>
-                                <span><%= couponDiscount %></span>
-                            </div>
-                        </article>
-                    </div>
-                </div>             
+                </article>
             </div>
-            <div class="row">
-                <div class="col-xl-8 col-lg-12">
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Sale statistics</h5>
-                            <canvas id="myChart" height="120px"></canvas>
-                        </article>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Overall discount</h6>
+                        <span><%= overallDiscount %></span>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-5">
-                            <div class="card mb-4">
-                        </div>
-                        <div class="col-lg-7">
-                            <div class="card mb-4">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </article>
             </div>
-
-            <div class="row">
-                <div class="col-xl-8 col-lg-12">
-
-                    <!-- New section for top 10 best-selling products -->
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Top 10 Best Selling Products</h5>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Product Name</th>
-                                            <th>Quantity Sold</th>
-                                            <th>Price</th>
-                                            <th>Total Sales</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% topProducts.forEach(product => { %>
-                                            <tr>
-                                                <td>
-                                                    <b><%= product.productDetails.productName %></b>
-                                                </td>
-                                                <td><%= product.totalQuantitySold %></td>
-                                                <td>₹<%= product.productDetails.salesPriceAfterDiscount ? product.productDetails.salesPriceAfterDiscount : product.productDetails.salesPrice %></td>
-                                                <td>₹<%= product.productDetails.salesPriceAfterDiscount ?  product.totalQuantitySold * product.productDetails.salesPriceAfterDiscount :  product.totalQuantitySold * product.productDetails.salesPrice%></td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </article>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Overall Coupon Deduction</h6>
+                        <span><%= couponDiscount %></span>
                     </div>
-        </section> <!-- content-main end// -->
+                </article>
+            </div>
+        </div>             
+    </div>
+    <div class="btn-group mb-4" role="group">
+        <button type="button" class="btn btn-primary" onclick="fetchOrders('last10Days')">Last 10 Days</button>
+        <button type="button" class="btn btn-primary" onclick="fetchOrders('monthly')">Monthly</button>
+        <button type="button" class="btn btn-primary" onclick="fetchOrders('yearly')">Yearly</button>
+    </div>
+    <div class="row">
+        <div class="col-xl-8 col-lg-12">
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">Sale statistics</h5>
+                    <canvas id="myChart" height="120px"></canvas>
+                </article>
+            </div>
+            <!-- Top 10 best-selling products section -->
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">Top 10 Best Selling Products</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Quantity Sold</th>
+                                    <th>Price</th>
+                                    <th>Total Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% topProducts.forEach(product => { %>
+                                    <tr>
+                                        <td>
+                                            <b><%= product.productDetails.productName %></b>
+                                        </td>
+                                        <td><%= product.categoryDetails.name %></td>
+                                        <td><%= product.totalQuantitySold %></td>
+                                        <td>₹<%= product.productDetails.salesPriceAfterDiscount ? product.productDetails.salesPriceAfterDiscount : product.productDetails.salesPrice%></td>
+                                        <td>₹<%= product.productDetails.salesPriceAfterDiscount ?  product.totalQuantitySold * product.productDetails.salesPriceAfterDiscount : product.totalQuantitySold * product.productDetails.salesPrice%></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-12">
+            <!-- Top 10 best-selling categories section -->
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">Top 10 Best Selling Categories</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category Name</th>
+                                    <th>Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% topProducts.forEach(category => { %>
+                                    <tr>
+                                        <td>
+                                            <b><%= category.categoryDetails.name %></b>
+                                        </td>
+                                        <td><%= category.totalQuantitySold %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section> <!-- content-main end// -->
 
-        <%- include('./partials/footer.ejs') %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    window.onload = function() {
+        fetchOrders('last10Days'); // Default view: Last 10 Days
+    };
+
+    function fetchOrders(filter) {
+        $.ajax({
+            url: '/admin/chart',
+            type: 'POST',
+            data: { filter: filter },
+            success: function(data) {
+                updateChart(data.labels, data.dataset);
+            },
+            error: function(error) {
+                console.error('Error fetching order data:', error);
+            }
+        });
+    }
+
+    
+    function updateChart(labels, dataset) {
+        myChart.data.labels = labels;
+        myChart.data.datasets[0].data = dataset;
+        myChart.update();
+    }
+
+    
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Order Amount',
+                data: [],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+<%- include('./partials/footer.ejs') %>

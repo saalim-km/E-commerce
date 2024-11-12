@@ -6,7 +6,6 @@ const isAdmin = async(req,res,next)=> {
             next();
         }
     } catch (error) {
-        console.log("error in the isAdmin middleware ",error.message);
     }
 }
 

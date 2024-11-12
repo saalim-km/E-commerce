@@ -64,7 +64,7 @@
                                             <%= order.status%>
                                         </span>
                                     </td>
-                                    <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                    <td><%= new Date(order.createdAt).toLocaleDateString('en-GB') %></td>
                                     <td class="text-end">
                                         <a href="/admin/orders/<%= order._id %>" class="btn btn-md rounded font-sm">View</a>
                                     </td>

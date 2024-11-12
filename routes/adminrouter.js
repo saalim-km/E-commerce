@@ -9,6 +9,7 @@ const orderController = require("../controllers/orderController");
 const categoriesController = require("../controllers/categoriesController");
 const couponController = require("../controllers/couponController");
 const salesRepController = require("../controllers/reportController");
+const charController = require('../controllers/chart');
 
 // middleware
 const adminMiddleware = require("../middlewares/isAdmin");
@@ -105,6 +106,10 @@ router.get("/salesReport",adminMiddleware.isAdmin,salesRepController.reportPage)
 router.post('/sales-report', salesRepController.filterSalesReport);
 
 router.get("/sales-report/download",salesRepController.downloadSalesReportPdf);
+
+
+// chart 
+router.post('/chart',charController.chart)
 module.exports = router;
 
 

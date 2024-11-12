@@ -339,6 +339,7 @@
                 var formData = $(checkoutForm).serialize(); 
                 console.log(formData);
                 
+                
                 $.ajax({
                     url: "/user/online_order",
                     type: "POST",
@@ -370,15 +371,24 @@
                                 }
                             };
                             var razorpayObject = new Razorpay(options);
+
+                            let paymentFailedSent = false;
                             razorpayObject.on('payment.failed', function (response) {
-                                $.ajax({
+                                if(!paymentFailedSent){
+                                    console.log('im payment fail handler');
+                                    paymentFailedSent = true;   
+                                    $.ajax({    
                                         url : "/user/payment_failed",
                                         type : 'POST',
                                         data : JSON.stringify({
                                             selectedAddress: $('#checkoutForm input[name="selectedAddress"]:checked').val(),
                                             formData,
                                         }),
-                                   })
+                                        success: function() {
+                                            showToast("Payment failed. Please try again.", "error");
+                                        }
+                                   });
+                                }   
                             });
                             razorpayObject.open();
                         } else {
@@ -386,6 +396,8 @@
                         }
                     }
                 });
+
+
             }
         });
 

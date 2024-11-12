@@ -45,7 +45,7 @@
                       </select>
                   
                       <!-- Disable the Save button for Cancelled and Delivered orders -->
-                      <% if (order.status === 'Cancelled' || order.status === 'Delivered') { %>
+                      <% if (order.status === 'Cancelled' || order.status === 'Delivered' || order.status === 'Returned') { %>
                         <button disabled class="btn btn-primary" type="submit">Save</button>
                       <% } else { %>
                         <button class="btn btn-primary" type="submit">Save</button>
@@ -114,7 +114,7 @@
                         <% products.forEach(item => { %>
                             <tr>
                                 <td>
-                                    <img style="height: 80px;" src="/uploads/product-images/<%= item.productId.images[0] %>" alt="">
+                                    <img style="height: 80px;" src="<%= item.productId.images[0] %>" alt="">
                                 </td>
                                 <td>
                                     <%=item.productId.productName%>

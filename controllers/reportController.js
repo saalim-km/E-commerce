@@ -1,4 +1,5 @@
 const PDFDocument = require("pdfkit");
+const ExcelJS = require('exceljs');
 const {Stream} = require("stream");
 const orderModel = require("../models/order");
 
@@ -40,14 +41,20 @@ const filterSalesReport = async (req, res) => {
 
 
           const salesData = await orderModel.find({
-              createdAt: { $gte: newStDate, $lte: newEndDate }
+              createdAt: { $gte: newStDate, $lte: newEndDate } , status : 'Delivered'
           }).sort({ createdAt: -1 });
 
-          const totalSales = salesData.reduce((sum, order) => sum + order.backupTotalAmount, 0);
+          const totalSalesObj = await orderModel.aggregate([
+            {"$match" : {createdAt : {$gte : newStDate , $lte : newEndDate} , status : 'Delivered'}},
+            {$group : {_id : null , totalSales : {$sum : '$totalAmount'}}}
+          ]);
+          const totalSales = totalSalesObj.length > 0 ? totalSalesObj[0].totalSales : 0;
 
           return res.render("reportsList", {
               salesData,
-              totalSales
+              totalSales ,
+              start : startDate,
+              end : endDate,
           });
       }
 
@@ -197,7 +204,97 @@ const downloadSalesReportPdf = async (req, res) => {
       res.status(500).json({ success: false, message: "Failed to generate PDF" });
     }
 };
-  
+
+
+const downloadSalesReportExcel = async (req, res) => {
+  try {
+    // Set the date range
+    let endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
+    let startDate = req.query.startDate
+      ? new Date(req.query.startDate)
+      : new Date(endDate.getFullYear(), endDate.getMonth() - 1, endDate.getDate());
+
+    endDate.setUTCHours(23, 59, 59, 999);
+    startDate.setUTCHours(0, 0, 0, 0);
+
+    // Fetch sales data and total sales and discount
+    const salesData = await orderModel.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+      status: 'Delivered'
+    });
+
+    const total = await orderModel.aggregate([
+      {
+        "$match": {
+          createdAt: { $gte: startDate, $lte: endDate },
+          status: 'Delivered'
+        }
+      },
+      {
+        $group: { _id: null, totalSales: { $sum: '$totalAmount' } }
+      }
+    ]);
+    const totalSales = total.length > 0 ? total[0].totalSales : 0;
+
+    const discount = await orderModel.aggregate([
+      {
+        "$match": {
+          createdAt: { $gte: startDate, $lte: endDate },
+          status: 'Delivered'
+        }
+      },
+      { $group: { _id: null, totalDiscount: { $sum: '$discount' } } }
+    ]);
+    const totalDiscount = discount.length > 0 ? discount[0].totalDiscount : 0;
+
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sales Report');
+
+    // Add headers to the worksheet
+    worksheet.columns = [
+      { header: 'Order ID', key: 'orderId', width: 20 },
+      { header: 'Date', key: 'date', width: 15 },
+      { header: 'Total Amount', key: 'totalAmount', width: 15 },
+      { header: 'Payment Method', key: 'paymentMethod', width: 20 },
+      { header: 'Status', key: 'status', width: 15 },
+    ];
+
+    // Add a summary row
+    worksheet.addRow([]);
+    worksheet.addRow(['Summary']);
+    worksheet.addRow(['Total Sales:', `₹${totalSales.toLocaleString()}`]);
+    worksheet.addRow(['Total Orders:', salesData.length]);
+    worksheet.addRow(['Total Discount:', `₹${totalDiscount}`]);
+    worksheet.addRow([]);
+
+    // Add column headers
+    worksheet.addRow([]);
+    worksheet.addRow(['Order ID', 'Date', 'Total Amount', 'Payment Method', 'Status']);
+
+    // Populate data rows
+    salesData.forEach((order) => {
+      worksheet.addRow([
+        order._id.toString().slice(-6),
+        new Date(order.createdAt).toLocaleDateString(),
+        `₹${order.totalAmount.toLocaleString()}`,
+        order.paymentMethod,
+        order.status
+      ]);
+    });
+
+    // Set response headers for file download
+    res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+    // Write the workbook to the response
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to generate Excel file" });
+  }
+};
+
 function drawTableRow(doc, y, texts) {
     const widths = [80, 100, 100, 120, 95];
     let x = 50;
@@ -211,5 +308,6 @@ function drawTableRow(doc, y, texts) {
 module.exports = {
     reportPage,
     filterSalesReport,
-    downloadSalesReportPdf
+    downloadSalesReportPdf,
+    downloadSalesReportExcel,
 }

@@ -105,8 +105,9 @@ router.delete('/coupon/delete',couponController.deleteCoupon)
 router.get("/salesReport",adminMiddleware.isAdmin,salesRepController.reportPage);
 router.post('/sales-report', salesRepController.filterSalesReport);
 
+// download salesReport PDF , Excel.
 router.get("/sales-report/download",salesRepController.downloadSalesReportPdf);
-
+router.get('/sales-report/downloadExcel',salesRepController.downloadSalesReportExcel);
 
 // chart 
 router.post('/chart',charController.chart)

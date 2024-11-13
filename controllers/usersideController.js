@@ -8,6 +8,7 @@ const categoryModel = require("../models/category");
 const CouponModel = require("../models/couponModel");
 const couponModel = require("../models/couponModel");
 const walletModel = require("../models/wallet");
+const mongoose = require('mongoose');
 const Razorpay = require("razorpay");
 const { ObjectId } = require("mongoose").Types;
 const PDFDocument = require("pdfkit");
@@ -26,6 +27,10 @@ const productView = async (req, res) => {
       return res.redirect("/user/login");
     } else {
       const productId = req.params.id;
+
+      if (!mongoose.Types.ObjectId.isValid(productId)) {
+        return res.status(404).render('404', { title: '404 - Product Not Found' });
+    }
       const user = req.session.user;
       const userData = await userModel.findOne({ email: user });
       const productData = await productModel
@@ -445,7 +450,7 @@ const loadCart = async (req, res) => {
       .populate({
         path: "productId",
         select:
-          "productName salesPrice images sizes salesPriceAfterDiscount offerStatus productOffer",
+          "productName salesPrice images sizes salesPriceAfterDiscount offerStatus productOffer isListed",
       })
       .populate("categoryId");
 

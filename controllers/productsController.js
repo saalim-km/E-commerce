@@ -171,6 +171,8 @@ const editProduct = async (req, res) => {
   try {
 
     const { productName, product_offer, salesPrice, description, category } = req.body;
+    console.log(category)
+    const categoryData = await categoryModel.findOne({name : category});
 
     // Collect the new sizes and stocks
     const updatedSizes = [
@@ -181,6 +183,44 @@ const editProduct = async (req, res) => {
     ];
 
     const productId = req.params.id;
+    const product = await productModel.findById(productId);
+    console.log(categoryData)
+    if(categoryData.categoryOffer.length > 0) {
+
+      const offerDiscountPercentage = categoryData.categoryOffer[0].discountPercentage;
+      const salesPrice = product.salesPrice;
+      const salesPriceAfterDiscount = Math.round(salesPrice - (salesPrice / 100 * offerDiscountPercentage));
+      const discountAmount = Math.round(salesPrice / 100 * offerDiscountPercentage);
+
+      if (product.productOffer.length > 0) {
+        await productModel.updateOne(
+          {
+            _id: productId,
+            "productOffer._id": product.productOffer[0]._id,
+          },
+          {
+            $set: {
+              "productOffer.$.discountPercentage": offerDiscountPercentage,
+              "productOffer.$.offerStartDate": categoryData.categoryOffer[0].offerStartDate,
+              "productOffer.$.offerExpiryDate": categoryData.categoryOffer[0].offerExpiryDate,
+              salesPriceAfterDiscount: salesPriceAfterDiscount,
+              discountAmount : discountAmount,
+            }
+          }
+        );
+      }else {
+        const newPrOffer = {
+          discountPercentage : offerDiscountPercentage,
+          offerStartDate : categoryData.categoryOffer[0].offerStartDate,
+          offerExpiryDate : categoryData.categoryOffer[0].offerExpiryDate,
+          discountAmount : discountAmount,
+        }
+        product.productOffer.push(newPrOffer);
+        product.salesPriceAfterDiscount = salesPriceAfterDiscount;
+        await product.save();
+      }
+    }
+
     const productExists = await productModel.findById(productId);
 
     if (productExists) {
@@ -249,6 +289,7 @@ const editProduct = async (req, res) => {
       res.redirect("/admin/products");
     }
   } catch (error) {
+    console.log(error.message);
     req.flash("error", "Error while updating product");
     res.redirect("/admin/products");
   }

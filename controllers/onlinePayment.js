@@ -1,5 +1,7 @@
 const Order = require('../models/order');
 const Product = require('../models/product');
+const cartModel = require('../models/cart');
+const User = require('../models/user');
 const Razorpay = require("razorpay");
 const { ObjectId } = require("mongoose").Types;
 
@@ -42,6 +44,7 @@ const re_verifyOrder = async(req,res)=> {
     try {
         const {orderId} = req.body;
         const orderObjId = new ObjectId(orderId);
+        const userData = await User.findOne({email : req.session.user});
         const order = await Order.findById(orderObjId);
         const items = order.products;
 
@@ -58,6 +61,9 @@ const re_verifyOrder = async(req,res)=> {
         const orderUpdate = await Order.findByIdAndUpdate(orderObjId , {
             status : 'Pending',
         });
+
+        // Deleting cart items
+        await cartModel.deleteMany({ userId: userData._id });
 
         if(orderUpdate) {
             res.json({success : true})

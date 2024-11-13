@@ -91,5 +91,7 @@ router.get('/custom_order/:id',userMiddleware.isLogin,customController.orderSucc
 
 // re-payment of failed order
 router.post('/re_onlineOrder',onlinePayment.order_repayment);
-router.post('/re_verifyOrder',onlinePayment.re_verifyOrder)
+router.post('/re_verifyOrder',onlinePayment.re_verifyOrder);
+
+
 module.exports = router;

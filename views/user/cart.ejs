@@ -47,69 +47,83 @@
 </style>
 
 <body>
-<div class="container mt-5">
-    <h2>Your Cart</h2>
+    <div class="container mt-5">
+        <h2>Your Cart</h2>
         <div class="cart-container">
             <div class="cart-items">
                 <!-- Loop through each cart item -->
                 <% cart.forEach(function(item) { %>
-                    <div class="cart-item" style="border: 1px solid rgba(128, 128, 128, 0.431); padding: 10px;">
-                        <div class="product-info">
-                            <img src="<%= item.productId.images[0] %>" alt="Product Image">
-                            <p><strong><%= item.productId.productName %></strong></p>
-                            <p>Size: <%= item.sizes[0].size %></p>
-                            <p>Category: <span class="badge bg-dark text-white"><%= item.categoryId.name %></span></p>
+                    <% if (item.productId.isListed) { %> <!-- Check if the product is listed -->
+                        <div class="cart-item" style="border: 1px solid rgba(128, 128, 128, 0.431); padding: 10px;">
+                            <div class="product-info">
+                                <img src="<%= item.productId.images[0] %>" alt="Product Image">
+                                <p><strong><%= item.productId.productName %></strong></p>
+                                <p>Size: <%= item.sizes[0].size %></p>
+                                <p>Category: <span class="badge bg-dark text-white"><%= item.categoryId.name %></span></p>
+                            </div>
+    
+                            <!-- Product Price -->
+                            <div class="price">
+                                ₹<span class="product-price">
+                                    <%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice %>
+                                </span>
+                            </div>
+    
+                            <!-- Quantity -->
+                            <div class="quantity-input">
+                                <button class="decrease-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">-</button>
+                                <input disabled type="text" value="<%= item.sizes[0].quantity %>" class="quantity" data-stock="<%= item.availableStock %>" data-id="<%= item._id %>">
+                                <button class="increase-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">+</button>
+                            </div>
+    
+                            <!-- Subtotal for this item -->
+                            <div class="subtotal">
+                                ₹<span class="item-subtotal">
+                                    <% if (item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus) { %>
+                                        <%= item.productId.salesPriceAfterDiscount * item.sizes[0].quantity %>
+                                    <% } else { %>
+                                        <%= item.productId.salesPrice * item.sizes[0].quantity %>
+                                    <% } %>
+                                </span>
+                            </div>
+    
+                            <!-- Delete button -->
+                            <form action="/user/cart/delete/<%= item._id %>" method="post">
+                                <button type="submit" class="btn btn-danger delete-item"><i class="fa fa-trash"></i></button>
+                            </form>
                         </div>
-                        <!-- Product Price -->
-                        <div class="price">
-                            ₹<span class="product-price"><%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice %></span>
-                        </div>
-
-                        <!-- Quantity -->
-                        <div class="quantity-input">
-                            <button class="decrease-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">-</button>
-                            <input disabled type="text" value="<%= item.sizes[0].quantity %>" class="quantity" data-stock="<%= item.availableStock %>" data-id="<%= item._id %>">
-                            <button class="increase-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">+</button>
-                        </div>
-
-                        <!-- Subtotal for this item -->
-                        <div class="subtotal">
-                            <% if (item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus) { %>
-                                ₹<span class="item-subtotal"><%= item.productId.salesPriceAfterDiscount * item.sizes[0].quantity %></span>  
-                            <% } else {%>
-                                ₹<span class="item-subtotal"><%= item.productId.salesPrice * item.sizes[0].quantity %></span>  
-                            <% } %>
-                        </div>
-
-                        <!-- Delete button -->
-                        <form action="/user/cart/delete/<%= item._id %>" method="post">
-                            <button type="submit" class="btn btn-danger delete-item"><i class="fa fa-trash"></i></button>
-                        </form>
-                    </div>
+                    <% } %> <!-- End of listed product check -->
                 <% }); %>
             </div>
-
+    
             <!-- Cart Totals Section -->
             <div class="cart-totals">
                 <h4>Cart Totals</h4>
                 <p>Total: ₹<span id="cart-total">
                     <%= cart.reduce((total, item) => {
-                        const itemPrice = item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice;
-                        return total + (itemPrice * item.sizes[0].quantity);
+                        if (item.productId.isListed) {
+                            const itemPrice = item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus
+                                ? item.productId.salesPriceAfterDiscount
+                                : item.productId.salesPrice;
+                            return total + (itemPrice * item.sizes[0].quantity);
+                        } else {
+                            return total; // Skip unlisted items
+                        }
                     }, 0) %>
                 </span></p>
-            
-                <% if (cart.length === 0) { %>
-                    <h1>No items in cart to checkout.</h1>
-                <% } else { %>
+    
+                <% if (cart.some(item => item.productId.isListed)) { %> <!-- Only show checkout if there are listed items -->
                     <a href="/user/checkout">
                         <button class="btn btn-dark">Proceed to Checkout</button>
                     </a>
+                <% } else { %>
+                    <h1>No available items in the cart to checkout.</h1>
                 <% } %>
             </div>
-
         </div>
-</div>
+    </div>
+    
+    
 
 <!-- Toastify -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

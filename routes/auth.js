@@ -63,6 +63,5 @@ router.get('/auth/google/callback',passport.authenticate('google',{failureRedire
 });
 
 
-// exporting routes
 module.exports = router;
 

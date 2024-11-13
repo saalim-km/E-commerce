@@ -111,6 +111,10 @@ router.get('/sales-report/downloadExcel',salesRepController.downloadSalesReportE
 
 // chart 
 router.post('/chart',charController.chart)
+
+
+
+
 module.exports = router;
 
 

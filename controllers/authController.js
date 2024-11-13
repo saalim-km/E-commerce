@@ -50,7 +50,6 @@ const landingPage = async (req, res) => {
       res.redirect("/home");
     }
   } catch (error) {
-    res.redirect("*");
   }
 };
 

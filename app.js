@@ -61,5 +61,9 @@ app.use('/admin',adminRoute);
 app.use('/user',userRoute);
 
 
+app.use((req, res) => {
+    res.status(404).render('404', { title: '404 - Page Not Found' });
+});
+
 const PORT = process.env.PORT || 3008
 app.listen(PORT)

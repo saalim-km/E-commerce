@@ -5,7 +5,7 @@ const { findByIdAndUpdate } = require("../models/user");
 const loadOrders = async(req,res)=> {
     try {
         const page = req.query.page || 1;
-        const perpage = 4;
+        const perpage = 8;
         const orders = await orderModel.find().populate('userId').skip((perpage * page)-perpage).limit(perpage).sort({createdAt : -1});
         const ordersCount = await orderModel.countDocuments();
         res.render("ordersAdmin" , {
@@ -14,6 +14,8 @@ const loadOrders = async(req,res)=> {
             totalPages : Math.round((ordersCount / perpage)),
         });
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -26,6 +28,8 @@ const loadOtderDetails = async(req,res)=> {
         const user = order.userId;
         res.render("orderDetail",{order , products , address , user});
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -101,12 +105,11 @@ const updateOrder = async (req, res) => {
             res.redirect("/admin/orders");
         }
     } catch (error) {
-        req.flash("error", `Error while updating the order: ${error.message}`);
+        console.log(error.message);
+        req.flash("error", `Error while updating the order`);
         res.redirect("/admin/orders");
     }
 };
-
-
 
 module.exports = {
     loadOrders,

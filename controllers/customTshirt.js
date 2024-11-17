@@ -10,6 +10,8 @@ const loadCustomPage = async(req,res)=> {
     try {
         res.render("custom")
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -29,6 +31,8 @@ const designPage = async(req,res)=> {
         }
         res.render("design",{tshirtImageUrl});
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -54,6 +58,7 @@ const saveDesign = async(req,res)=> {
             res.json({success : false});
         }
     } catch (error) {
+        console.log(error.message);
         res.json({success : false});
     }
 }
@@ -64,6 +69,8 @@ const getDesign = async(req,res)=> {
         const designs = await Design.find({userId : userData._id});
         res.render("mydesign",{designs : designs})
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -75,6 +82,8 @@ const getCheckout = async(req,res)=> {
         const wallet = await Wallet.findOne({userId : userData._id});
         res.render("customCheckout",{address : userData.addresses , item : design , user : userData , wallet : wallet.balance});
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -88,6 +97,7 @@ const deleteDesign = async(req,res)=> {
             res.json({success : false});
         }
     } catch (error) {
+        console.log(error.message);
         res.status(500).json({success : false});
     }
 }
@@ -146,6 +156,8 @@ const checkout = async(req,res)=> {
         const deleteDesign = await Design.findByIdAndDelete(designId);
         res.redirect(`/user/custom_order/${result._id}`);
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -155,8 +167,12 @@ const orderSuccess = async(req,res)=> {
         const order = await customOrder.findById(id);
         res.render("customOrderSuccess",{order : order});
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
+
+
 module.exports = {
     loadCustomPage,
     designPage,

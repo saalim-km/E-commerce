@@ -5,6 +5,8 @@ const couponPage = async(req,res)=> {
         const coupons = await couponModel.find().sort({createdAt : -1})
         res.render("coupons" , {coupons})
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -32,6 +34,8 @@ const addCoupon = async(req,res)=> {
             res.redirect('/admin/coupon');
         }
     } catch (error) {
+        req.flash("error" , "An error occured please try again later");
+        res.redirect('/admin/coupon');
     }
 }
 
@@ -45,6 +49,7 @@ const deleteCoupon = async(req,res)=> {
             res.json({success : false});
         }
     } catch (error) {
+        console.log(error.message);
         res.status(500).json({success : false});
     }
 }

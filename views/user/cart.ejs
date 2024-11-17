@@ -114,8 +114,8 @@
     
                 <% if (cart.some(item => item.productId.isListed)) { %> <!-- Only show checkout if there are listed items -->
                     <a href="/user/checkout">
-                        <button class="btn btn-dark">Proceed to Checkout</button>
                     </a>
+                    <button onclick="checkout()" class="btn btn-dark">Proceed to Checkout</button>
                 <% } else { %>
                     <h1>No available items in the cart to checkout.</h1>
                 <% } %>
@@ -181,6 +181,27 @@
     window.addEventListener('load', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+
+
+
+  function checkout() {
+    // Check if we are in the reload state
+    if (sessionStorage.getItem('reloaded') === 'true') {
+        sessionStorage.removeItem('reloaded'); // Clear the reload state
+
+        // Check the cart total after reload
+        if (parseFloat(cartTotal.innerText) <= 0) {
+            window.location.href = '/user/cart';
+        } else {
+            window.location.href = '/user/checkout';
+        }
+    } else {
+        // Set the reload state and reload the page
+        sessionStorage.setItem('reloaded', 'true');
+        location.reload();
+    }
+}
 </script>
 
 <%- include('../auth/partials/footer.ejs') %>

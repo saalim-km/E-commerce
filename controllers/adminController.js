@@ -4,15 +4,18 @@ const Order = require('../models/order');
 
 // get
 const loadLogin = async(req,res)=> {
-    try {   
+    try {
         if(req.session.admin){
-            return res.redirect('/admin');
-        }else{
+            return res.redirect('/admin')
+        }else {
             res.render("adminLogin",{message:null});
         }
-    } catch (error) {
+        } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
+
 // post
 const adminLogin = async(req,res)=> {
     try {
@@ -28,9 +31,10 @@ const adminLogin = async(req,res)=> {
         req.session.admin = adminData._id;
         res.redirect('/admin');
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
-
 
 const dashboardLoad = async (req, res) => {
     try {
@@ -110,24 +114,20 @@ const dashboardLoad = async (req, res) => {
             topProducts
         });
     } catch (error) {
+        console.log(error.message);
         res.status(500).send("Server Error");
     }
 };
-
-
-
 
 const Logout = async(req,res)=> {
     try {
         req.session.admin = null;
         res.redirect("/admin/login")
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
-
-
-// userlist
-
 module.exports = {
     loadLogin,
     adminLogin,

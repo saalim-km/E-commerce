@@ -8,7 +8,7 @@ const walletModel = require("../models/wallet");
 passport.use(new GoogleStrategy({ 
 	clientID:process.env.CLIENT_ID, // Your Credentials here. 
 	clientSecret:process.env.CLIENT_SECRET, // Your Credentials here. 
-	callbackURL:"http://localhost:3004/auth/google/callback", 
+	callbackURL:"https://savage.salimkm.tech/auth/google/callback", 
 	passReqToCallback:true
 }, 
 async function (request , accessToken, regreshToken, profile , done) {

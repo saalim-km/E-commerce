@@ -11,7 +11,7 @@ const razorpayInstance = new Razorpay({
   key_secret: RAZORPAY_SECRET_KEY,
 });
 
-
+// For Failed payments
 const order_repayment = async(req,res)=> {
     try {
         const {orderId} = req.body;
@@ -37,9 +37,12 @@ const order_repayment = async(req,res)=> {
         }
         });
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
+// Verify Order
 const re_verifyOrder = async(req,res)=> {
     try {
         const {orderId} = req.body;
@@ -71,8 +74,11 @@ const re_verifyOrder = async(req,res)=> {
             res.status(500).json({success : false});
         }
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
+
 module.exports = {
     order_repayment,
     re_verifyOrder,

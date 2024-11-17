@@ -17,10 +17,10 @@ const reportPage = async (req, res) => {
             end: defaultEndDate
         });
     } catch (error) {
-        res.status(500).send("Internal Server Error");
+      console.log(error.message);
+      res.status(500).render('500');
     }
 };
-
 
 const filterSalesReport = async (req, res) => {
   try {
@@ -95,12 +95,10 @@ const filterSalesReport = async (req, res) => {
           end,
       });
   } catch (error) {
-      res.status(500).send("Internal Server Error");
+    console.log(error.message);
+    res.status(500).render('500');
   }
 };
-
-
-
 
 const downloadSalesReportPdf = async (req, res) => {
     try {
@@ -204,7 +202,6 @@ const downloadSalesReportPdf = async (req, res) => {
       res.status(500).json({ success: false, message: "Failed to generate PDF" });
     }
 };
-
 
 const downloadSalesReportExcel = async (req, res) => {
   try {

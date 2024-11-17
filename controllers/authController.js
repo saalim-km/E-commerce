@@ -37,10 +37,12 @@ const generateOtp = () => {
     const otp = Math.floor(100000 + Math.random() * 900000);
     return otp; // Generates a 6-digit OTP
   } catch (error) {
+    console.log(error.message);
+    res.status(500).render('500');
   }
 };
 
-// Controllers
+// landing page
 const landingPage = async (req, res) => {
   try {
     const products = await productModel.find({isListed : true}).limit(4).populate('category','name');
@@ -50,9 +52,12 @@ const landingPage = async (req, res) => {
       res.redirect("/home");
     }
   } catch (error) {
+    console.log(error.message);
+    res.status(500).render('500');
   }
 };
 
+// GET signupPage
 const signupPage = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -61,10 +66,12 @@ const signupPage = async (req, res) => {
       res.redirect("/home");
     }
   } catch (error) {
-    res.send("error while loading signUpPage", error.message);
+    console.log(error.message);
+    res.status(500).render('500');
   }
 };
 
+// GET Home
 const loadHome = async (req, res) => {
   try {
     const products = await productModel.find({isListed : true}).limit(4).populate('category','name');
@@ -77,10 +84,12 @@ const loadHome = async (req, res) => {
       res.redirect("/user/login");
     }
   } catch (error) {
-    res.status(400).send("error while loading home page");
+    console.log(error.message);
+    res.status(500).render('500');
   }
 };
 
+// GET login
 const loginPage = async (req, res) => {
   try {
     if (!req.session.user) {
@@ -89,9 +98,12 @@ const loginPage = async (req, res) => {
       res.redirect("/home");
     }
   } catch (error) {
+    cconsole.log(error.message);
+    res.status(500).render('500');
   }
 };
 
+// POST sendotp
 const sendOtp = async (req, res) => {
   try {
     const { email, username, password, phone } = req.body;
@@ -104,6 +116,7 @@ const sendOtp = async (req, res) => {
     }
     // generating otp
     const otp = generateOtp();
+    console.log(otp);
     // Store OTP and user data in the session
     req.session.otp = otp;
     req.session.userData = { email, username, password, phone };
@@ -111,10 +124,12 @@ const sendOtp = async (req, res) => {
     await sendMail(email, "Your OTP for verification", otp);
     return res.render("enter-otp");
   } catch (error) {
+    console.log(error.message);
     return res.status(500).json({ error: "An error occurred during signup." });
   }
 };
 
+// verify OTP
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -151,10 +166,12 @@ const verifyOtp = async (req, res) => {
       res.status(400).json({ success: false, message: "Invalid OTP" });
     }
   } catch (err) {
+    console.log(error.message);
     res.status(500).json({ success: false, message: "An error occured" });
   }
 };
 
+// Resend OTP
 const resendOtp = async (req, res) => {
   try {
     const { email } = req.session.userData;
@@ -168,6 +185,7 @@ const resendOtp = async (req, res) => {
     }
 
     const otp = generateOtp();
+    console.log(`resend otp ${otp}`);
     req.session.otp = otp;
 
     await sendMail(email, "Your OTP for verification", otp);
@@ -175,12 +193,14 @@ const resendOtp = async (req, res) => {
       return res.json({ success: true, message: "OTP resend successfully" });
     }
   } catch (error) {
+    console.log(error.message);
     return res
       .status(500)
       .json({ success: false, error: "Failed to resend OTP." });
   }
 };
 
+// Verifying Login
 const verifyLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -202,21 +222,23 @@ const verifyLogin = async (req, res) => {
       return res.json({success : true});
     }
   } catch (error) {
-    res.render("login", { message: "login failed , please try again later" });
+    console.log(error.message);
+    res.status(500).json({ success : false });
   }
 };
 
+// Logout
 const userLogout = async (req, res) => {
   try {
     req.session.user = null;
     res.redirect("/");
   } catch (error) {
+    console.log(error.message);
+    res.status(500).render('500');
   }
 };
 
-
-
-  // forogt passwor controllers
+// forogt password page
 const forgotPass = async(req,res)=> {
   try {
     if(req.session.user){
@@ -225,9 +247,12 @@ const forgotPass = async(req,res)=> {
       res.render("forgotpass");
     }
   } catch (error) {
+    console.log(error.message);
+    res.status(500).render('500');
   }
 }
 
+// Verify Forgot Email
 const verifyForgotEmail = async(req,res)=> {
   try {
     const {email} = req.body;
@@ -238,10 +263,12 @@ const verifyForgotEmail = async(req,res)=> {
       res.json({success : false});
     }
   } catch (error) {
-      res.status(500).json({success : false});
+    console.log(error.message);
+    res.status(500).json({success : false});
   }
 }
 
+// Update password
 const updatePassword = async(req,res)=> {
   try {
     const {password,email} = req.body;
@@ -254,9 +281,11 @@ const updatePassword = async(req,res)=> {
       res.json({success : false})
     }
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({success : false});
   }
 }
+
 module.exports = {
   landingPage,
   signupPage,

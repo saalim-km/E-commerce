@@ -36,6 +36,8 @@ const chart = async(req,res)=> {
 
         res.json({labels , dataset});
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 

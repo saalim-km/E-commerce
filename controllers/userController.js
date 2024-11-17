@@ -2,9 +2,6 @@ const userModel = require('../models/user');
 
 const userList = async(req,res)=> {
     try {
-        if(!req.session.admin){
-            return res.redirect("/admin/login");
-        }else{
             let search = "";
         if(req.query.search){
             search=req.query.search;
@@ -28,8 +25,9 @@ const userList = async(req,res)=> {
             currentPage : page,
             totalPages,
         });
-        }
     } catch (error) {
+        console.log(error.message);
+        res.status(500).render('500');
     }
 }
 
@@ -44,7 +42,6 @@ const userBlock = async(req,res)=> {
         res.redirect("/admin/users")
     }
 }
-
 
 const userUnBlock = async(req,res)=> {
     try {

@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
+    <!-- favicon -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
+<link rel="manifest" href="/assets/images/favicon/site.webmanifest">
     <link rel="stylesheet" href="/assets/css/style.css">
     <!-- Toastify -->
     <link rel="stylesheet" href="css/fonts.css">
@@ -91,7 +96,7 @@
     </style>
 </head>
 <body class="page-template belle">
-<form id="checkoutForm" action="/user/checkout" method="POST" >
+<form id="checkoutForm" action="/user/checkout" method="POST">
 <div class="pageWrapper">
 
     <%- include('../auth/partials/header'); %>
@@ -303,7 +308,7 @@
             couponCodeInput.value = '';
 
             showToast("Coupon removed successfully!", "error");
-        })
+        });
 
         // helper function for firing toast.
         function showToast(message, type) {
@@ -333,73 +338,107 @@
                 return;
             }
 
-            if (selectedPaymentMethod.value === "Razorpay") {
-                event.preventDefault();  
+            if(selectedPaymentMethod.value === "Razorpay"){
+                validateCartAndSubmit();
+            }
 
-                var formData = $(checkoutForm).serialize(); 
-                console.log(formData);
-                
-                
-                $.ajax({
-                    url: "/user/online_order",
-                    type: "POST",
-                    data: JSON.stringify({
-                        formData
-                    }),
-                    success: function(res) {
-                        if (res.success) {
-                            var options = {
-                                "key": ""+res.key_id+"",
-                                "amount": ""+res.amount+"",
-                                "currency": "INR",
-                                "handler": function (response) {
-                                   $.ajax({
-                                        url : "/user/verify_order",
-                                        type : 'POST',
-                                        data : JSON.stringify({
-                                            selectedAddress: $('#checkoutForm input[name="selectedAddress"]:checked').val(),
-                                            formData,
-                                        }),
-                                        success : function (res) {
-                                            if(res.success){
-                                                window.location.href = `/user/order/${res.orderId}`;
-                                            }else {
-                                                showToast("Something went wrong. Please try again later.", "error");
-                                            }
-                                        }
-                                   })
-                                }
-                            };
-                            var razorpayObject = new Razorpay(options);
+        });
 
-                            let paymentFailedSent = false;
-                            razorpayObject.on('payment.failed', function (response) {
-                                if(!paymentFailedSent){
-                                    console.log('im payment fail handler');
-                                    paymentFailedSent = true;   
-                                    $.ajax({    
-                                        url : "/user/payment_failed",
-                                        type : 'POST',
-                                        data : JSON.stringify({
-                                            selectedAddress: $('#checkoutForm input[name="selectedAddress"]:checked').val(),
-                                            formData,
-                                        }),
-                                        success: function() {
-                                            showToast("Payment failed. Please try again.", "error");
+        function validateCartAndSubmit(){
+                event.preventDefault();
+                    $.ajax({
+                    url : "/user/cart_validate",
+                    method : 'GET',
+                    success : function (res){
+                        if(res.success){
+                                event.preventDefault();  
+
+                                var formData = $(checkoutForm).serialize(); 
+                                console.log(formData);
+                                
+                                
+                                $.ajax({
+                                    url: "/user/online_order",
+                                    type: "POST",
+                                    data: JSON.stringify({
+                                        formData
+                                    }),
+                                    success: function(res) {
+                                        if (res.success) {
+                                            var options = {
+                                                "key": ""+res.key_id+"",
+                                                "amount": ""+res.amount+"",
+                                                "currency": "INR",
+                                                "handler": function (response) {
+                                                $.ajax({
+                                                        url : "/user/verify_order",
+                                                        type : 'POST',
+                                                        data : JSON.stringify({
+                                                            selectedAddress: $('#checkoutForm input[name="selectedAddress"]:checked').val(),
+                                                            formData,
+                                                        }),
+                                                        success : function (res) {
+                                                            if(res.success){
+                                                                window.location.href = `/user/order/${res.orderId}`;
+                                                            }else {
+                                                                showToast("Something went wrong. Please try again later.", "error");
+                                                            }
+                                                        }
+                                                })
+                                                }
+                                            };
+                                            var razorpayObject = new Razorpay(options);
+
+                                            let paymentFailedSent = false;
+                                            razorpayObject.on('payment.failed', function (response) {
+                                                if(!paymentFailedSent){
+                                                    console.log('im payment fail handler');
+                                                    paymentFailedSent = true;   
+                                                    $.ajax({    
+                                                        url : "/user/payment_failed",
+                                                        type : 'POST',
+                                                        data : JSON.stringify({
+                                                            selectedAddress: $('#checkoutForm input[name="selectedAddress"]:checked').val(),
+                                                            formData,
+                                                        }),
+                                                        success: function() {
+                                                            showToast("Payment failed. Please try again.", "error");
+                                                        }
+                                                });
+                                                }   
+                                            });
+                                            razorpayObject.open();
+                                        } else {
+                                            showToast(res.msg || "Error processing order", "error");
                                         }
-                                   });
-                                }   
-                            });
-                            razorpayObject.open();
-                        } else {
-                            showToast(res.msg || "Error processing order", "error");
+                                    }
+                                });
+                        }else {
+                            event.preventDefault(); 
+                            Toastify({
+                                text: res.message,
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#f44336",
+                            }).showToast();
+                            return;
                         }
+                    },error : function (res){
+                        event.preventDefault(); 
+                            Toastify({
+                                text: res.message,
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#f44336",
+                            }).showToast();
+                            return;
                     }
                 });
-
-
             }
-        });
 
         const copyButtons = document.querySelectorAll('.copy-coupon');
         

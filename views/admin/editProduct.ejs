@@ -353,10 +353,10 @@ function validateForm(e) {
 
     sizeInputs.forEach(input => {
     const sizeValue = input.value.trim();
-    if (!/^\d+$/.test(sizeValue) || parseInt(sizeValue) <= 0) {
+    if (!/^\d+$/.test(sizeValue) || parseInt(sizeValue) < 0) {
       const errorElement = document.getElementById(`${input.id}-error`);
       if (errorElement) {
-        errorElement.textContent = "Stock must be greater than zero.";
+        errorElement.textContent = "Stock cannot be less that zero";
       }
       formValid = false; 
     }

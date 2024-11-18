@@ -217,9 +217,66 @@ const deleteCart = async (req, res) => {
   }
 };
 
+
+const validateCart = async (req, res) => {
+  try {
+    const userData = await userModel.findOne({ email: req.session.user });
+    const cartItems = await cartModel.find({ userId: userData._id });
+
+    if (cartItems.length === 0) {
+      return res.json({
+        success: false,
+        message: "Your cart is empty or some products are UnListed by admin.",
+      });
+    }
+
+    const productIds = cartItems.map(item => item.productId);
+    const products = await productModel.find({ _id: { $in: productIds } });
+    const productMap = new Map(products.map(p => [p._id.toString(), p]));
+
+    let isValid = true;
+
+    for (let item of cartItems) {
+      const productData = productMap.get(item.productId.toString());
+      if (!productData || !productData.isListed) {
+        isValid = false;
+        continue;
+      }
+
+      for (let sizeDetail of item.sizes) {
+        const { size, quantity } = sizeDetail;
+        const productSize = productData.sizes.find(s => s.size === size);
+
+        if (!productSize || productSize.stock < quantity || quantity == 0) {
+          isValid = false;
+        }
+      }
+    }
+
+    if (!isValid) {
+      return res.json({
+        success: false,
+        message: "Some items in your cart are invalid. Please check stock or product availability.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Cart is valid",
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.json({ success: false, message: "An error occurred. Please try again later." });
+  }
+};
+
+
+
+
 module.exports = {
   addCart,
   loadCart,
   deleteCart,
   updateCartQuantity,
+  validateCart
 };

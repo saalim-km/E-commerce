@@ -39,7 +39,7 @@ router.get("/cart",userMiddleware.isLogin,cartController.loadCart);
 router.post("/cart",cartController.addCart);
 router.post("/cart/delete/:id",cartController.deleteCart);
 router.post("/cart/updateQuantity",cartController.updateCartQuantity);
-
+router.get('/cart_validate',cartController.validateCart)
 
 
 // whislist

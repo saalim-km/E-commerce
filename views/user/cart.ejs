@@ -49,81 +49,114 @@
 <body>
     <div class="container mt-5">
         <h2>Your Cart</h2>
-        <div class="cart-container">
+        <div id="cart-load" class="cart-container">
             <div class="cart-items">
                 <!-- Loop through each cart item -->
                 <% cart.forEach(function(item) { %>
                     <% if (item.productId.isListed) { %> <!-- Check if the product is listed -->
-                        <div class="cart-item" style="border: 1px solid rgba(128, 128, 128, 0.431); padding: 10px;">
-                            <div class="product-info">
-                                <img src="<%= item.productId.images[0] %>" alt="Product Image">
-                                <p><strong><%= item.productId.productName %></strong></p>
-                                <p>Size: <%= item.sizes[0].size %></p>
-                                <p>Category: <span class="badge bg-dark text-white"><%= item.categoryId.name %></span></p>
+                        <% const productSize = item.productId.sizes.find(s => s.size === item.sizes[0].size); %>
+                        <% const availableStock = productSize ? productSize.stock : 0; %>
+                        
+                        <% if (availableStock > 0) { %> <!-- Check if stock is available -->
+                            <div class="cart-item" style="border: 1px solid rgba(128, 128, 128, 0.431); padding: 10px;">
+                                <div class="product-info">
+                                    <img src="<%= item.productId.images[0] %>" alt="Product Image">
+                                    <p><strong><%= item.productId.productName %></strong></p>
+                                    <p>Size: <%= item.sizes[0].size %></p>
+                                    <p>Category: <span class="badge bg-dark text-white"><%= item.categoryId.name %></span></p>
+                                </div>
+        
+                                <!-- Product Price -->
+                                <div class="price">
+                                    ₹<span class="product-price">
+                                        <%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice %>
+                                    </span>
+                                </div>
+        
+                                <!-- Quantity -->
+                                <div class="quantity-input">
+                                    <button class="decrease-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">-</button>
+                                    <input disabled type="text" value="<%= item.sizes[0].quantity %>" class="quantity" data-stock="<%= availableStock %>" data-id="<%= item._id %>">
+                                    <button class="increase-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">+</button>
+                                </div>
+        
+                                <!-- Subtotal for this item -->
+                                <div class="subtotal">
+                                    ₹<span class="item-subtotal">
+                                        <% if (item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus) { %>
+                                            <%= item.productId.salesPriceAfterDiscount * item.sizes[0].quantity %>
+                                        <% } else { %>
+                                            <%= item.productId.salesPrice * item.sizes[0].quantity %>
+                                        <% } %>
+                                    </span>
+                                </div>
+        
+                                <!-- Delete button -->
+                                <form action="/user/cart/delete/<%= item._id %>" method="post">
+                                    <button type="submit" class="btn btn-danger delete-item"><i class="fa fa-trash"></i></button>
+                                </form>
                             </div>
-    
-                            <!-- Product Price -->
-                            <div class="price">
-                                ₹<span class="product-price">
-                                    <%= item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus ? item.productId.salesPriceAfterDiscount : item.productId.salesPrice %>
-                                </span>
+                        <% } else { %>
+                            <!-- Display message for out-of-stock items -->
+                            <div class="cart-item out-of-stock" style="border: 1px solid rgba(255, 0, 0, 0.5); padding: 10px; display: flex; align-items: center;">
+                                <!-- Product image -->
+                                <div class="product-image" style="margin-right: 10px;">
+                                    <img src="<%= item.productId.images[0] %>" alt="Product Image" style="width: 60px; height: 60px; object-fit: cover;">
+                                </div>
+
+                                <!-- Out-of-stock message -->
+                                <div class="product-info">
+                                    <p>
+                                        <strong><%= item.productId.productName %></strong>
+                                        (Size: <%= item.sizes[0].size %>) is currently <span style="color: red;">out of stock</span>.
+                                    </p>
+                                </div>
+
+                                <!-- Delete button for out-of-stock item -->
+                                <div class="remove-item" style="margin-left: auto;">
+                                    <form action="/user/cart/delete/<%= item._id %>" method="post">
+                                        <button type="submit" class="btn btn-danger delete-item">
+                                            <i class="fa fa-trash"></i> Remove
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-    
-                            <!-- Quantity -->
-                            <div class="quantity-input">
-                                <button class="decrease-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">-</button>
-                                <input disabled type="text" value="<%= item.sizes[0].quantity %>" class="quantity" data-stock="<%= item.availableStock %>" data-id="<%= item._id %>">
-                                <button class="increase-btn" data-id="<%= item._id %>" data-size="<%= item.sizes[0].size %>">+</button>
-                            </div>
-    
-                            <!-- Subtotal for this item -->
-                            <div class="subtotal">
-                                ₹<span class="item-subtotal">
-                                    <% if (item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus) { %>
-                                        <%= item.productId.salesPriceAfterDiscount * item.sizes[0].quantity %>
-                                    <% } else { %>
-                                        <%= item.productId.salesPrice * item.sizes[0].quantity %>
-                                    <% } %>
-                                </span>
-                            </div>
-    
-                            <!-- Delete button -->
-                            <form action="/user/cart/delete/<%= item._id %>" method="post">
-                                <button type="submit" class="btn btn-danger delete-item"><i class="fa fa-trash"></i></button>
-                            </form>
-                        </div>
+                        <% } %>
                     <% } %> <!-- End of listed product check -->
                 <% }); %>
             </div>
-    
+        
             <!-- Cart Totals Section -->
             <div class="cart-totals">
                 <h4>Cart Totals</h4>
                 <p>Total: ₹<span id="cart-total">
                     <%= cart.reduce((total, item) => {
                         if (item.productId.isListed) {
-                            const itemPrice = item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus
-                                ? item.productId.salesPriceAfterDiscount
-                                : item.productId.salesPrice;
-                            return total + (itemPrice * item.sizes[0].quantity);
-                        } else {
-                            return total; // Skip unlisted items
+                            const productSize = item.productId.sizes.find(s => s.size === item.sizes[0].size);
+                            const availableStock = productSize ? productSize.stock : 0;
+                            if (availableStock > 0) {
+                                const itemPrice = item.productId.salesPriceAfterDiscount && item.productId.productOffer[0].offerStatus
+                                    ? item.productId.salesPriceAfterDiscount
+                                    : item.productId.salesPrice;
+                                return total + (itemPrice * item.sizes[0].quantity);
+                            }
                         }
+                        return total; // Skip unlisted or out-of-stock items
                     }, 0) %>
                 </span></p>
-    
-                <% if (cart.some(item => item.productId.isListed)) { %> <!-- Only show checkout if there are listed items -->
-                    <a href="/user/checkout">
-                    </a>
+        
+                <% if (cart.some(item => item.productId.isListed && item.productId.sizes.some(s => s.stock > 0))) { %> <!-- Only show checkout if there are listed and in-stock items -->
                     <button onclick="checkout()" class="btn btn-dark">Proceed to Checkout</button>
                 <% } else { %>
                     <h1>No available items in the cart to checkout.</h1>
                 <% } %>
             </div>
         </div>
+        
     </div>
     
-    
+<!-- j query -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
 
 <!-- Toastify -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -185,23 +218,36 @@
 
 
 
-  function checkout() {
-    // Check if we are in the reload state
-    if (sessionStorage.getItem('reloaded') === 'true') {
-        sessionStorage.removeItem('reloaded'); // Clear the reload state
-
-        // Check the cart total after reload
-        if (parseFloat(cartTotal.innerText) <= 0) {
-            window.location.href = '/user/cart';
-        } else {
-            window.location.href = '/user/checkout';
+function checkout() {
+    $.ajax({
+        url : "/user/cart_validate",
+        method : 'GET',
+        success : function (res){
+            if(res.success){
+                window.location.href = '/user/checkout'
+            }else {
+                Toastify({
+                    text: res.message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#f44336",
+                }).showToast();
+            }
+        },error : function (res){
+            Toastify({
+                    text: res.message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#f44336",
+                }).showToast();
         }
-    } else {
-        // Set the reload state and reload the page
-        sessionStorage.setItem('reloaded', 'true');
-        location.reload();
-    }
+    })
 }
+
 </script>
 
 <%- include('../auth/partials/footer.ejs') %>

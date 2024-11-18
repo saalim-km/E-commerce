@@ -151,29 +151,37 @@ const loadEditPage = async(req,res)=> {
 // updating cart 
 const updateCartsWithReducedStock = async (productId, updatedSizes) => {
   try {
+    // Fetch all carts containing the product
     const carts = await cartModel.find({ productId });
 
     for (const cart of carts) {
-      let cartUpdated = false;
-  
-  
-      for (const cartItem of cart.sizes) {
-        const updatedSize = updatedSizes.find(size => size.size === cartItem.size);
-  
-        if (updatedSize && updatedSize.stock < cartItem.quantity) {
-          cartItem.quantity = updatedSize.stock;
-          cartUpdated = true;
+      let sizeModified = false;
+
+      // Update sizes in the cart
+      cart.sizes = cart.sizes.map((cartSize) => {
+        const updatedSize = updatedSizes.find(size => size.size === cartSize.size);
+        if (updatedSize) {
+          if (cartSize.quantity > updatedSize.stock) {
+            
+            cartSize.quantity = updatedSize.stock;
+            sizeModified = true;
+          } else if (updatedSize.stock > 0 && cartSize.quantity === 0) {
+           
+            cartSize.quantity = 1;
+            sizeModified = true;
+          }
         }
-      }
-  
-      // Save the cart if it was updated
-      if (cartUpdated) {
+        return cartSize;
+      });
+
+      // Save the updated cart if any size was modified
+      if (sizeModified) {
         await cart.save();
+        console.log(`Cart with id ${cart._id} updated successfully.`);
       }
     }
   } catch (error) {
-    console.log(error.message);
-    res.status(500).render('500');
+    console.error("Error updating carts with changed stock:", error.message);
   }
 };
 
@@ -182,7 +190,6 @@ const editProduct = async (req, res) => {
   try {
 
     const { productName, product_offer, salesPrice, description, category } = req.body;
-    console.log(category)
     const categoryData = await categoryModel.findOne({name : category});
 
     // Collect the new sizes and stocks
@@ -267,13 +274,25 @@ const editProduct = async (req, res) => {
       const categoryId = categoryObj ? categoryObj._id : null;
 
       
-      let stockReduced = false;
+      let stockChanged = false; 
+      let stockReduced = false; 
       const oldSizes = productExists.sizes;
+      
+      console.log("Old Sizes:", oldSizes);
+      console.log("Updated Sizes:", updatedSizes);
+      
       const sizesToUpdate = updatedSizes.map((newSize) => {
         const oldSize = oldSizes.find(size => size.size === newSize.size);
-        if (oldSize && oldSize.stock > newSize.stock) {
-          stockReduced = true; 
+        
+        if (oldSize) {
+          if (oldSize.stock !== newSize.stock) {
+            stockChanged = true; 
+          }
+          if (oldSize.stock > newSize.stock) {
+            stockReduced = true;
+          }
         }
+        
         return newSize;
       });
 
@@ -289,7 +308,7 @@ const editProduct = async (req, res) => {
       const result = await productExists.save();
 
       
-      if (stockReduced) {
+      if (stockChanged) {
         await updateCartsWithReducedStock(productId, sizesToUpdate);
       }
 
@@ -300,7 +319,7 @@ const editProduct = async (req, res) => {
       res.redirect("/admin/products");
     }
   } catch (error) {
-    console.log(error.message);
+    console.log(error.stack);
     req.flash("error", "Error while updating product");
     res.redirect("/admin/products");
   }

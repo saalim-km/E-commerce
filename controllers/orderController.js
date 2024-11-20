@@ -75,25 +75,25 @@ const updateOrder = async (req, res) => {
                 }
             }
         } 
-        else if(status === 'Delivered') {
+        else if (status === 'Delivered') {
             const order = await orderModel.findById(id);
             if (order) {
-
-                const orderUpdate = await orderModel.findByIdAndUpdate(
-                    id,
-                    {
-                        $set: {
-                            status: 'Delivered',
-                            'products.$[].status': 'Delivered'  
-                        }
-                    },
-                    { new: true }
-                );
-
-                if (orderUpdate) {
-                    req.flash("success", "Order and products Delivered successfully.");
-                    res.redirect("/admin/orders");
-                }
+                // Loop through the products and update their status conditionally
+                order.products.forEach((product) => {
+                    if (product.status !== 'Cancelled') {
+                        product.status = 'Delivered'; // Update status if not Cancelled
+                    }
+                });
+        
+                // Update the order's status and save changes
+                order.status = 'Delivered';
+                await order.save();
+        
+                req.flash("success", "Order and eligible products marked as Delivered successfully.");
+                res.redirect("/admin/orders");
+            } else {
+                req.flash("error", "Order not found.");
+                res.redirect("/admin/orders");
             }
         }
         else {

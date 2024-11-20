@@ -36,7 +36,10 @@ const productView = async (req, res) => {
       const productData = await productModel
         .findById(productId)
         .populate("category", "name");
-      res.render("productView", { product: productData, user: userData });
+
+      const relatedProducts = await productModel.find({category : productData.category , _id : {$ne : productData._id} , isListed : true});
+
+      res.render("productView", { product: productData, user: userData , relatedProducts});
     }
   } catch (error) {
     console.log(error.message);

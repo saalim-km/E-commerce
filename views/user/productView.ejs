@@ -122,7 +122,124 @@
     }
 </style>
 
-<div class="container mt-5">
+<style>
+    .related-products-title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #333;
+    }
+  
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
+      opacity: 0;
+      animation: gridFadeIn 0.6s ease-out forwards;
+    }
+  
+    /* Optimized Image Loading Styles */
+    .image-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 100%; /* 1:1 Aspect Ratio */
+      background-color: #f8f8f8; /* Placeholder color */
+      overflow: hidden;
+      border-radius: 12px 12px 0 0;
+    }
+  
+    .product-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+  
+    .product-image.loaded {
+      opacity: 1;
+    }
+  
+    /* Animation Keyframes */
+    @keyframes gridFadeIn {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  
+    /* Product Card Styles */
+    .product-item {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+  
+    .product-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+  
+    .product-info {
+      padding: 1.5rem;
+      background: white;
+    }
+  
+    .product-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+  
+    .price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #e74c3c;
+    }
+  
+    .category {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+      margin-bottom: 1rem;
+    }
+  
+    /* Button Styles */
+    .animated-button {
+      display: inline-block;
+      padding: 10px 20px;
+      color: #fff;
+      background-color: #141313;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      text-align: center;
+    }
+  
+    .animated-button:hover {
+      transform: translateY(-2px);
+      background-color: #2c2c2c;
+    }
+  </style>
+
+<div class="container mt-5" style="margin-bottom: 8%;">
     <!-- Breadcrumbs -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -235,6 +352,68 @@
         </div>
     </div>
 </div>
+
+<div class="container" style="margin-bottom: 8%;">
+    <h2 class="related-products-title">Related Products</h2>
+    <div class="product-grid related-products">
+        <% relatedProducts.forEach((product, index) => { %>
+            <div class="product-item" style="animation-delay: <%= index * 0.1 %>s;">
+                <a href="/user/products/<%= product._id %>">
+                    <div class="image-wrapper">
+                        <img 
+                            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                            data-src="<%= product.images[0] %>"
+                            alt="<%= product.productName %>"
+                            class="product-image"
+                            width="300"
+                            height="300"
+                            loading="lazy"
+                        />
+                    </div>
+                    <div class="product-info">
+                        <h5 class="product-name"><%= product.productName %></h5>
+                        <% if (product.salesPriceAfterDiscount && product.productOffer && product.productOffer[0] && product.productOffer[0].offerStatus) { %>
+                            <p class="price">
+                                ₹<%= product.salesPriceAfterDiscount %> 
+                                <del class="text-muted">₹<%= product.salesPrice %></del> 
+                                <span class="text-success font-weight-bold">
+                                    <%= product.productOffer[0].discountPercentage %>% OFF
+                                </span>
+                            </p>
+                        <% } else { %>
+                            <p class="price">₹<%= product.salesPrice %></p>
+                        <% } %>
+                        <p class="category">
+                            <%= product.category.name %>
+                        </p>
+                        <span class="animated-button">View Product</span>
+                    </div>
+                </a>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (event) => {
+    const images = document.querySelectorAll('.product-image');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.add('loaded');
+          observer.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px 200px 0px'
+    });
+
+    images.forEach(img => observer.observe(img));
+  });
+</script>
 
 <!-- Bootstrap 4 JS, Popper.js, and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

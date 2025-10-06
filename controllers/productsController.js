@@ -4,7 +4,6 @@ const cloudinary = require("../config/cloudinary");
 const productModel = require("../models/product");
 const categoryModel = require("../models/category");
 const cartModel = require('../models/cart');
-const path = require("path");
 
 
 const loadAddProduct = async (req, res) => {

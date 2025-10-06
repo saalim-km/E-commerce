@@ -11,14 +11,14 @@ const walletModel = require("../models/wallet");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "saalimkm@gmail.com",
-    pass: "pmqusttzbjtsnljj",
+    user: process.env.USER_EMAIL,
+    pass: process.env.USER_PASSWORD,
   },
 });
 
 const sendMail = (to, subject, otp) => {
   return transporter.sendMail({
-    from: "saalimkm@gmail.com",
+    from: process.env.USER_EMAIL,
     to: to,
     subject: subject,
     text: `

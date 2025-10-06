@@ -91,41 +91,83 @@
 </section>
 
 <script>
+    // Validation configuration for flexibility
+    const validationRules = {
+        name: {
+            minLength: 3,
+            maxLength: 50,
+            pattern: /^[a-zA-Z0-9\s\-_&]+$/,
+            errorMessages: {
+                empty: "Category name cannot be empty.",
+                length: "Category name must be between 3 and 50 characters.",
+                pattern: "Category name can only contain letters, numbers, spaces, hyphens, underscores, or ampersands."
+            }
+        },
+        description: {
+            minLength: 10,
+            maxLength: 500,
+            errorMessages: {
+                empty: "Description cannot be empty.",
+                length: "Description must be between 10 and 500 characters."
+            }
+        }
+    };
+
     function validateName() {
+        const name = document.getElementById('category_name').value.trim();
         const nameError = document.getElementById('nameError');
-        const name = document.getElementById('category_name').value;
         
-        const namePattern = /^[A-Z][a-zA-Z ]*$/; 
+        if (!name) {
+            nameError.textContent = validationRules.name.errorMessages.empty;
+            return false;
+        }
         
-        if (!namePattern.test(name)) {
-            nameError.textContent = "Name must start with an uppercase letter and contain only letters.";
+        if (name.length < validationRules.name.minLength || name.length > validationRules.name.maxLength) {
+            nameError.textContent = validationRules.name.errorMessages.length;
+            return false;
+        }
+        
+        if (!validationRules.name.pattern.test(name)) {
+            nameError.textContent = validationRules.name.errorMessages.pattern;
             return false;
         }
         
         nameError.textContent = '';
         return true;
     }
-    function validateDescription(){
-        const description = document.getElementById('description').value;
+
+    function validateDescription() {
+        const description = document.getElementById('description').value.trim();
         const descriptionError = document.getElementById('descriptionError');
-        if(description===""){
-            descriptionError.textContent = "description cannot be empty";
+        
+        if (!description) {
+            descriptionError.textContent = validationRules.description.errorMessages.empty;
             return false;
         }
-
-        descriptionError.textContent = "";
+        
+        if (description.length < validationRules.description.minLength || description.length > validationRules.description.maxLength) {
+            descriptionError.textContent = validationRules.description.errorMessages.length;
+            return false;
+        }
+        
+        descriptionError.textContent = '';
         return true;
     }
-    function validateForm() {
-        const name = validateName();
-        const description = validateDescription();
 
-        return name && description;
+    function validateForm() {
+        const isNameValid = validateName();
+        const isDescriptionValid = validateDescription();
+        return isNameValid && isDescriptionValid;
     }
 
+    // Real-time validation on input
+    document.getElementById('category_name').addEventListener('input', validateName);
+    document.getElementById('description').addEventListener('input', validateDescription);
+
+    // Scroll to top on page load
     window.addEventListener('load', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 </script>
 
 <%- include('./partials/footer.ejs') %>

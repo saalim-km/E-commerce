@@ -84,12 +84,12 @@
                                 <% topProducts.forEach(product => { %>
                                     <tr>
                                         <td>
-                                            <b><%= product.productDetails.productName %></b>
+                                            <b><%= product?.productDetails?.productName %></b>
                                         </td>
-                                        <td><%= product.categoryDetails.name %></td>
-                                        <td><%= product.totalQuantitySold %></td>
-                                        <td>₹<%= product.productDetails.salesPriceAfterDiscount ? product.productDetails.salesPriceAfterDiscount : product.productDetails.salesPrice%></td>
-                                        <td>₹<%= product.productDetails.salesPriceAfterDiscount ?  product.totalQuantitySold * product.productDetails.salesPriceAfterDiscount : product.totalQuantitySold * product.productDetails.salesPrice%></td>
+                                        <td><%= product?.categoryDetails?.name %></td>
+                                        <td><%= product?.totalQuantitySold %></td>
+                                        <td>₹<%= product?.productDetails?.salesPriceAfterDiscount ? product.productDetails?.salesPriceAfterDiscount : product?.productDetails?.salesPrice%></td>
+                                        <td>₹<%= product?.productDetails?.salesPriceAfterDiscount ?  product.totalQuantitySold * product.productDetails.salesPriceAfterDiscount : product.totalQuantitySold * product.productDetails.salesPrice%></td>
                                     </tr>
                                 <% }); %>
                             </tbody>

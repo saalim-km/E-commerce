@@ -21,13 +21,7 @@ const designPage = async(req,res)=> {
         const {color} = req.query;
         let tshirtImageUrl;
         if(color == 'white'){
-            tshirtImageUrl = 'https://res.cloudinary.com/deh2nuqeb/image/upload/v1730554192/https___d1e00ek4ebabms.cloudfront.net_production_bb4d4c4d-3305-40a8-9e93-fdd595ec583e_ttr2zh.avif';
-        }else if(color == 'black'){
-            tshirtImageUrl = 'https://res.cloudinary.com/deh2nuqeb/image/upload/v1730554174/black_q0cwba.png';
-        }else if(color == 'blue'){
-            tshirtImageUrl = 'https://res.cloudinary.com/deh2nuqeb/image/upload/v1730561154/blue_vep21i.png';
-        }else if(color == 'green'){
-            tshirtImageUrl = 'https://res.cloudinary.com/deh2nuqeb/image/upload/v1730561154/green_bx8ypb.png';
+            tshirtImageUrl = 'https://res.cloudinary.com/deh2nuqeb/image/upload/v1759816201/white-removebg-preview_dbjvlc.png';
         }
         res.render("design",{tshirtImageUrl});
     } catch (error) {

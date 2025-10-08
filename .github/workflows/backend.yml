@@ -32,6 +32,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd E-commerce/
-            git pull origin main
+            git pull origin master
             npm install
             pm2 restart all || pm2 start 0

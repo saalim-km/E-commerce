@@ -3,7 +3,7 @@ name: CI/CD Deploy to EC2
 on:
   push:
     branches:
-      - main  # change if using another branch
+      - master  # change if using another branch
 
 jobs:
   deploy:

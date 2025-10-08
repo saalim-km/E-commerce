@@ -109,8 +109,8 @@ const dashboardLoad = async (req, res) => {
         res.render("dashboard", {
             totalSalesCount,
             overallOrderAmount: orderAmount,
-            overallDiscount: discount[0].totalDiscount,
-            couponDiscount : couponDiscount[0].totalCouponDiscount,
+            overallDiscount: discount[0] ? discount[0]?.totalDiscount : 0,
+            couponDiscount : couponDiscount[0] ? couponDiscount[0].totalCouponDiscount : 0,
             topProducts
         });
     } catch (error) {
